@@ -57,13 +57,13 @@
                 <div class="collapse navbar-collapse" id="ftco-nav">
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item active"><a href="Home.jsp" class="nav-link">Trang chủ</a></li>
-                        <li class="nav-item"><a href="about.jsp" class="nav-link">Hệ thống</a></li>
+                        <li class="nav-item"><a href="about.jsp" class="nav-link">Khóa học</a></li>
                         <li class="nav-item"><a href="vet.jsp" class="nav-link">Chuyên gia</a></li>
-                        <li class="nav-item"><a href="services.jsp" class="nav-link">Dịch Vụ</a></li>
-                        <li class="nav-item"><a href="gallery.jsp" class="nav-link">Thú Cưng</a></li>
-                        <li class="nav-item"><a href="pricing.jsp" class="nav-link">Gói Dịch Vụ</a></li>
-                        <li class="nav-item"><a href="blog.jsp" class="nav-link">Tin Tức</a></li>
-                        <li class="nav-item"><a href="contact.jsp" class="nav-link">Liên Hệ</a></li>
+                        <li class="nav-item"><a href="service.jsp" class="nav-link">Sản phẩm</a></li>
+                        <li class="nav-item"><a href="gallery.jsp" class="nav-link">Thú cưng</a></li>
+                        <li class="nav-item"><a href="pricing.jsp" class="nav-link">Gói dịch vụ</a></li>
+                        <li class="nav-item"><a href="blog.jsp" class="nav-link">Tin tức</a></li>
+                        <li class="nav-item"><a href="contact.jsp" class="nav-link">Liên hệ</a></li>
                     </ul>
                 </div>
             </div>

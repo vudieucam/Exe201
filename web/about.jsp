@@ -36,39 +36,34 @@
                 <div class="row">
                     <div class="col-md-6 d-flex align-items-center">
                         <p class="mb-0 phone pl-md-2">
-                            <a href="#" class="mr-2"><span class="fa fa-phone mr-1"></span> +00 1234 567</a> 
-                            <a href="#"><span class="fa fa-paper-plane mr-1"></span> youremail@email.com</a>
+                            <a href="#" class="mr-2"><span class="fa fa-phone mr-1"></span> 0352138596</a> 
+                            <a href="#"><span class="fa fa-paper-plane mr-1"></span> PetTech@email.com</a>
                         </p>
                     </div>
                     <div class="col-md-6 d-flex justify-content-md-end">
-                        <div class="social-media">
-                            <p class="mb-0 d-flex">
-                                <a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-facebook"><i class="sr-only">Facebook</i></span></a>
-                                <a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-twitter"><i class="sr-only">Twitter</i></span></a>
-                                <a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-instagram"><i class="sr-only">Instagram</i></span></a>
-                                <a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-dribbble"><i class="sr-only">Dribbble</i></span></a>
-                            </p>
-                        </div>
+                        <a href="#" class="d-flex align-items-center justify-content-center"><span >Đăng Nhập</span></a>
+                        <a href="#" class="d-flex align-items-center justify-content-center"><span >Đăng Ký</span></a>
                     </div>
                 </div>
             </div>
         </div>
+
         <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
             <div class="container">
-                <a class="navbar-brand" href="index.html"><span class="flaticon-pawprint-1 mr-2"></span>Pet sitting</a>
+                <a class="navbar-brand" href="index.html"><span class="flaticon-pawprint-1 mr-2"></span>PetTech</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="fa fa-bars"></span> Menu
                 </button>
                 <div class="collapse navbar-collapse" id="ftco-nav">
                     <ul class="navbar-nav ml-auto">
-                        <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
-                        <li class="nav-item active"><a href="about.html" class="nav-link">About</a></li>
-                        <li class="nav-item"><a href="vet.html" class="nav-link">Veterinarian</a></li>
-                        <li class="nav-item"><a href="services.html" class="nav-link">Services</a></li>
-                        <li class="nav-item"><a href="gallery.html" class="nav-link">Gallery</a></li>
-                        <li class="nav-item"><a href="pricing.html" class="nav-link">Pricing</a></li>
-                        <li class="nav-item"><a href="blog.html" class="nav-link">Blog</a></li>
-                        <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>
+                        <li class="nav-item active"><a href="Home.jsp" class="nav-link">Trang chủ</a></li>
+                        <li class="nav-item"><a href="about.jsp" class="nav-link">Khóa học</a></li>
+                        <li class="nav-item"><a href="vet.jsp" class="nav-link">Chuyên gia</a></li>
+                        <li class="nav-item"><a href="service.jsp" class="nav-link">Sản phẩm</a></li>
+                        <li class="nav-item"><a href="gallery.jsp" class="nav-link">Thú cưng</a></li>
+                        <li class="nav-item"><a href="pricing.jsp" class="nav-link">Gói dịch vụ</a></li>
+                        <li class="nav-item"><a href="blog.jsp" class="nav-link">Tin tức</a></li>
+                        <li class="nav-item"><a href="contact.jsp" class="nav-link">Liên hệ</a></li>
                     </ul>
                 </div>
             </div>

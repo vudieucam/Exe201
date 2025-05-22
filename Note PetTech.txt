@@ -1,0 +1,63 @@
+các Tính năng của web, database sẽ dùng cho cả customer và admin
+
+1. Xác thực tài khoản người dùng gồm( đăng ký, đăng nhập, đăng xuất, nhớ mật khẩu, quên mật khẩu, thông tin cá nhân)
+tạo bảng user
+- Email
+- mật khẩu
+- số điện thoại
+- địa chỉ 
+- vai trò ( để phân chia khách, đối tác, admin)
+- gói dịch vụ đang sử dụng
+
+2. Các gói dịch vụ
+Hãy tạo bảng các gói dịch vụ
+
+🔹 GÓI MIỄN PHÍ (Free – Thành viên Cơ Bản)
+Phù hợp với người mới bắt đầu nuôi thú cưng hoặc đang tìm hiểu.
+Lợi ích:
+- Truy cập miễn phí vào các bài viết cơ bản về chăm sóc thú cưng có giới hạn thông tin nội dung.
+- Tham gia diễn đàn cộng đồng để thảo luận với người nuôi thú cưng khác.
+
+🟡 GÓI TIÊU CHUẨN (Standard) – 99.000đ/tháng
+Dành cho người nuôi thú cưng có nhu cầu chăm sóc tốt hơn và học hỏi thêm.
+Lợi ích:
+- Truy cập miễn phí vào các bài viết cơ bản về chăm sóc thú cưng.
+- Tham gia diễn đàn cộng đồng để thảo luận với người nuôi thú cưng khác.
+- Truy cập không giới hạn tất cả video hướng dẫn chất lượng cao.
+- Truy cập vào thư viện bài viết nâng cao theo loại thú cưng (chó, mèo,hamster…).
+- Tham gia các khóa học cơ bản (chăm sóc, dinh dưỡng, vệ sinh…).
+- Tư vấn trực tuyến với chuyên gia định kỳ 1 lần/tháng.
+
+🟠 GÓI CHUYÊN NGHIỆP (Pro) – 199.000đ/tháng
+Phù hợp với người yêu thú cưng nghiêm túc hoặc kinh doanh nhỏ (pet shop, grooming).
+Lợi ích:
+- Truy cập miễn phí vào các bài viết cơ bản về chăm sóc thú cưng.
+- Tham gia diễn đàn cộng đồng để thảo luận với người nuôi thú cưng khác.
+- Truy cập không giới hạn tất cả video hướng dẫn chất lượng cao.
+- Truy cập vào thư viện bài viết nâng cao theo loại thú cưng (chó, mèo, hamster...).
+- Tham gia các khóa học cơ bản (chăm sóc, dinh dưỡng, vệ sinh…).
+- Truy cập vào khóa học chuyên sâu (phòng bệnh, huấn luyện hành vi, sơ cứu…).
+- Tư vấn 1-1 không giới hạn với bác sĩ thú y / chuyên gia huấn luyện.
+- Nhận tài liệu độc quyền (PDF, infographic…).
+- Ưu đãi giảm giá 10% khi mua khóa học nâng cao hoặc sản phẩm từ đối tác.
+
+3. Khóa học 
+- Mã khóa học 
+- Tiêu đề 
+- Nội dung
+- ngày đăng
+- người nghiên cứu
+- image
+- video
+
+
+cần tạo thêm bảng phân loại các khóa học theo (cân nặng, giống loài, theo tuổi)
+
+4. Bảng sản phẩm
+- Tôi có kết hợp với đối tác để bán hàng, tôi sẽ ăn 3% trên tổng giá trị đơn hàng
+hãy tạo cho tôi các bảng liên quan để bán hàng dùng cho cả admin để theo dõi doanh thu bán hàng và customer cùng theo dõi trạng thái đơn hàng
+
+5. 
+
+
+
