@@ -1,14 +1,25 @@
 <%-- 
-    Document   : pricing
-    Created on : May 21, 2025, 11:35:34 PM
+    Document   : about
+    Created on : May 21, 2025, 11:32:22 PM
     Author     : FPT
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ page import="java.util.List, model.Course" %>
+<%@ page import="java.util.List, java.util.ArrayList" %>
+<%
+    List<Course> courses = (List<Course>) request.getAttribute("courses");
+    if (courses == null) {
+        courses = new ArrayList<>(); // Không còn lỗi biên dịch
+    }
+    System.out.println("DEBUG: Số khóa học trong JSP = " + courses.size());
+%>
+
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Pet Sitting - Free Bootstrap 4 Template by Colorlib</title>
+        <title>PetTech</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -28,6 +39,170 @@
 
         <link rel="stylesheet" href="css/flaticon.css">
         <link rel="stylesheet" href="css/style.css">
+
+        <style>
+            /* Style tổng thể */
+            .course-section {
+                background-color: #f9f5ff;
+                padding: 60px 0;
+            }
+
+            .course-header {
+                text-align: center;
+                margin-bottom: 40px;
+                position: relative;
+            }
+
+            .course-header h2 {
+                font-size: 2.5rem;
+                color: #6d4aff;
+                font-weight: 700;
+                display: inline-block;
+                background: linear-gradient(90deg, #ff9a9e 0%, #fad0c4 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                position: relative;
+                z-index: 1;
+            }
+
+            .course-header h2:after {
+                content: "🐾";
+                position: absolute;
+                right: -40px;
+                top: -15px;
+                font-size: 2rem;
+            }
+
+            .course-header h2:before {
+                content: "🐾";
+                position: absolute;
+                left: -40px;
+                top: -15px;
+                font-size: 2rem;
+            }
+
+            /* Card khóa học */
+            .course-card {
+                background: white;
+                border-radius: 15px;
+                overflow: hidden;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                transition: all 0.3s ease;
+                margin-bottom: 30px;
+                border: none;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .course-card:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            }
+
+            .course-img-container {
+                height: 200px;
+                overflow: hidden;
+                position: relative;
+            }
+
+            .course-img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: transform 0.5s ease;
+            }
+
+            .course-card:hover .course-img {
+                transform: scale(1.1);
+            }
+
+            .course-badge {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                background: #ff6b81;
+                color: white;
+                padding: 5px 10px;
+                border-radius: 20px;
+                font-size: 0.8rem;
+                font-weight: bold;
+            }
+
+            .course-body {
+                padding: 20px;
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .course-title {
+                font-size: 1.3rem;
+                color: #3a3a3a;
+                margin-bottom: 10px;
+                font-weight: 600;
+            }
+
+            .course-meta {
+                display: flex;
+                align-items: center;
+                margin-bottom: 15px;
+                color: #6d4aff;
+                font-size: 0.9rem;
+            }
+
+            .course-meta i {
+                margin-right: 5px;
+            }
+
+            .course-desc {
+                color: #666;
+                margin-bottom: 20px;
+                flex-grow: 1;
+            }
+
+            .course-btn {
+                background: linear-gradient(90deg, #6d4aff 0%, #a37aff 100%);
+                border: none;
+                border-radius: 50px;
+                padding: 10px 25px;
+                color: white;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                font-size: 0.8rem;
+                transition: all 0.3s ease;
+                align-self: flex-start;
+            }
+
+            .course-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 5px 15px rgba(109, 74, 255, 0.4);
+                color: white;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .course-header h2 {
+                    font-size: 2rem;
+                }
+
+                .course-header h2:after,
+                .course-header h2:before {
+                    font-size: 1.5rem;
+                    top: -10px;
+                }
+
+                .course-header h2:after {
+                    right: -30px;
+                }
+
+                .course-header h2:before {
+                    left: -30px;
+                }
+            }
+        </style>
+
     </head>
     <body>
 
@@ -57,7 +232,7 @@
                 <div class="collapse navbar-collapse" id="ftco-nav">
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item active"><a href="Home.jsp" class="nav-link">Trang chủ</a></li>
-                        <li class="nav-item"><a href="course.jsp" class="nav-link">Khóa học</a></li>
+                        <li class="nav-item"><a href="course" class="nav-link">Khóa học</a></li>
                         <li class="nav-item"><a href="vet.jsp" class="nav-link">Chuyên gia</a></li>
                         <li class="nav-item"><a href="service.jsp" class="nav-link">Sản phẩm</a></li>
                         <li class="nav-item"><a href="gallery.jsp" class="nav-link">Thú cưng</a></li>
@@ -67,153 +242,101 @@
                     </ul>
                 </div>
             </div>
-        </nav> 
-        <!-- END nav -->
-        <section class="hero-wrap hero-wrap-2" style="background-image: url('images/bg_2.jpg');" data-stellar-background-ratio="0.5">
-            <div class="overlay"></div>
-            <div class="container">
-                <div class="row no-gutters slider-text align-items-end">
-                    <div class="col-md-9 ftco-animate pb-5">
-                        <p class="breadcrumbs mb-2"><span class="mr-2"><a href="index.html">Home <i class="ion-ios-arrow-forward"></i></a></span> <span>Pricing <i class="ion-ios-arrow-forward"></i></span></p>
-                        <h1 class="mb-0 bread">Pricing</h1>
-                    </div>
-                </div>
-            </div>
-        </section>
+        </nav>
 
-        <section class="ftco-section bg-light">
+
+
+        <section class="course-section">
             <div class="container">
-                <div class="row justify-content-center pb-5 mb-3">
-                    <div class="col-md-7 heading-section text-center ftco-animate">
-                        <h2>Affordable Packages</h2>
-                    </div>
+                <div class="course-header">
+                    <h2>Danh Sách Khóa Học</h2>
                 </div>
+
                 <div class="row">
-                    <div class="col-md-4 ftco-animate">
-                        <div class="block-7">
-                            <div class="img" style="background-image: url(images/pricing-1.jpg);"></div>
-                            <div class="text-center p-4">
-                                <span class="excerpt d-block">Personal</span>
-                                <span class="price"><sup>$</sup> <span class="number">49</span> <sub>/mos</sub></span>
+                    <% if (courses != null && !courses.isEmpty()) { %>
+                    <% for (Course course : courses) { %>
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="course-card">
 
-                                <ul class="pricing-text mb-5">
-                                    <li><span class="fa fa-check mr-2"></span>5 Dog Walk</li>
-                                    <li><span class="fa fa-check mr-2"></span>3 Vet Visit</li>
-                                    <li><span class="fa fa-check mr-2"></span>3 Pet Spa</li>
-                                    <li><span class="fa fa-check mr-2"></span>Free Supports</li>
-                                </ul>
+                            <div class="course-img-container">
+                                <% 
+                                // Xử lý đường dẫn ảnh an toàn
+                                String imageUrl = course.getImageUrl();
+                                String defaultImage = request.getContextPath() + "/images/corgin-1.jpg";
+    
+                                // Xây dựng đường dẫn ảnh cuối cùng
+                                String finalImagePath;
+                                if (imageUrl != null && !imageUrl.isEmpty()) {
+                                    // Nếu URL ảnh đã bắt đầu bằng / hoặc http
+                                    if (imageUrl.startsWith("/") || imageUrl.startsWith("http")) {
+                                        finalImagePath = imageUrl.startsWith("/") ? request.getContextPath() + imageUrl : imageUrl;
+                                    } else {
+                                        // Nếu URL ảnh là relative path không có / đầu
+                                        finalImagePath = request.getContextPath() + "/" + imageUrl;
+                                    }
+                                } else {
+                                    finalImagePath = defaultImage;
+                                }
+                                %>
 
-                                <a href="#" class="btn btn-primary d-block px-2 py-3">Get Started</a>
+                                <img src="<%= finalImagePath %>" 
+                                     alt="<%= course.getTitle() %>" 
+                                     class="course-img"
+                                     onerror="this.onerror=null; this.src='<%= defaultImage %>'">
+
+                                <span class="course-badge">Mới</span>
+
+
+                            </div>
+                            <div class="course-body">
+                                <h3 class="course-title"><%= course.getTitle() %></h3>
+
+                                <div class="course-meta">
+                                    <i class="fa fa-clock-o"></i> <%= course.getTime() != null ? course.getTime() : "Đang cập nhật" %>
+                                </div>
+
+                                <% if (course.getResearcher() != null && !course.getResearcher().isEmpty()) { %>
+                                <div class="course-meta">
+                                    <i class="fa fa-user"></i> <%= course.getResearcher() %>
+                                </div>
+                                <% } %>
+
+                                <p class="course-desc">
+                                    <% if (course.getContent() != null) { 
+                                        if (course.getContent().length() > 100) { %>
+                                    <%= course.getContent().substring(0, 100) %>...
+                                    <% } else { %>
+                                    <%= course.getContent() %>
+                                    <% } 
+                                    } else { %>
+                                    Nội dung đang được cập nhật...
+                                    <% } %>
+                                </p>
+
+                                <div class="course-meta">
+                                    <i class="fa fa-calendar"></i> <%= course.getTime() != null ? course.getTime() : "" %>
+                                </div>
+
+                                <a href="${pageContext.request.contextPath}/coursedetail?id=<%= course.getId() %>" class="course-btn">
+                                    Xem chi tiết <i class="fa fa-arrow-right"></i>
+                                </a>
+
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4 ftco-animate">
-                        <div class="block-7">
-                            <div class="img" style="background-image: url(images/pricing-2.jpg);"></div>
-                            <div class="text-center p-4">
-                                <span class="excerpt d-block">Business</span>
-                                <span class="price"><sup>$</sup> <span class="number">79</span> <sub>/mos</sub></span>
-
-                                <ul class="pricing-text mb-5">
-                                    <li><span class="fa fa-check mr-2"></span>5 Dog Walk</li>
-                                    <li><span class="fa fa-check mr-2"></span>3 Vet Visit</li>
-                                    <li><span class="fa fa-check mr-2"></span>3 Pet Spa</li>
-                                    <li><span class="fa fa-check mr-2"></span>Free Supports</li>
-                                </ul>
-
-                                <a href="#" class="btn btn-primary d-block px-2 py-3">Get Started</a>
-                            </div>
+                    <% } %>
+                    <% } else { %>
+                    <div class="col-12 text-center">
+                        <div class="alert alert-info" style="background-color: #e2d9ff; border-color: #6d4aff; color: #3a3a3a;">
+                            <i class="fa fa-paw"></i> Hiện chưa có khóa học nào. Vui lòng quay lại sau!
                         </div>
                     </div>
-                    <div class="col-md-4 ftco-animate">
-                        <div class="block-7">
-                            <div class="img" style="background-image: url(images/pricing-3.jpg);"></div>
-                            <div class="text-center p-4">
-                                <span class="excerpt d-block">Ultimate</span>
-                                <span class="price"><sup>$</sup> <span class="number">109</span> <sub>/mos</sub></span>
-
-                                <ul class="pricing-text mb-5">
-                                    <li><span class="fa fa-check mr-2"></span>5 Dog Walk</li>
-                                    <li><span class="fa fa-check mr-2"></span>3 Vet Visit</li>
-                                    <li><span class="fa fa-check mr-2"></span>3 Pet Spa</li>
-                                    <li><span class="fa fa-check mr-2"></span>Free Supports</li>
-                                </ul>
-
-                                <a href="#" class="btn btn-primary d-block px-2 py-3">Get Started</a>
-                            </div>
-                        </div>
-                    </div>
+                    <% } %>
                 </div>
             </div>
         </section>
 
-        <section class="ftco-appointment ftco-section ftco-no-pt ftco-no-pb img" style="background-image: url(images/bg_3.jpg);">
-            <div class="overlay"></div>
-            <div class="container">
-                <div class="row d-md-flex justify-content-end">
-                    <div class="col-md-12 col-lg-6 half p-3 py-5 pl-lg-5 ftco-animate">
-                        <h2 class="mb-4">Free Consultation</h2>
-                        <form action="#" class="appointment">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <div class="form-field">
-                                            <div class="select-wrap">
-                                                <div class="icon"><span class="fa fa-chevron-down"></span></div>
-                                                <select name="" id="" class="form-control">
-                                                    <option value="">Select services</option>
-                                                    <option value="">Cat Sitting</option>
-                                                    <option value="">Dog Walk</option>
-                                                    <option value="">Pet Spa</option>
-                                                    <option value="">Pet Grooming</option>
-                                                    <option value="">Pet Daycare</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" placeholder="Your Name">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" placeholder="Vehicle number">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <div class="input-wrap">
-                                            <div class="icon"><span class="fa fa-calendar"></span></div>
-                                            <input type="text" class="form-control appointment_date" placeholder="Date">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <div class="input-wrap">
-                                            <div class="icon"><span class="fa fa-clock-o"></span></div>
-                                            <input type="text" class="form-control appointment_time" placeholder="Time">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <textarea name="" id="" cols="30" rows="7" class="form-control" placeholder="Message"></textarea>
-                                    </div>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <input type="submit" value="Send message" class="btn btn-primary py-3 px-4">
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </section>
+
 
         <footer class="footer">
             <div class="container">
@@ -308,7 +431,6 @@
         <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&sensor=false"></script>
         <script src="js/google-map.js"></script>
         <script src="js/main.js"></script>
-
 
 
     </body>

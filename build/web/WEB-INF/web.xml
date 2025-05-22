@@ -4,8 +4,32 @@
         <servlet-name>LoginServlet</servlet-name>
         <servlet-class>customer.Authentication.LoginServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>CourseServlet</servlet-name>
+        <servlet-class>customer.Course.CourseServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CourseCategoryServlet</servlet-name>
+        <servlet-class>customer.Course.CourseCategoryServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CourseDetailServlet</servlet-name>
+        <servlet-class>customer.Course.CourseDetailServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/login</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CourseServlet</servlet-name>
+        <url-pattern>/course</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CourseCategoryServlet</servlet-name>
+        <url-pattern>/coursecategory</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CourseDetailServlet</servlet-name>
+        <url-pattern>/coursedetail</url-pattern>
     </servlet-mapping>
 </web-app>

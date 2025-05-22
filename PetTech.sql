@@ -45,6 +45,21 @@ CREATE TABLE courses (
     video_url NVARCHAR(MAX)
 );
 
+ALTER TABLE courses ADD status INT DEFAULT 1;
+
+ALTER TABLE courses ADD time NVARCHAR(50);
+
+CREATE TABLE course_images (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    course_id INT NOT NULL,
+    image_url NVARCHAR(255) NOT NULL,
+    is_primary BIT DEFAULT 0,
+    created_at DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_CourseImage_Course FOREIGN KEY (course_id) REFERENCES courses(id)
+);
+
+
+
 -- 5. Phân loại khóa học
 CREATE TABLE course_categories (
     id INT IDENTITY(1,1) PRIMARY KEY,
@@ -188,3 +203,36 @@ VALUES
 (1, 1), -- Thức ăn cho chó
 (2, 3), -- Cát vệ sinh cho mèo
 (3, 3); -- Sữa tắm thú cưng
+
+
+UPDATE courses 
+SET image_url = 'C:\Users\FPT\OneDrive\Documents\NetBeansProjects\PetTech/course_dog.jpg' 
+WHERE title = N'Chăm sóc chó con';
+
+UPDATE courses 
+SET image_url = 'C:\Users\FPT\OneDrive\Documents\NetBeansProjects\PetTech/course_cat.jpg' 
+WHERE title = N'Dinh dưỡng cho mèo trưởng thành';
+
+UPDATE courses 
+SET image_url = 'C:\Users\FPT\OneDrive\Documents\NetBeansProjects\PetTech/course_pet_first_aid.jpg' 
+WHERE title = N'Sơ cứu thú cưng tại nhà';
+
+UPDATE courses SET time = N'4 tuần' WHERE title = N'Chăm sóc chó con';
+UPDATE courses SET time = N'6 tuần' WHERE title = N'Dinh dưỡng cho mèo trưởng thành';
+UPDATE courses SET time = N'3 tháng' WHERE title = N'Sơ cứu thú cưng tại nhà'
+
+
+INSERT INTO course_images (course_id, image_url, is_primary) 
+VALUES 
+(1, '/img/course/course_cat.jpg', 1),
+(2, '/img/course/course_dog.jpg', 1),
+(3, '/img/course/course_pet_first_aid.jpg', 1);
+
+
+-- Nếu constraint chưa tồn tại
+ALTER TABLE course_images
+ADD CONSTRAINT FK_CourseImages_Courses
+FOREIGN KEY (course_id) REFERENCES courses(id);
+
+ALTER TABLE courses
+DROP COLUMN image_url;
