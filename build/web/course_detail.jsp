@@ -812,26 +812,33 @@ if (imageUrl != null && !imageUrl.isEmpty()) {
                                     </c:if>
 
                                     <div class="lesson-text">
-                                        ${not empty currentLesson.content ? 
-                                          currentLesson.content : 
-                                          '<div class="alert alert-info">Nội dung bài học đang được cập nhật. Vui lòng quay lại sau!</div>'}
+                                        <c:choose>
+                                            <c:when test="${not empty currentLesson.content}">
+                                                <c:out value="${currentLesson.content}" escapeXml="false" />
+                                            </c:when>
+                                            <c:otherwise>
+                                                <div class="alert alert-info">
+                                                    Nội dung bài học đang được cập nhật. Vui lòng quay lại sau!
+                                                </div>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </div>
 
                                     <!-- Navigation buttons -->
-                                    <div class="lesson-navigation mt-5">
-                                        <div class="row">
-                                            <div class="col-6">
-                                                <a href="#" class="btn btn-outline-primary btn-block">
-                                                    <i class="fa fa-arrow-left"></i> Bài trước
-                                                </a>
-                                            </div>
-                                            <div class="col-6">
-                                                <a href="#" class="btn btn-primary btn-block">
-                                                    Bài tiếp theo <i class="fa fa-arrow-right"></i>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <%-- Lấy id của bài học hiện tại từ URL --%>
+                                    <c:if test="${previousLesson != null}">
+                                        <a href="coursedetail?id=${course.id}&lesson=${previousLesson.id}" class="btn btn-outline-primary">
+                                            ← Bài trước
+                                        </a>
+                                    </c:if>
+
+                                    <c:if test="${nextLesson != null}">
+                                        <a href="coursedetail?id=${course.id}&lesson=${nextLesson.id}" class="btn btn-primary float-end">
+                                            Bài tiếp theo →
+                                        </a>
+                                    </c:if>
+
+
                                 </div>
                             </c:when>
                             <c:otherwise>

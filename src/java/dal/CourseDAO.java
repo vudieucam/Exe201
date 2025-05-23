@@ -262,4 +262,50 @@ public class CourseDAO extends DBConnect {
             return false;
         }
     }
+    
+    // Lấy bài học theo ID
+    public CourseLesson getLessonById(int id) {
+        String sql = "SELECT * FROM course_lessons WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return mapLesson(rs);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Lấy danh sách bài học theo course_id (dựa vào course_modules)
+    public List<CourseLesson> getLessonsByCourse(int courseId) {
+        List<CourseLesson> list = new ArrayList<>();
+        String sql = "SELECT cl.* FROM course_lessons cl " +
+                     "JOIN course_modules cm ON cl.module_id = cm.id " +
+                     "WHERE cm.course_id = ? ORDER BY cl.module_id, cl.order_index";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, courseId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(mapLesson(rs));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // Hàm tiện ích để map từ ResultSet sang Lesson
+    private CourseLesson mapLesson(ResultSet rs) throws SQLException {
+        CourseLesson l = new CourseLesson();
+        l.setId(rs.getInt("id"));
+        l.setModuleId(rs.getInt("module_id"));
+        l.setTitle(rs.getString("title"));
+        l.setContent(rs.getString("content"));
+        l.setVideoUrl(rs.getString("video_url"));
+        l.setDuration(rs.getInt("duration"));
+        l.setOrderIndex(rs.getInt("order_index"));
+        return l;
+    }
 }

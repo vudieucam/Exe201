@@ -11,6 +11,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,9 +51,8 @@ public class CourseDetailServlet extends HttpServlet {
             String idRaw = request.getParameter("id");
             String lessonIdRaw = request.getParameter("lesson");
 
-            // Validate course ID
             if (idRaw == null || idRaw.isEmpty()) {
-                request.getSession().setAttribute("errorMessage", "Thiếu tham số ID khóa học");
+                request.getSession().setAttribute("errorMessage", "Thiếu ID khóa học");
                 response.sendRedirect("course");
                 return;
             }
@@ -60,71 +60,72 @@ public class CourseDetailServlet extends HttpServlet {
             int courseId = Integer.parseInt(idRaw);
             int lessonId = (lessonIdRaw != null && !lessonIdRaw.isEmpty()) ? Integer.parseInt(lessonIdRaw) : 0;
 
-            // Get course details
             Course course = courseDAO.getCourseDetails(courseId);
             if (course == null) {
-                request.getSession().setAttribute("errorMessage", "Không tìm thấy khóa học với ID: " + courseId);
+                request.getSession().setAttribute("errorMessage", "Không tìm thấy khóa học");
                 response.sendRedirect("course");
                 return;
             }
 
-            // Get all modules for the course
             List<CourseModule> modules = courseDAO.getCourseModules(courseId);
-
-            // Create a map to store lessons for each module
             Map<Integer, List<CourseLesson>> moduleLessonsMap = new HashMap<>();
             CourseLesson currentLesson = null;
+            List<CourseLesson> allLessons = new ArrayList<>();
 
-            // Load lessons for each module and find the current lesson
+            // Lấy tất cả bài học
             for (CourseModule module : modules) {
                 List<CourseLesson> lessons = courseDAO.getModuleLessons(module.getId());
                 moduleLessonsMap.put(module.getId(), lessons);
+                allLessons.addAll(lessons);
 
-                // If no specific lesson requested, select the first one from the first module
                 if (lessonId == 0 && currentLesson == null && !lessons.isEmpty()) {
                     currentLesson = lessons.get(0);
                 }
             }
 
-            // If a specific lesson is requested, get it
+            // Nếu chỉ định lessonId
             if (lessonId > 0) {
                 currentLesson = courseDAO.getLessonDetails(lessonId);
 
-                // Verify the lesson belongs to this course
-                if (currentLesson != null) {
-                    boolean lessonBelongsToCourse = false;
-                    for (List<CourseLesson> lessons : moduleLessonsMap.values()) {
-                        if (lessons.stream().anyMatch(l -> l.getId() == lessonId)) {
-                            lessonBelongsToCourse = true;
-                            break;
-                        }
-                    }
-
-                    if (!lessonBelongsToCourse) {
-                        currentLesson = null;
-                    }
+                boolean valid = allLessons.stream().anyMatch(l -> l.getId() == lessonId);
+                if (!valid) {
+                    currentLesson = null;
                 }
             }
 
-            // Format lesson content if exists
+            // Căn lề và xuống dòng HTML
             if (currentLesson != null && currentLesson.getContent() != null) {
                 currentLesson.setContent(currentLesson.getContent().replace("\n", "<br>"));
             }
 
-            // Set attributes for JSP
+            // Tìm vị trí hiện tại và bài liền trước / sau
+            int currentIndex = -1;
+            for (int i = 0; i < allLessons.size(); i++) {
+                if (allLessons.get(i).getId() == currentLesson.getId()) {
+                    currentIndex = i;
+                    break;
+                }
+            }
+
+            CourseLesson previousLesson = (currentIndex > 0) ? allLessons.get(currentIndex - 1) : null;
+            CourseLesson nextLesson = (currentIndex >= 0 && currentIndex < allLessons.size() - 1)
+                    ? allLessons.get(currentIndex + 1) : null;
+
+            // Đưa ra view
             request.setAttribute("course", course);
             request.setAttribute("modules", modules);
             request.setAttribute("moduleLessonsMap", moduleLessonsMap);
             request.setAttribute("currentLesson", currentLesson);
+            request.setAttribute("previousLesson", previousLesson);
+            request.setAttribute("nextLesson", nextLesson);
 
-            // Forward to JSP
             request.getRequestDispatcher("course_detail.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
             request.getSession().setAttribute("errorMessage", "ID không hợp lệ");
             response.sendRedirect("course");
         } catch (Exception e) {
-            request.getSession().setAttribute("errorMessage", "Đã xảy ra lỗi: " + e.getMessage());
+            request.getSession().setAttribute("errorMessage", "Lỗi: " + e.getMessage());
             response.sendRedirect("course");
         }
     }

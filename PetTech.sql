@@ -262,9 +262,9 @@ VALUES
 -- 4. Hình ảnh khóa học
 INSERT INTO course_images (course_id, image_url, is_primary)
 VALUES 
-(1, '/imgages/img/course/course_dog.jpg', 1),
-(2, '/imgages/img/course/course_cat.jpg', 1),
-(3, '/imgages/img/course/course_pet_first_aid.jpg', 1);
+(1, '/images/course/course_dog.jpg', 1),
+(2, '/images/course/course_cat.jpg', 1),
+(3, '/images/course/course_pet_first_aid.jpg', 1);
 
 
 -- 6. Sản phẩm và danh mục
@@ -296,11 +296,7 @@ VALUES (1, 1, 1, 350000);
 INSERT INTO payments (order_id, payment_date, method, amount)
 VALUES (1, GETDATE(), 'VNPay', 350000);
 
--- 8. Tài liệu đính kèm
-INSERT INTO lesson_attachments (lesson_id, file_name, file_url, file_size)
-VALUES
-(1, N'Tài liệu hướng dẫn nuôi chó con.pdf', '/Note PetTech.txt', 1024),
-(3, N'Danh sách đồ dùng cần thiết.docx', '/Note PetTech.txt', 512);
+
 
 -- ===========================================
 --        HOÀN TẤT TẠO DỮ LIỆU MẪU
