@@ -10,6 +10,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import model.Course;
+import model.CourseLesson;
+import model.CourseModule;
 
 /**
  *
@@ -112,6 +114,84 @@ public class CourseDAO extends DBConnect {
             e.printStackTrace();
         }
         return course;
+    }
+
+// Thêm các phương thức sau vào class CourseDAO
+    public List<CourseModule> getCourseModules(int courseId) {
+        List<CourseModule> modules = new ArrayList<>();
+        String sql = "SELECT * FROM course_modules WHERE course_id = ? ORDER BY order_index";
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, courseId);
+            ResultSet rs = st.executeQuery();
+
+            while (rs.next()) {
+                CourseModule module = new CourseModule(
+                        rs.getInt("id"),
+                        rs.getInt("course_id"),
+                        rs.getString("title"),
+                        rs.getString("description"),
+                        rs.getInt("order_index")
+                );
+                modules.add(module);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting course modules: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return modules;
+    }
+
+    public List<CourseLesson> getModuleLessons(int moduleId) {
+        List<CourseLesson> lessons = new ArrayList<>();
+        String sql = "SELECT * FROM course_lessons WHERE module_id = ? ORDER BY order_index";
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, moduleId);
+            ResultSet rs = st.executeQuery();
+
+            while (rs.next()) {
+                CourseLesson lesson = new CourseLesson(
+                        rs.getInt("id"),
+                        rs.getInt("module_id"),
+                        rs.getString("title"),
+                        rs.getString("content"),
+                        rs.getString("video_url"),
+                        rs.getInt("duration"),
+                        rs.getInt("order_index")
+                );
+                lessons.add(lesson);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting module lessons: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return lessons;
+    }
+
+    public CourseLesson getLessonDetails(int lessonId) {
+        String sql = "SELECT * FROM course_lessons WHERE id = ?";
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, lessonId);
+            ResultSet rs = st.executeQuery();
+
+            if (rs.next()) {
+                return new CourseLesson(
+                        rs.getInt("id"),
+                        rs.getInt("module_id"),
+                        rs.getString("title"),
+                        rs.getString("content"),
+                        rs.getString("video_url"),
+                        rs.getInt("duration"),
+                        rs.getInt("order_index")
+                );
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting lesson details: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static void main(String[] args) {
