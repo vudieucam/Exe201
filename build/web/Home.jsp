@@ -29,6 +29,27 @@
 
         <link rel="stylesheet" href="css/flaticon.css">
         <link rel="stylesheet" href="css/style.css">
+        
+        <style>
+            .login-link {
+                color: #fff;
+                font-weight: 600;
+                font-size: 1.05rem;
+                text-decoration: none;
+                padding: 6px 10px;
+                transition: all 0.2s ease;
+            }
+
+            .login-link i {
+                font-size: 1.1rem;
+                color: #fff;
+                margin-right: 6px;
+            }
+
+            .login-link:hover {
+                text-decoration: underline;
+            }
+        </style>
     </head>
     <body>
 
@@ -41,9 +62,15 @@
                             <a href="#"><span class="fa fa-paper-plane mr-1"></span> PetTech@email.com</a>
                         </p>
                     </div>
-                    <div class="col-md-6 d-flex justify-content-md-end">
-                        <a href="#" class="d-flex align-items-center justify-content-center"><span >Đăng Nhập</span></a>
-                        <a href="#" class="d-flex align-items-center justify-content-center"><span >Đăng Ký</span></a>
+                    <div class="col-md-6 d-flex justify-content-md-end align-items-center">
+                        <a href="#" class="login-link d-flex align-items-center mr-3">
+                            <i class="fa fa-sign-in mr-2"></i>
+                            <span>Đăng Nhập</span>
+                        </a>
+                        <a href="#" class="login-link d-flex align-items-center">
+                            <i class="fa fa-user-plus mr-2"></i>
+                            <span>Đăng Ký</span>
+                        </a>
                     </div>
                 </div>
             </div>
