@@ -49,6 +49,142 @@ public class CourseDAO extends DBConnect {
         return list;
     }
 
+    public List<Course> getCoursesByPage(int page, int recordsPerPage) {
+        List<Course> list = new ArrayList<>();
+        String sql = "SELECT c.id, c.title, c.content, c.post_date, c.researcher, c.time, "
+                + "COALESCE(ci.image_url, '/images/corgin-1.jpg') AS image_url "
+                + "FROM courses c "
+                + "LEFT JOIN course_images ci ON c.id = ci.course_id AND ci.is_primary = 1 "
+                + "ORDER BY c.id OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setInt(1, (page - 1) * recordsPerPage);
+            st.setInt(2, recordsPerPage);
+            ResultSet rs = st.executeQuery();
+
+            while (rs.next()) {
+                Course c = new Course(
+                        rs.getInt("id"),
+                        rs.getString("title"),
+                        rs.getString("content"),
+                        rs.getString("post_date"),
+                        rs.getString("researcher"),
+                        rs.getString("image_url"),
+                        rs.getString("time")
+                );
+                list.add(c);
+            }
+        } catch (SQLException e) {
+            System.out.println("Lỗi SQL: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public int getTotalCourses() {
+        String sql = "SELECT COUNT(*) FROM courses";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public List<Course> searchCourses(String query, int page, int recordsPerPage) {
+        List<Course> list = new ArrayList<>();
+        String sql = "SELECT c.id, c.title, c.content, c.post_date, c.researcher, c.time, "
+                + "COALESCE(ci.image_url, '/images/corgin-1.jpg') AS image_url "
+                + "FROM courses c "
+                + "LEFT JOIN course_images ci ON c.id = ci.course_id AND ci.is_primary = 1 "
+                + "WHERE c.title LIKE ? OR c.content LIKE ? OR c.researcher LIKE ? "
+                + "ORDER BY c.id OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            String searchParam = "%" + query + "%";
+            st.setString(1, searchParam);
+            st.setString(2, searchParam);
+            st.setString(3, searchParam);
+            st.setInt(4, (page - 1) * recordsPerPage);
+            st.setInt(5, recordsPerPage);
+            ResultSet rs = st.executeQuery();
+
+            while (rs.next()) {
+                Course c = new Course(
+                        rs.getInt("id"),
+                        rs.getString("title"),
+                        rs.getString("content"),
+                        rs.getString("post_date"),
+                        rs.getString("researcher"),
+                        rs.getString("image_url"),
+                        rs.getString("time")
+                );
+                list.add(c);
+            }
+        } catch (SQLException e) {
+            System.out.println("Lỗi SQL: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public int getTotalSearchCourses(String query) {
+        String sql = "SELECT COUNT(*) FROM courses "
+                + "WHERE title LIKE ? OR content LIKE ? OR researcher LIKE ?";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            String searchParam = "%" + query + "%";
+            st.setString(1, searchParam);
+            st.setString(2, searchParam);
+            st.setString(3, searchParam);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public List<Course> getFeaturedCourses(int limit) {
+        List<Course> list = new ArrayList<>();
+        String sql = "SELECT TOP (?) c.id, c.title, c.content, c.post_date, c.researcher, c.time, "
+                + "COALESCE(ci.image_url, '/images/corgin-1.jpg') AS image_url "
+                + "FROM courses c "
+                + "LEFT JOIN course_images ci ON c.id = ci.course_id AND ci.is_primary = 1 "
+                + "ORDER BY c.post_date DESC";
+
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setInt(1, limit);
+            ResultSet rs = st.executeQuery();
+
+            while (rs.next()) {
+                Course c = new Course(
+                        rs.getInt("id"),
+                        rs.getString("title"),
+                        rs.getString("content"),
+                        rs.getString("post_date"),
+                        rs.getString("researcher"),
+                        rs.getString("image_url"),
+                        rs.getString("time")
+                );
+                list.add(c);
+            }
+        } catch (SQLException e) {
+            System.out.println("Lỗi SQL: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return list;
+    }
+
     // Lấy khóa học theo danh mục
     public List<Course> getCoursesByCategory(String category) {
         List<Course> list = new ArrayList<>();
@@ -262,7 +398,7 @@ public class CourseDAO extends DBConnect {
             return false;
         }
     }
-    
+
     // Lấy bài học theo ID
     public CourseLesson getLessonById(int id) {
         String sql = "SELECT * FROM course_lessons WHERE id = ?";
@@ -281,9 +417,9 @@ public class CourseDAO extends DBConnect {
     // Lấy danh sách bài học theo course_id (dựa vào course_modules)
     public List<CourseLesson> getLessonsByCourse(int courseId) {
         List<CourseLesson> list = new ArrayList<>();
-        String sql = "SELECT cl.* FROM course_lessons cl " +
-                     "JOIN course_modules cm ON cl.module_id = cm.id " +
-                     "WHERE cm.course_id = ? ORDER BY cl.module_id, cl.order_index";
+        String sql = "SELECT cl.* FROM course_lessons cl "
+                + "JOIN course_modules cm ON cl.module_id = cm.id "
+                + "WHERE cm.course_id = ? ORDER BY cl.module_id, cl.order_index";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, courseId);
             ResultSet rs = ps.executeQuery();

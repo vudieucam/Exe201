@@ -5,7 +5,8 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ page import="java.util.List, model.Course" %>
 <%@ page import="java.util.List, java.util.ArrayList" %>
 <%
@@ -220,7 +221,175 @@
             .login-link:hover {
                 text-decoration: underline;
             }
+            .course-card {
+                transition: all 0.3s ease;
+                transform: translateY(0);
+            }
+
+            .course-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+                z-index: 10;
+            }
+            /* Dropdown Mega Menu - PetTech */
+            .mega-menu {
+                width: 850px;
+                left: -200px !important;
+                border: none;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+                border-radius: 0 0 15px 15px;
+                overflow: hidden;
+            }
+
+            .course-item {
+                transition: all 0.3s ease;
+                border-radius: 8px;
+                margin: 3px;
+            }
+
+            .course-item:hover {
+                background-color: #f8f5ff;
+                transform: translateY(-3px);
+                box-shadow: 0 5px 15px rgba(109, 74, 255, 0.1);
+            }
+
+            .course-thumbnail {
+                width: 60px;
+                height: 60px;
+                object-fit: cover;
+                border-radius: 8px;
+                border: 2px solid #e2d9ff;
+            }
+
+            .course-title {
+                font-size: 14px;
+                font-weight: 600;
+                color: #4a2c82;
+                line-height: 1.3;
+            }
+
+            .course-author {
+                font-size: 12px;
+                color: #a37aff;
+            }
+
+            .text-purple {
+                color: #6d4aff !important;
+            }
+
+            .btn-view-all {
+                display: inline-block;
+                color: #e67e22 !important; /* Màu cam */
+                font-weight: 600;
+                padding: 5px 15px;
+                border-radius: 20px;
+                transition: all 0.3s;
+                text-decoration: none;
+                background-color: #fff4e6;
+            }
+
+            .btn-view-all:hover {
+                color: #d35400 !important;
+                background-color: #ffe8cc;
+                transform: translateX(5px);
+            }
+
+            /* Mobile responsive */
+            @media (max-width: 992px) {
+                .mega-menu {
+                    width: 100% !important;
+                    left: 0 !important;
+                }
+
+                .course-item {
+                    border-bottom: 1px solid #eee;
+                    border-radius: 0;
+                    margin: 0;
+                }
+
+                .course-thumbnail {
+                    width: 50px;
+                    height: 50px;
+                }
+            }
+            /* Dropdown đơn giản - chỉ hiển thị title */
+            .dropdown-menu {
+                min-width: 250px;
+                border: none;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                border-radius: 8px;
+                padding: 0;
+            }
+
+            .dropdown-header {
+                color: #6d4aff;
+                font-weight: 600;
+                padding: 10px 15px;
+                background-color: #f8f5ff;
+                border-bottom: 1px solid #e2d9ff;
+            }
+
+            .dropdown-item {
+                padding: 10px 15px;
+                color: #4a2c82;
+                transition: all 0.2s;
+                border-bottom: 1px solid #f0f0f0;
+            }
+
+            .dropdown-item:hover {
+                background-color: #f3edff;
+                color: #6d4aff;
+                padding-left: 20px;
+            }
+
+            .view-all-btn {
+                color: #e67e22 !important; /* Màu cam */
+                font-weight: 600;
+                background-color: #fff4e6;
+            }
+
+            .view-all-btn:hover {
+                background-color: #ffe8cc !important;
+            }
+            /* Style cho input search */
+            .search-form .form-control {
+                border-radius: 50px 0 0 50px;
+                border: 1px solid #FFD6A0;
+                padding: 10px 20px;
+                font-size: 1rem;
+                box-shadow: none;
+            }
+
+            /* Nút tìm kiếm nâu-cam dễ thương */
+            .search-form .btn {
+                background: linear-gradient(45deg, #FFA630, #D2691E);
+                color: white;
+                border: none;
+                border-radius: 0 50px 50px 0;
+                padding: 10px 25px;
+                font-size: 1.1rem;
+                font-weight: bold;
+                box-shadow: 0 4px 10px rgba(210, 105, 30, 0.3);
+                transition: all 0.3s ease;
+            }
+
+            .search-form .btn:hover {
+                background: linear-gradient(45deg, #FF6B35, #B25C1D);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 15px rgba(210, 105, 30, 0.4);
+            }
+
+
         </style>
+
+        <script>
+            $(document).ready(function () {
+                // Hiệu ứng loading khi click vào phân trang hoặc tìm kiếm
+                $('.page-link, .search-form button').click(function () {
+                    $('#ftco-loader').addClass('show');
+                });
+            });
+        </script>
 
     </head>
     <body>
@@ -257,7 +426,30 @@
                 <div class="collapse navbar-collapse" id="ftco-nav">
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item active"><a href="Home.jsp" class="nav-link">Trang chủ</a></li>
-                        <li class="nav-item"><a href="course" class="nav-link">Khóa học</a></li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="coursesDropdown" role="button" 
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Khóa học
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="coursesDropdown">
+                                <div class="dropdown-header">
+                                    <i class="fa fa-book mr-2"></i>Danh mục khóa học
+                                </div>
+
+                                <c:forEach items="${featuredCourses}" var="course" end="8">
+                                    <a class="dropdown-item" href="coursedetail?id=${course.id}">
+                                        ${fn:substring(course.title, 0, 50)}${fn:length(course.title) > 50 ? '...' : ''}
+                                    </a>
+                                </c:forEach>
+
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item text-center view-all-btn" href="course">
+                                    <i class="fa fa-arrow-right mr-2"></i>Xem tất cả
+                                </a>
+                            </div>
+                        </li>
+                        </li>
                         <li class="nav-item"><a href="vet.jsp" class="nav-link">Chuyên gia</a></li>
                         <li class="nav-item"><a href="service.jsp" class="nav-link">Sản phẩm</a></li>
                         <li class="nav-item"><a href="gallery.jsp" class="nav-link">Thú cưng</a></li>
@@ -272,6 +464,23 @@
 
 
         <section class="course-section">
+            <!-- Thêm vào đầu section course-section -->
+            <div class="container mb-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <form action="course" method="get" class="search-form">
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="search" placeholder="Tìm kiếm khóa học..." 
+                                       value="${param.search}">
+                                <button class="btn" type="submit">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
             <div class="container">
                 <div class="course-header">
                     <h2>Danh Sách Khóa Học</h2>
@@ -309,7 +518,7 @@
                                      class="course-img"
                                      onerror="this.onerror=null; this.src='<%= defaultImage %>'">
 
-                                <span class="course-badge">Mới</span>
+                                
 
 
                             </div>
@@ -357,6 +566,36 @@
                         </div>
                     </div>
                     <% } %>
+                </div>
+            </div>
+            <!-- Thêm sau phần hiển thị danh sách khóa học -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            <c:if test="${currentPage > 1}">
+                                <li class="page-item">
+                                    <a class="page-link" href="course?page=${currentPage - 1}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            </c:if>
+
+                            <c:forEach begin="1" end="${totalPages}" var="i">
+                                <li class="page-item ${currentPage == i ? 'active' : ''}">
+                                    <a class="page-link" href="course?page=${i}">${i}</a>
+                                </li>
+                            </c:forEach>
+
+                            <c:if test="${currentPage < totalPages}">
+                                <li class="page-item">
+                                    <a class="page-link" href="course?page=${currentPage + 1}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            </c:if>
+                        </ul>
+                    </nav>
                 </div>
             </div>
         </section>

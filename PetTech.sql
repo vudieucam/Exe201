@@ -252,19 +252,6 @@ VALUES
 ('partner2@shop.vn', 'hashed_pw_5', '0888888888', N'Cần Thơ', 'partner', NULL),
 ('admin@pettech.vn', 'hashed_admin_pw', NULL, NULL, 'admin', NULL);
 
--- 3. Khóa học
-INSERT INTO courses (title, content, post_date, researcher, video_url, status, time)
-VALUES 
-(N'Chăm sóc chó con', N'Hướng dẫn nuôi dạy chó con toàn diện', GETDATE(), N'Dr. Trí Nguyễn', NULL, 1, N'4 tuần'),
-(N'Dinh dưỡng cho mèo trưởng thành', N'Phân tích chế độ ăn và thực phẩm phù hợp cho mèo', GETDATE(), N'Dr. Lệ Hằng', NULL, 1, N'6 tuần'),
-(N'Sơ cứu thú cưng tại nhà', N'Hướng dẫn các bước sơ cứu cơ bản cho thú cưng', GETDATE(), N'Dr. Dũng Phạm', NULL, 1, N'3 tháng');
-
--- 4. Hình ảnh khóa học
-INSERT INTO course_images (course_id, image_url, is_primary)
-VALUES 
-(1, '/images/course/course_dog.jpg', 1),
-(2, '/images/course/course_cat.jpg', 1),
-(3, '/images/course/course_pet_first_aid.jpg', 1);
 
 
 -- 6. Sản phẩm và danh mục
@@ -301,6 +288,22 @@ VALUES (1, GETDATE(), 'VNPay', 350000);
 -- ===========================================
 --        HOÀN TẤT TẠO DỮ LIỆU MẪU
 -- ===========================================
+
+
+
+-- 3. Khóa học
+INSERT INTO courses (title, content, post_date, researcher, video_url, status, time)
+VALUES 
+(N'Chăm sóc chó con', N'Hướng dẫn nuôi dạy chó con toàn diện', GETDATE(), N'Dr. Trí Nguyễn', NULL, 1, N'4 tuần'),
+(N'Dinh dưỡng cho mèo trưởng thành', N'Phân tích chế độ ăn và thực phẩm phù hợp cho mèo', GETDATE(), N'Dr. Lệ Hằng', NULL, 1, N'6 tuần'),
+(N'Sơ cứu thú cưng tại nhà', N'Hướng dẫn các bước sơ cứu cơ bản cho thú cưng', GETDATE(), N'Dr. Dũng Phạm', NULL, 1, N'3 tháng');
+
+-- 4. Hình ảnh khóa học
+INSERT INTO course_images (course_id, image_url, is_primary)
+VALUES 
+(1, '/images/course/course_dog.jpg', 1),
+(2, '/images/course/course_cat.jpg', 1),
+(3, '/images/course/course_pet_first_aid.jpg', 1);
 
 -- === KHÓA HỌC 1: Chăm sóc chó con ===
 INSERT INTO course_modules (course_id, title, description, order_index) VALUES
@@ -532,6 +535,526 @@ INSERT INTO lesson_attachments (lesson_id, file_name, file_url, file_size) VALUE
 -- ===========================================
 --   KẾT THÚC BỔ SUNG MODULE/LESSON CHI TIẾT CHO 3 KHÓA
 -- ===========================================
+
+-- Khóa học 4: Huấn luyện chó căn bản
+INSERT INTO courses (title, content, post_date, researcher, video_url, status, time)
+VALUES
+(N'Huấn luyện chó căn bản', N'Hướng dẫn chi tiết các kỹ thuật huấn luyện chó cơ bản, giúp thú cưng ngoan ngoãn và hiểu lời chủ.', GETDATE(), N'Dr. Thanh Phạm', NULL, 1, N'5 tuần');
+
+-- Hình ảnh khóa học
+INSERT INTO course_images (course_id, image_url, is_primary)
+VALUES
+(4, '/images/course/course_training_dog.jpg', 1);
+
+-- Modules cho khóa học 4
+INSERT INTO course_modules (course_id, title, description, order_index) VALUES
+(4, N'Giới thiệu về huấn luyện chó', N'Tổng quan về tâm lý và các bước chuẩn bị khi huấn luyện chó.', 1),
+(4, N'Kỹ thuật huấn luyện cơ bản', N'Chi tiết các bài tập và kỹ thuật giúp chó nghe lời.', 2);
+
+-- Bài học cho module 1
+INSERT INTO course_lessons (module_id, title, content, video_url, duration, order_index) VALUES
+(7, N'Bài 1: Tâm lý chó khi huấn luyện',
+N'I. Tầm quan trọng của tâm lý trong huấn luyện
+
+Việc hiểu rõ tâm lý của chó sẽ giúp bạn áp dụng phương pháp huấn luyện hiệu quả, tránh làm thú cưng sợ hãi hoặc phản kháng.
+
+II. Đặc điểm tâm lý chó
+
+1. Chó là loài xã hội, thích gắn kết với chủ nhân.
+2. Chó thích lặp lại và phản hồi nhanh với phần thưởng.
+3. Chó sợ bị phạt quá mức, dễ bị stress nếu huấn luyện sai cách.
+
+III. Các bước chuẩn bị tâm lý cho huấn luyện
+
+1. Tạo môi trường yên tĩnh, không bị làm phiền.
+2. Chuẩn bị đồ ăn thưởng cho chó.
+3. Dành thời gian làm quen và chơi với chó trước khi bắt đầu huấn luyện.
+
+![Chó vui khi được huấn luyện](https://example.com/images/happy_dog_training.jpg)
+
+IV. Kết luận
+
+Huấn luyện thành công bắt đầu từ việc hiểu và tôn trọng tâm lý của thú cưng.', NULL, 15, 1);
+
+-- Bài học cho module 2
+INSERT INTO course_lessons (module_id, title, content, video_url, duration, order_index) VALUES
+(8, N'Bài 1: Huấn luyện chó nghe lệnh "Ngồi"',
+N'I. Mục tiêu
+
+Huấn luyện chó biết ngồi khi được ra lệnh là bài học cơ bản giúp kiểm soát hành vi và tạo nền tảng cho các bài huấn luyện nâng cao.
+
+II. Hướng dẫn chi tiết
+
+1. Chuẩn bị thức ăn thưởng yêu thích của chó.
+2. Giữ thức ăn trước mũi chó, từ từ di chuyển tay lên trên và ra sau đầu chó.
+3. Khi chó ngồi xuống theo tay bạn, ngay lập tức nói lệnh "Ngồi" và thưởng thức ăn.
+4. Lặp lại nhiều lần trong ngày, mỗi lần huấn luyện không quá 10 phút để tránh chó mệt.
+
+III. Lưu ý
+
+- Kiên nhẫn và tránh la mắng khi chó chưa hiểu.
+- Không huấn luyện ngay sau khi chó ăn no.
+
+IV. Video minh họa
+
+Bạn có thể xem video hướng dẫn tại đây:
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/dog_sit_training" title="Huấn luyện chó ngồi" frameborder="0" allowfullscreen></iframe>
+
+![Huấn luyện chó ngồi](https://example.com/images/dog_sit_command.jpg)
+
+V. Kết luận
+
+Bài huấn luyện "Ngồi" là bước đầu tiên quan trọng giúp xây dựng kỷ luật và sự hợp tác giữa chó và chủ.', NULL, 20, 1);
+
+-- Tài liệu đính kèm bài học
+INSERT INTO lesson_attachments (lesson_id, file_name, file_url, file_size) VALUES
+(7, N'Hướng dẫn chi tiết bài huấn luyện Ngồi.pdf', '/uploads/documents/dog_sit_training.pdf', 2048);
+
+-- Khóa học 5: Chăm sóc mèo cơ bản
+INSERT INTO courses (title, content, post_date, researcher, video_url, status, time)
+VALUES
+(N'Chăm sóc mèo cơ bản', N'Hướng dẫn chi tiết chăm sóc mèo từ thức ăn, vệ sinh, đến sức khỏe.', GETDATE(), N'Dr. Mai Phương', NULL, 1, N'4 tuần');
+
+-- Hình ảnh khóa học
+INSERT INTO course_images (course_id, image_url, is_primary)
+VALUES
+(5, '/images/course/course_cat_care.jpg', 1);
+
+-- Modules
+INSERT INTO course_modules (course_id, title, description, order_index) VALUES
+(5, N'Chế độ dinh dưỡng', N'Hướng dẫn lựa chọn thức ăn và chế độ dinh dưỡng phù hợp cho mèo.', 1),
+(5, N'Vệ sinh và phòng bệnh', N'Cách vệ sinh cơ bản và phòng tránh các bệnh thường gặp ở mèo.', 2);
+
+-- Bài học module 1
+INSERT INTO course_lessons (module_id, title, content, video_url, duration, order_index) VALUES
+(9, N'Bài 1: Dinh dưỡng cho mèo',
+N'I. Tổng quan về dinh dưỡng
+
+Mèo là loài ăn thịt, cần chế độ giàu protein và chất béo từ động vật để phát triển khỏe mạnh.
+
+II. Các loại thức ăn phổ biến
+
+1. Thức ăn khô (dry food)
+- Tiện lợi, dễ bảo quản.
+- Cần bổ sung nước đầy đủ khi cho mèo ăn thức ăn khô.
+
+2. Thức ăn ướt (wet food)
+- Độ ẩm cao, hỗ trợ tiêu hóa.
+- Giá thành cao hơn và bảo quản khó hơn.
+
+III. Lời khuyên chọn thức ăn
+
+- Ưu tiên các loại có protein động vật đứng đầu thành phần.
+- Tránh thức ăn nhiều ngũ cốc và phụ gia nhân tạo.
+- Chia khẩu phần ăn hợp lý, tránh cho mèo ăn quá nhiều gây béo phì.
+
+![Dinh dưỡng cho mèo](https://example.com/images/cat_food_nutrition.jpg)
+
+IV. Kết luận
+
+Chế độ dinh dưỡng đúng sẽ giúp mèo tăng sức đề kháng và giảm nguy cơ bệnh tật.',
+NULL, 18, 1);
+
+-- Bài học module 2
+INSERT INTO course_lessons (module_id, title, content, video_url, duration, order_index) VALUES
+(10, N'Bài 1: Vệ sinh và phòng bệnh cho mèo',
+N'I. Vệ sinh cơ bản
+
+- Tắm cho mèo: dùng dầu gội chuyên dụng, tắm định kỳ 2-3 tuần/lần.
+- Chải lông: giúp loại bỏ lông rụng và phòng ngừa rối lông.
+
+II. Phòng bệnh
+
+- Tiêm phòng đầy đủ: bệnh dại, bạch cầu, viêm đường hô hấp.
+- Vệ sinh khu vực ăn uống và vệ sinh vệ sinh môi trường sống.
+
+III. Phát hiện sớm dấu hiệu bệnh
+
+- Mèo bị bỏ ăn, lười vận động, rụng lông bất thường.
+- Tiêu chảy hoặc nôn mửa kéo dài.
+- Tham khảo ý kiến bác sĩ thú y ngay khi nghi ngờ.
+
+![Vệ sinh mèo](https://example.com/images/cat_hygiene.jpg)
+
+IV. Kết luận
+
+Vệ sinh tốt kết hợp phòng bệnh chủ động giúp mèo khỏe mạnh và sống lâu hơn.',
+'https://www.youtube.com/embed/cat_care_basics', 20, 1);
+
+-- Tài liệu đính kèm
+INSERT INTO lesson_attachments (lesson_id, file_name, file_url, file_size) VALUES
+(8, N'Hướng dẫn vệ sinh mèo cơ bản.pdf', '/uploads/documents/cat_hygiene_guide.pdf', 1536);
+
+-- Khóa học 6: Tập luyện và vận động cho thú cưng
+INSERT INTO courses (title, content, post_date, researcher, video_url, status, time)
+VALUES
+(N'Tập luyện và vận động cho thú cưng', N'Chương trình hướng dẫn các bài tập thể dục phù hợp với từng loại thú cưng để nâng cao sức khỏe.', GETDATE(), N'Dr. Hải Vương', NULL, 1, N'5 tuần');
+
+-- Hình ảnh khóa học
+INSERT INTO course_images (course_id, image_url, is_primary)
+VALUES
+(6, '/images/course/course_pet_exercise.jpg', 1);
+
+-- Modules
+INSERT INTO course_modules (course_id, title, description, order_index) VALUES
+(6, N'Chuẩn bị trước khi tập luyện', N'Những lưu ý cần biết trước khi bắt đầu tập luyện cho thú cưng.', 1),
+(6, N'Các bài tập cơ bản', N'Hướng dẫn các bài tập thể dục phù hợp cho thú cưng.', 2);
+
+-- Bài học module 1
+INSERT INTO course_lessons (module_id, title, content, video_url, duration, order_index) VALUES
+(11, N'Bài 1: Lưu ý khi tập luyện cho thú cưng',
+N'I. Tầm quan trọng của vận động
+
+Tập luyện giúp thú cưng duy trì cân nặng hợp lý, tăng cường sức khỏe tim mạch và tinh thần vui vẻ.
+
+II. Các bước chuẩn bị
+
+- Kiểm tra sức khỏe thú cưng trước khi bắt đầu.
+- Chọn không gian tập luyện rộng rãi và an toàn.
+- Chuẩn bị dụng cụ tập luyện phù hợp.
+
+III. Những lưu ý quan trọng
+
+- Không tập quá sức, theo dõi phản ứng của thú cưng.
+- Uống nước đầy đủ trước và sau khi tập.
+- Tăng dần cường độ và thời gian tập luyện theo khả năng.
+
+![Thú cưng tập thể dục](https://example.com/images/pet_exercise_preparation.jpg)
+
+IV. Kết luận
+
+Chuẩn bị kỹ lưỡng giúp buổi tập hiệu quả và an toàn cho thú cưng.',
+NULL, 15, 1);
+
+-- Bài học module 2
+INSERT INTO course_lessons (module_id, title, content, video_url, duration, order_index) VALUES
+(12, N'Bài 1: Các bài tập vận động cơ bản',
+N'I. Bài tập đi dạo
+
+- Đi bộ hằng ngày 20-30 phút giúp tăng sức bền và giảm stress.
+- Chọn đường đi an toàn, tránh nắng gắt hoặc khu vực đông xe.
+
+II. Bài tập chơi kéo co
+
+- Kích thích sự nhanh nhẹn và rèn luyện cơ bắp.
+- Dùng dây kéo hoặc đồ chơi chuyên dụng.
+
+III. Bài tập tìm kiếm
+
+- Giúp thú cưng phát triển trí tuệ và tăng tương tác với chủ.
+- Ẩn đồ chơi hoặc thức ăn để thú cưng tìm kiếm.
+
+![Thú cưng tập kéo co](https://example.com/images/pet_tug_game.jpg)
+
+IV. Video hướng dẫn
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/pet_exercise_basic" title="Tập luyện cho thú cưng" frameborder="0" allowfullscreen></iframe>
+
+V. Kết luận
+
+Các bài tập đa dạng giúp thú cưng khỏe mạnh và vui vẻ hơn.',
+NULL, 20, 1);
+
+-- Tài liệu đính kèm
+INSERT INTO lesson_attachments (lesson_id, file_name, file_url, file_size) VALUES
+(9, N'Hướng dẫn các bài tập thể dục cho thú cưng.pdf', '/uploads/documents/pet_exercise_guide.pdf', 2300);
+
+-- Khóa học 7: Phòng bệnh và tiêm phòng cho thú cưng
+INSERT INTO courses (title, content, post_date, researcher, video_url, status, time)
+VALUES
+(N'Phòng bệnh và tiêm phòng cho thú cưng', N'Hướng dẫn chi tiết các loại vaccine cần thiết và biện pháp phòng bệnh phổ biến cho chó mèo.', GETDATE(), N'Dr. Hương Lan', NULL, 1, N'3 tuần');
+
+-- Hình ảnh khóa học
+INSERT INTO course_images (course_id, image_url, is_primary)
+VALUES
+(7, '/images/course/course_vaccination.jpg', 1);
+
+-- Modules
+INSERT INTO course_modules (course_id, title, description, order_index) VALUES
+(7, N'Các bệnh thường gặp', N'Tìm hiểu các bệnh phổ biến ở thú cưng.', 1),
+(7, N'Chương trình tiêm phòng', N'Lịch tiêm chủng và hướng dẫn theo dõi sau tiêm.', 2);
+
+-- Bài học module 1
+INSERT INTO course_lessons (module_id, title, content, video_url, duration, order_index) VALUES
+(13, N'Bài 1: Các bệnh thường gặp ở chó mèo',
+N'I. Bệnh dại
+
+- Lây truyền qua vết cắn, gây tử vong gần như 100% nếu không điều trị.
+- Triệu chứng: thay đổi hành vi, sợ nước, co giật.
+
+II. Bệnh parvovirus
+
+- Gây tiêu chảy nặng, suy dinh dưỡng, đặc biệt nguy hiểm với chó con.
+- Lây truyền qua phân.
+
+III. Bệnh viêm đường hô hấp
+
+- Gây ho, sổ mũi, khó thở.
+- Lây qua tiếp xúc và không khí.
+
+IV. Lời khuyên
+
+- Tiêm phòng đầy đủ và định kỳ.
+- Giữ vệ sinh nơi ở sạch sẽ, tránh tiếp xúc với thú cưng lạ.
+
+![Phòng bệnh thú cưng](https://example.com/images/pet_disease_prevention.jpg)
+
+V. Kết luận
+
+Hiểu rõ bệnh để phòng tránh là cách tốt nhất bảo vệ thú cưng của bạn.',
+NULL, 25, 1);
+
+-- Bài học module 2
+INSERT INTO course_lessons (module_id, title, content, video_url, duration, order_index) VALUES
+(14, N'Bài 1: Chương trình tiêm phòng cho thú cưng',
+N'I. Lịch tiêm phòng cơ bản
+
+- Mũi đầu tiên: từ 6-8 tuần tuổi.
+- Tiêm nhắc lại: mỗi 3-4 tuần cho đến khi đủ 16 tuần tuổi.
+- Tiêm nhắc lại hàng năm.
+
+II. Các loại vaccine phổ biến
+
+- Vaccine dại.
+- Vaccine parvovirus, distemper, adenovirus.
+- Vaccine phòng bệnh hô hấp.
+
+III. Chăm sóc sau tiêm
+
+- Theo dõi phản ứng dị ứng, sốt nhẹ.
+- Tránh tắm rửa và vận động mạnh trong 24 giờ sau tiêm.
+
+IV. Video hướng dẫn tiêm phòng
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/pet_vaccination_guide" title="Hướng dẫn tiêm phòng cho thú cưng" frameborder="0" allowfullscreen></iframe>
+
+V. Kết luận
+
+Thực hiện đúng lịch tiêm giúp thú cưng khỏe mạnh, hạn chế nguy cơ dịch bệnh.',
+NULL, 22, 1);
+
+-- Tài liệu đính kèm
+INSERT INTO lesson_attachments (lesson_id, file_name, file_url, file_size) VALUES
+(10, N'Lịch tiêm phòng chuẩn cho thú cưng.pdf', '/uploads/documents/pet_vaccination_schedule.pdf', 2048);
+
+-- Khóa học 8: Dạy thú cưng các lệnh cơ bản
+INSERT INTO courses (title, content, post_date, researcher, video_url, status, time)
+VALUES
+(N'Dạy thú cưng các lệnh cơ bản', N'Hướng dẫn phương pháp dạy thú cưng các lệnh như ngồi, nằm, gọi về, giữ đồ.', GETDATE(), N'Trần Minh Quân', NULL, 1, N'6 tuần');
+
+-- Hình ảnh khóa học
+INSERT INTO course_images (course_id, image_url, is_primary)
+VALUES
+(8, '/images/course/course_basic_commands.jpg', 1);
+
+-- Modules
+INSERT INTO course_modules (course_id, title, description, order_index) VALUES
+(8, N'Làm quen với thú cưng', N'Thời gian và môi trường phù hợp để bắt đầu huấn luyện.', 1),
+(8, N'Các lệnh cơ bản', N'Hướng dẫn từng lệnh chi tiết.', 2);
+
+-- Bài học module 1
+INSERT INTO course_lessons (module_id, title, content, video_url, duration, order_index) VALUES
+(15, N'Bài 1: Chuẩn bị cho việc huấn luyện',
+N'I. Chọn thời điểm
+
+- Thú cưng cần tỉnh táo, không quá đói hay quá no.
+- Môi trường yên tĩnh, ít tác động bên ngoài.
+
+II. Chuẩn bị vật dụng
+
+- Đồ ăn thưởng (treats).
+- Dây dắt, vòng cổ phù hợp.
+- Đồ chơi làm phần thưởng.
+
+III. Thiết lập mục tiêu
+
+- Huấn luyện từng lệnh riêng biệt.
+- Giữ kiên nhẫn và khích lệ tích cực.
+
+![Huấn luyện thú cưng](https://example.com/images/pet_training_preparation.jpg)
+
+IV. Kết luận
+
+Chuẩn bị kỹ càng giúp quá trình dạy dễ dàng và hiệu quả hơn.',
+NULL, 17, 1);
+
+-- Bài học module 2
+INSERT INTO course_lessons (module_id, title, content, video_url, duration, order_index) VALUES
+(16, N'Bài 1: Dạy lệnh "Ngồi"',
+N'I. Bước 1: Gọi sự chú ý
+
+- Giữ treat trên mũi thú cưng.
+- Từ từ nâng treat lên cao khiến thú cưng ngẩng đầu.
+
+II. Bước 2: Ra lệnh và thưởng
+
+- Khi thú cưng ngồi xuống, nói rõ ràng "Ngồi".
+- Ngay lập tức thưởng treat và khen ngợi.
+
+III. Lặp lại nhiều lần
+
+- Mỗi buổi 10-15 phút, tập 2-3 lần/ngày.
+- Dần dần giảm treat, thay bằng lời khen.
+
+![Dạy lệnh ngồi](https://example.com/images/pet_command_sit.jpg)
+
+IV. Video hướng dẫn
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/pet_command_sit_tutorial" title="Dạy lệnh Ngồi cho thú cưng" frameborder="0" allowfullscreen></iframe>
+
+V. Kết luận
+
+Luyện tập kiên trì giúp thú cưng nhanh nhớ và phản ứng chính xác.',
+NULL, 20, 1);
+
+-- Tài liệu đính kèm
+INSERT INTO lesson_attachments (lesson_id, file_name, file_url, file_size) VALUES
+(11, N'Hướng dẫn dạy thú cưng các lệnh cơ bản.pdf', '/uploads/documents/pet_basic_commands_guide.pdf', 2700);
+
+-- Khóa học 9: Chăm sóc sức khỏe và dinh dưỡng cho chó con
+INSERT INTO courses (title, content, post_date, researcher, video_url, status, time)
+VALUES
+(N'Chăm sóc sức khỏe và dinh dưỡng cho chó con', N'Kiến thức và kỹ năng chăm sóc chó con từ lúc mới sinh đến 6 tháng tuổi.', GETDATE(), N'Dr. Phạm Thanh', NULL, 1, N'5 tuần');
+
+-- Hình ảnh khóa học
+INSERT INTO course_images (course_id, image_url, is_primary)
+VALUES
+(9, '/images/course/course_puppy_care.jpg', 1);
+
+-- Modules
+INSERT INTO course_modules (course_id, title, description, order_index) VALUES
+(9, N'Chăm sóc sức khỏe', N'Hướng dẫn theo dõi và chăm sóc chó con.', 1),
+(9, N'Dinh dưỡng phù hợp', N'Cách lựa chọn thức ăn và chế độ dinh dưỡng.', 2);
+
+-- Bài học module 1
+INSERT INTO course_lessons (module_id, title, content, video_url, duration, order_index) VALUES
+(17, N'Bài 1: Theo dõi sức khỏe chó con',
+N'I. Các dấu hiệu khỏe mạnh
+
+- Chó con hoạt bát, ăn uống đều.
+- Lông mượt, không có vết thương ngoài da.
+
+II. Các dấu hiệu cần chú ý
+
+- Sốt cao, tiêu chảy, nôn mửa.
+- Lười ăn, bỏ ăn kéo dài.
+
+III. Cách chăm sóc thường nhật
+
+- Giữ nơi ở sạch sẽ, ấm áp.
+- Tiêm phòng đầy đủ và đúng lịch.
+
+![Chó con khỏe mạnh](https://example.com/images/puppy_health_check.jpg)
+
+IV. Kết luận
+
+Chăm sóc sớm giúp chó con phát triển khỏe mạnh và giảm nguy cơ bệnh tật.',
+NULL, 18, 1);
+
+-- Bài học module 2
+INSERT INTO course_lessons (module_id, title, content, video_url, duration, order_index) VALUES
+(18, N'Bài 1: Chế độ dinh dưỡng cho chó con',
+N'I. Thức ăn phù hợp
+
+- Sữa mẹ là tốt nhất trong 4 tuần đầu.
+- Sau 4 tuần chuyển sang thức ăn dạng mềm hoặc bột dinh dưỡng.
+
+II. Tăng dần thức ăn rắn
+
+- Tập cho chó con ăn dần thức ăn hạt nhỏ.
+- Chia khẩu phần nhỏ ăn nhiều lần/ngày.
+
+III. Các loại thức ăn bổ sung
+
+- Vitamin và khoáng chất theo hướng dẫn thú y.
+- Tránh thức ăn nhiều muối và chất bảo quản.
+
+![Dinh dưỡng cho chó con](https://example.com/images/puppy_nutrition.jpg)
+
+IV. Video minh họa
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/puppy_nutrition_guide" title="Chế độ dinh dưỡng cho chó con" frameborder="0" allowfullscreen></iframe>
+
+V. Kết luận
+
+Dinh dưỡng hợp lý giúp chó con phát triển toàn diện và phòng bệnh tốt.',
+NULL, 20, 1);
+
+-- Tài liệu đính kèm
+INSERT INTO lesson_attachments (lesson_id, file_name, file_url, file_size) VALUES
+(12, N'Hướng dẫn dinh dưỡng cho chó con.pdf', '/uploads/documents/puppy_nutrition_guide.pdf', 2400);
+
+-- Khóa học 10: Kỹ thuật cắt tỉa lông và vệ sinh cho thú cưng
+INSERT INTO courses (title, content, post_date, researcher, video_url, status, time)
+VALUES
+(N'Kỹ thuật cắt tỉa lông và vệ sinh cho thú cưng', N'Hướng dẫn các kỹ thuật chăm sóc ngoại hình, cắt tỉa lông và vệ sinh cho thú cưng.', GETDATE(), N'Nguyễn Minh Tú', NULL, 1, N'4 tuần');
+
+-- Hình ảnh khóa học
+INSERT INTO course_images (course_id, image_url, is_primary)
+VALUES
+(10, '/images/course/course_grooming.jpg', 1);
+
+-- Modules
+INSERT INTO course_modules (course_id, title, description, order_index) VALUES
+(10, N'Chuẩn bị dụng cụ', N'Tổng quan dụng cụ cắt tỉa, chải lông và vệ sinh.', 1),
+(10, N'Kỹ thuật cắt tỉa và chăm sóc lông', N'Hướng dẫn từng bước cắt tỉa và chăm sóc lông.', 2);
+
+-- Bài học module 1
+INSERT INTO course_lessons (module_id, title, content, video_url, duration, order_index) VALUES
+(19, N'Bài 1: Dụng cụ cần thiết',
+N'I. Dụng cụ cắt tỉa
+
+- Kéo cắt lông chuyên dụng.
+- Tông đơ với nhiều đầu cắt.
+
+II. Dụng cụ vệ sinh
+
+- Bàn chải lông, lược.
+- Dầu gội chuyên dụng cho thú cưng.
+
+III. Chuẩn bị môi trường
+
+- Nơi thoáng mát, đủ ánh sáng.
+- Bề mặt chắc chắn, chống trơn trượt.
+
+![Dụng cụ cắt tỉa lông](https://example.com/images/grooming_tools.jpg)
+
+IV. Kết luận
+
+Chuẩn bị đầy đủ giúp việc cắt tỉa hiệu quả, an toàn cho thú cưng.',
+NULL, 15, 1);
+
+-- Bài học module 2
+INSERT INTO course_lessons (module_id, title, content, video_url, duration, order_index) VALUES
+(20, N'Bài 1: Kỹ thuật cắt tỉa lông cơ bản',
+N'I. Các bước thực hiện
+
+1. Chải lông kỹ để loại bỏ lông rối.
+2. Dùng tông đơ cắt tỉa phần lông quá dài.
+3. Dùng kéo tạo kiểu lông theo ý muốn.
+4. Tắm cho thú cưng với dầu gội phù hợp.
+5. Sấy khô và chải lại lần cuối.
+
+II. Lưu ý an toàn
+
+- Không cắt sát da gây tổn thương.
+- Giữ thú cưng yên tâm bằng lời nói nhẹ nhàng.
+- Nghỉ giải lao nếu thú cưng căng thẳng.
+
+III. Video hướng dẫn
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/pet_grooming_basics" title="Kỹ thuật cắt tỉa lông" frameborder="0" allowfullscreen></iframe>
+
+IV. Kết luận
+
+Thường xuyên chăm sóc giúp thú cưng sạch sẽ, thoải mái và đẹp hơn.',
+NULL, 22, 1);
+
+-- Tài liệu đính kèm
+INSERT INTO lesson_attachments (lesson_id, file_name, file_url, file_size) VALUES
+(13, N'Hướng dẫn cắt tỉa lông cho thú cưng.pdf', '/uploads/documents/pet_grooming_guide.pdf', 2800);
+
 
 
 -- Xóa tài liệu đính kèm trước

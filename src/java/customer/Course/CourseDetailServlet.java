@@ -48,6 +48,9 @@ public class CourseDetailServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
+            // Lấy danh sách khóa học nổi bật cho menu dropdown
+            List<Course> featuredCourses = courseDAO.getFeaturedCourses(9);
+            request.setAttribute("featuredCourses", featuredCourses);
             String idRaw = request.getParameter("id");
             String lessonIdRaw = request.getParameter("lesson");
 

@@ -681,8 +681,245 @@ if (imageUrl != null && !imageUrl.isEmpty()) {
             .login-link:hover {
                 text-decoration: underline;
             }
+            .search-bar-container {
+                background: #f8f9fa;
+                padding: 15px 0;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+
+            .search-form {
+                max-width: 600px;
+                margin: 0 auto;
+            }
+
+            .search-form .input-group {
+                box-shadow: 0 2px 10px rgba(109, 74, 255, 0.1);
+            }
+
+            .search-form .form-control {
+                border-radius: 50px 0 0 50px;
+                border: 1px solid #e2d9ff;
+                padding: 10px 20px;
+            }
+
+            .search-form .btn {
+                border-radius: 0 50px 50px 0;
+                padding: 10px 20px;
+            }
+            .course-card {
+                transition: all 0.3s ease;
+                transform: translateY(0);
+            }
+
+            .course-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+                z-index: 10;
+            }
+            /* Dropdown Mega Menu - PetTech */
+            .mega-menu {
+                width: 850px;
+                left: -200px !important;
+                border: none;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+                border-radius: 0 0 15px 15px;
+                overflow: hidden;
+            }
+
+            .course-item {
+                transition: all 0.3s ease;
+                border-radius: 8px;
+                margin: 3px;
+            }
+
+            .course-item:hover {
+                background-color: #f8f5ff;
+                transform: translateY(-3px);
+                box-shadow: 0 5px 15px rgba(109, 74, 255, 0.1);
+            }
+
+            .course-thumbnail {
+                width: 60px;
+                height: 60px;
+                object-fit: cover;
+                border-radius: 8px;
+                border: 2px solid #e2d9ff;
+            }
+
+            .course-title {
+                font-size: 14px;
+                font-weight: 600;
+                color: #4a2c82;
+                line-height: 1.3;
+            }
+
+            .course-author {
+                font-size: 12px;
+                color: #a37aff;
+            }
+
+            .text-purple {
+                color: #6d4aff !important;
+            }
+
+            .btn-view-all {
+                display: inline-block;
+                color: #e67e22 !important; /* Màu cam */
+                font-weight: 600;
+                padding: 5px 15px;
+                border-radius: 20px;
+                transition: all 0.3s;
+                text-decoration: none;
+                background-color: #fff4e6;
+            }
+
+            .btn-view-all:hover {
+                color: #d35400 !important;
+                background-color: #ffe8cc;
+                transform: translateX(5px);
+            }
+
+            /* Mobile responsive */
+            @media (max-width: 992px) {
+                .mega-menu {
+                    width: 100% !important;
+                    left: 0 !important;
+                }
+
+                .course-item {
+                    border-bottom: 1px solid #eee;
+                    border-radius: 0;
+                    margin: 0;
+                }
+
+                .course-thumbnail {
+                    width: 50px;
+                    height: 50px;
+                }
+            }
+            /* Dropdown đơn giản - chỉ hiển thị title */
+            .dropdown-menu {
+                min-width: 250px;
+                border: none;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                border-radius: 8px;
+                padding: 0;
+            }
+
+            .dropdown-header {
+                color: #6d4aff;
+                font-weight: 600;
+                padding: 10px 15px;
+                background-color: #f8f5ff;
+                border-bottom: 1px solid #e2d9ff;
+            }
+
+            .dropdown-item {
+                padding: 10px 15px;
+                color: #4a2c82;
+                transition: all 0.2s;
+                border-bottom: 1px solid #f0f0f0;
+            }
+
+            .dropdown-item:hover {
+                background-color: #f3edff;
+                color: #6d4aff;
+                padding-left: 20px;
+            }
+
+            .view-all-btn {
+                color: #e67e22 !important; /* Màu cam */
+                font-weight: 600;
+                background-color: #fff4e6;
+            }
+
+            .view-all-btn:hover {
+                background-color: #ffe8cc !important;
+            }
+
+            /* Thay các màu xanh bằng màu nâu cam */
+
+            /* Header */
+            .course-detail-header {
+                background: linear-gradient(135deg, #f5f7fa 0%, #fef0e7 100%);
+            }
+
+            .course-title {
+                color: #d35400;
+            }
+
+            .meta-item i {
+                color: #e67e22;
+            }
+
+            /* Sidebar */
+            .sidebar-header {
+                background: linear-gradient(90deg, #e67e22 0%, #f39c12 100%);
+            }
+
+            .module-header i {
+                color: #e67e22;
+            }
+
+            .lesson-item:hover, .lesson-item.active {
+                background: #fff4e6;
+                color: #d35400;
+                border-left-color: #e67e22;
+            }
+
+            /* Nút */
+            .btn-enroll {
+                background: linear-gradient(90deg, #e67e22 0%, #f39c12 100%);
+            }
+
+            .btn-enroll:hover {
+                box-shadow: 0 10px 20px rgba(230, 126, 34, 0.3);
+            }
+
+            .btn-back {
+                color: #e67e22;
+                border: 2px solid #e67e22;
+            }
+
+            /* Discussion */
+            .user-name {
+                color: #d35400;
+            }
+
+            /* Researcher card */
+            .researcher-card {
+                border-left: 5px solid #e67e22;
+            }
+
+            .researcher-title {
+                color: #e67e22;
+            }
+            .paw-icon {
+                color: #8b4513; /* Màu nâu đậm cho hình paw */
+            }
+            /* Nút tìm kiếm cute nâu-cam */
+            .search-form .btn {
+                background: linear-gradient(45deg, #FFA630, #D2691E);
+                color: white;
+                border: none;
+                border-radius: 0 50px 50px 0;
+                padding: 10px 25px;
+                font-size: 1.1rem;
+                font-weight: bold;
+                box-shadow: 0 4px 10px rgba(210, 105, 30, 0.3);
+                transition: all 0.3s ease;
+            }
+
+            .search-form .btn:hover {
+                background: linear-gradient(45deg, #FF6B35, #B25C1D);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 15px rgba(210, 105, 30, 0.4);
+            }
+            
+            
 
         </style>
+
     </head>
     <body>
 
@@ -706,9 +943,6 @@ if (imageUrl != null && !imageUrl.isEmpty()) {
                         </a>
                     </div>
 
-
-
-
                 </div>
             </div>
         </div>
@@ -722,7 +956,28 @@ if (imageUrl != null && !imageUrl.isEmpty()) {
                 <div class="collapse navbar-collapse" id="ftco-nav">
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item"><a href="Home.jsp" class="nav-link">Trang chủ</a></li>
-                        <li class="nav-item"><a href="course" class="nav-link">Khóa học</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="coursedetail" id="coursesDropdown" role="button" 
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Khóa học
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="coursesDropdown">
+                                <div class="dropdown-header">
+                                    <i class="fa fa-book mr-2"></i>Danh mục khóa học
+                                </div>
+
+                                <c:forEach items="${featuredCourses}" var="course" end="8">
+                                    <a class="dropdown-item" href="coursedetail?id=${course.id}">
+                                        ${fn:substring(course.title, 0, 50)}${fn:length(course.title) > 50 ? '...' : ''}
+                                    </a>
+                                </c:forEach>
+
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item text-center view-all-btn" href="course">
+                                    <i class="fa fa-arrow-right mr-2"></i>Xem tất cả
+                                </a>
+                            </div>
+                        </li>
                         <li class="nav-item"><a href="vet.jsp" class="nav-link">Chuyên gia</a></li>
                         <li class="nav-item"><a href="service.jsp" class="nav-link">Sản phẩm</a></li>
                         <li class="nav-item"><a href="gallery.jsp" class="nav-link">Thú cưng</a></li>
@@ -736,50 +991,133 @@ if (imageUrl != null && !imageUrl.isEmpty()) {
 
         <!-- Course Header Section -->
         <section class="course-detail-header">
+            <!-- Thêm vào sau phần navbar -->
+            <div class="search-bar-container">
+                <div class="container">
+                    <form action="course" method="get" class="search-form">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="search" placeholder="Tìm kiếm khóa học khác..." 
+                                   value="${param.search}">
+                            <button class="btn" type="submit">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <div class="container">
-                <div class="row align-items-center">
-                    <div class="col-lg-7">
-                        <% if (course != null) { %>
-                        <title><%= course.getTitle() != null ? course.getTitle() : "Chi tiết khóa học" %> | PetTech</title>
-                        <!-- Các phần hiển thị khác liên quan đến course -->
-                        <% } else { %>
-                        <title>Lỗi - Không tìm thấy khóa học | PetTech</title>
-                        <% } %>
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-lg-7">
+                            <% if (course != null) { %>
+                            <title><%= course.getTitle() != null ? course.getTitle() : "Chi tiết khóa học" %> | PetTech</title>
 
-                        <div class="course-meta">
-                            <% if (course.getResearcher() != null && !course.getResearcher().isEmpty()) { %>
-                            <div class="meta-item">
-                                <i class="fa fa-user"></i>
-                                <span>Giảng viên: <%= course.getResearcher() %></span>
-                            </div>
+                            <!-- Tiêu đề khóa học -->
+                            <h1 class="course-title" style="
+                                color: #FF6B35;
+                                font-weight: 700;
+                                margin-bottom: 20px;
+                                font-size: 2.3rem;
+                                text-shadow: 1px 1px 3px rgba(0,0,0,0.08);
+                                font-family: 'Montserrat', cursive;
+                                ">
+                                🐶 <span style="color: #FFA630;">
+                                    <%= course.getTitle() != null ? course.getTitle().toUpperCase() : "KHÓA HỌC THÚ CƯNG" %>
+                                </span> 🐱
+                            </h1>
+
+                            <% } else { %>
+                            <title>Lỗi - Không tìm thấy khóa học | PetTech</title>
                             <% } %>
 
-                            <div class="meta-item">
-                                <i class="fa fa-calendar"></i>
-                                <span>Ngày đăng: <%= formattedDate %></span>
-                            </div>
+                            <!-- Thông tin khóa học -->
+                            <div class="course-meta" style="
+                                 display: flex;
+                                 flex-wrap: wrap;
+                                 gap: 10px;
+                                 align-items: center;
+                                 font-family: 'Montserrat', sans-serif;
+                                 ">
+                                <% if (course.getResearcher() != null && !course.getResearcher().isEmpty()) { %>
+                                <div class="meta-item" style="
+                                     background-color: #FFE8CC;
+                                     border: 2px dashed #FF9F1C;
+                                     padding: 8px 16px;
+                                     border-radius: 50px;
+                                     font-size: 0.95rem;
+                                     display: flex;
+                                     align-items: center;
+                                     gap: 6px;
+                                     ">
+                                    <i class="fa fa-user" style="color: #FF6B35; font-size: 1.1rem;"></i>
+                                    <span><strong>Giảng viên:</strong> <span style="color: #FF6B35; font-size: 1rem;"><%= course.getResearcher() %></span></span>
+                                </div>
+                                <% } %>
 
-                            <% if (course.getTime() != null && !course.getTime().isEmpty()) { %>
-                            <div class="meta-item">
-                                <i class="fa fa-clock-o"></i>
-                                <span>Thời lượng: <%= course.getTime() %></span>
-                            </div>
-                            <% } %>
+                                <div class="meta-item" style="
+                                     background-color: #FFE8CC;
+                                     border: 2px dashed #FF9F1C;
+                                     padding: 8px 16px;
+                                     border-radius: 50px;
+                                     font-size: 0.95rem;
+                                     display: flex;
+                                     align-items: center;
+                                     gap: 6px;
+                                     ">
+                                    <i class="fa fa-calendar" style="color: #FF6B35; font-size: 1.1rem;"></i>
+                                    <span><strong>Ngày đăng:</strong> <span style="color: #FF6B35; font-size: 1rem;"><%= formattedDate %></span></span>
+                                </div>
 
-                            <div class="meta-item">
-                                <i class="fa fa-paw"></i>
-                                <span>Dành cho: Chó/Mèo</span>
+                                <% if (course.getTime() != null && !course.getTime().isEmpty()) { %>
+                                <div class="meta-item" style="
+                                     background-color: #FFE8CC;
+                                     border: 2px dashed #FF9F1C;
+                                     padding: 8px 16px;
+                                     border-radius: 50px;
+                                     font-size: 0.95rem;
+                                     display: flex;
+                                     align-items: center;
+                                     gap: 6px;
+                                     ">
+                                    <i class="fa fa-clock-o" style="color: #FF6B35; font-size: 1.1rem;"></i>
+                                    <span><strong>Thời lượng:</strong> <span style="color: #FF6B35; font-size: 1rem;"><%= course.getTime() %></span></span>
+                                </div>
+                                <% } %>
+
+                                <div class="meta-item" style="
+                                     background-color: #FFE8CC;
+                                     border: 2px dashed #FF9F1C;
+                                     padding: 8px 16px;
+                                     border-radius: 50px;
+                                     font-size: 0.95rem;
+                                     display: flex;
+                                     align-items: center;
+                                     gap: 6px;
+                                     ">
+                                    <i class="fa fa-paw" style="color: #FF6B35; font-size: 1.1rem;"></i>
+                                    <span><strong>Dành cho:</strong> <span style="color: #FF6B35; font-size: 1rem;">Chó 🐕 / Mèo 🐈</span></span>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="col-lg-5">
-                        <img src="<%= finalImagePath %>" 
-                             alt="<%= course.getTitle() != null ? course.getTitle() : "Khóa học thú cưng" %>" 
-                             class="course-hero-image"
-                             onerror="this.onerror=null; this.src='<%= defaultImage %>'">
+                        <div class="col-lg-5">
+                            <img src="<%= finalImagePath %>" 
+                                 alt="<%= course.getTitle() != null ? course.getTitle() : "Khóa học thú cưng" %>" 
+                                 class="course-hero-image"
+                                 style="
+                                 border: 4px solid #FFA630;
+                                 border-radius: 20px;
+                                 box-shadow: 0 10px 20px rgba(255, 166, 48, 0.3);
+                                 height: 300px;
+                                 object-fit: cover;
+                                 width: 100%;
+                                 "
+                                 onerror="this.onerror=null; this.src='<%= defaultImage %>'">
+                        </div>
                     </div>
                 </div>
+
             </div>
         </section>
 
@@ -989,6 +1327,12 @@ if (imageUrl != null && !imageUrl.isEmpty()) {
             $(document).ready(function () {
                 $('.module-header').click(function () {
                     $(this).find('i').toggleClass('fa-folder-open fa-folder');
+                });
+            });
+            $(document).ready(function () {
+                // Hiệu ứng loading khi click vào phân trang hoặc tìm kiếm
+                $('.page-link, .search-form button').click(function () {
+                    $('#ftco-loader').addClass('show');
                 });
             });
         </script>

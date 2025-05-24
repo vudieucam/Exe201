@@ -43,16 +43,32 @@ public class CourseServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            List<Course> courses = courseDAO.getAllCourses();
+            // Lấy danh sách khóa học nổi bật cho menu dropdown
+            List<Course> featuredCourses = courseDAO.getFeaturedCourses(9);
+            request.setAttribute("featuredCourses", featuredCourses);
+            String searchQuery = request.getParameter("search");
+            String pageParam = request.getParameter("page");
+            int currentPage = (pageParam == null || pageParam.isEmpty()) ? 1 : Integer.parseInt(pageParam);
+            int recordsPerPage = 9;
 
-            // Debug
-            System.out.println("DEBUG: Số khóa học = " + courses.size());
-            for (Course course : courses) {
-                System.out.printf("Course ID=%d, Image=%s%n",
-                        course.getId(), course.getImageUrl());
+            List<Course> courses;
+            int totalCourses;
+
+            if (searchQuery != null && !searchQuery.isEmpty()) {
+                courses = courseDAO.searchCourses(searchQuery, currentPage, recordsPerPage);
+                totalCourses = courseDAO.getTotalSearchCourses(searchQuery);
+            } else {
+                courses = courseDAO.getCoursesByPage(currentPage, recordsPerPage);
+                totalCourses = courseDAO.getTotalCourses();
             }
 
+            int totalPages = (int) Math.ceil((double) totalCourses / recordsPerPage);
+
             request.setAttribute("courses", courses);
+            request.setAttribute("currentPage", currentPage);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("searchQuery", searchQuery);
+
             request.getRequestDispatcher("/course.jsp").forward(request, response);
 
         } catch (Exception e) {
