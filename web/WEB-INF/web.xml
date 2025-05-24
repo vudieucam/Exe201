@@ -20,6 +20,10 @@
         <servlet-name>AuthenServlet</servlet-name>
         <servlet-class>AuthenController.AuthenServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>PackageServlet</servlet-name>
+        <servlet-class>customer.ServicePackage.PackageServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/login</url-pattern>
@@ -39,5 +43,13 @@
     <servlet-mapping>
         <servlet-name>AuthenServlet</servlet-name>
         <url-pattern>/authen</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PackageServlet</servlet-name>
+        <url-pattern>/package</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PackageServlet</servlet-name>
+        <url-pattern>/packageservlet</url-pattern>
     </servlet-mapping>
 </web-app>

@@ -41,19 +41,21 @@ public class UserDAO extends DBConnect {
     }
 
     public boolean register(User user) throws SQLException {
-        String sql = "INSERT INTO users (email, password, fullname, phone, address, role_id, status, verification_token) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, user.getEmail());
-            stmt.setString(2, user.getPassword());
-            stmt.setString(3, user.getFullname());
-            stmt.setString(4, user.getPhone());
-            stmt.setString(5, user.getAddress());
-            stmt.setInt(6, user.getRoleId());
-            stmt.setBoolean(7, user.isStatus());
-            stmt.setString(8, user.getVerificationToken());
+        String sql = "INSERT INTO users (email, password, fullname, phone, address, role_id, status, verification_token, service_package_id) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-            return stmt.executeUpdate() > 0;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, user.getEmail());
+            ps.setString(2, user.getPassword());
+            ps.setString(3, user.getFullname());
+            ps.setString(4, user.getPhone());
+            ps.setString(5, user.getAddress());
+            ps.setInt(6, user.getRoleId());
+            ps.setBoolean(7, user.isStatus());
+            ps.setString(8, user.getVerificationToken());
+            ps.setObject(9, user.getServicePackageId()); // thêm dòng này
+
+            return ps.executeUpdate() > 0;
         }
     }
 
@@ -100,7 +102,7 @@ public class UserDAO extends DBConnect {
         }
         return null;
     }
-    
+
     public boolean saveResetToken(String email, String resetToken) throws SQLException {
         String sql = "UPDATE users SET reset_token = ?, reset_token_expiry = DATE_ADD(NOW(), INTERVAL 1 DAY) WHERE email = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -109,7 +111,7 @@ public class UserDAO extends DBConnect {
             return stmt.executeUpdate() > 0;
         }
     }
-    
+
     public User getUserByResetToken(String token) throws SQLException {
         String sql = "SELECT * FROM users WHERE reset_token = ? AND reset_token_expiry > NOW()";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -232,7 +234,6 @@ public class UserDAO extends DBConnect {
         }
     }
 
-    
     public User convert(GoogleAccount googleAccount) {
         User user = new User();
         user.setEmail(googleAccount.getEmail());

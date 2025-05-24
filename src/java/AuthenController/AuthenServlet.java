@@ -4,6 +4,7 @@
  */
 package AuthenController;
 
+import dal.PackageDAO;
 import dal.UserDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -12,8 +13,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 import model.SendMailOK;
+import model.ServicePackage;
 import model.User;
 
 /**
@@ -94,6 +97,7 @@ public class AuthenServlet extends HttpServlet {
 
     private String login(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
@@ -101,28 +105,35 @@ public class AuthenServlet extends HttpServlet {
             User user = userDAO.login(email, password);
 
             if (user == null) {
-                request.setAttribute("notification", "Sai email hoặc mật khẩu");
+                request.setAttribute("notification", "❌ Sai email hoặc mật khẩu. Vui lòng thử lại.");
                 return "login.jsp";
             }
 
             if (!user.isStatus()) {
-                request.setAttribute("notification", "Tài khoản chưa được kích hoạt");
+                request.setAttribute("notification", "⚠️ Tài khoản chưa được kích hoạt. Vui lòng kiểm tra email.");
                 return "login.jsp";
             }
 
+            // Lưu user vào session
             HttpSession session = request.getSession();
             session.setAttribute("user", user);
 
+            // In debug ra console (tuỳ môi trường)
+            System.out.println("Đăng nhập thành công: " + user.getFullname() + " | Vai trò: " + user.getRoleId());
+
+            // Chuyển hướng theo vai trò
             switch (user.getRoleId()) {
-                case 3: // Admin
-                    return "admin-dashboard.jsp";
-                case 2: // Staff
-                    return "staff-dashboard.jsp";
-                default: // User
-                    return "Home.jsp";
+                case 3:
+                    return "admin-dashboard.jsp"; // Trang admin
+                case 2:
+                    return "staff-dashboard.jsp"; // Trang nhân viên
+                default:
+                    return "Home.jsp"; // Người dùng thông thường
             }
+
         } catch (SQLException ex) {
-            request.setAttribute("error", "Lỗi hệ thống: " + ex.getMessage());
+            ex.printStackTrace();
+            request.setAttribute("error", "🚨 Lỗi hệ thống: " + ex.getMessage());
             return "login.jsp";
         }
     }
@@ -145,76 +156,101 @@ public class AuthenServlet extends HttpServlet {
         String phone = request.getParameter("phone");
         String address = request.getParameter("address");
         String confirmPassword = request.getParameter("confirm_password");
+        String packageIdStr = request.getParameter("packageId");
 
-        if (!password.equals(confirmPassword)) {
-            request.setAttribute("notification", "Nhập lại mật khẩu không giống nhau");
-            url = "signup.jsp";
-        } else {
-            try {
-                if (!email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
-                    request.setAttribute("notification", "Địa chỉ email không hợp lệ");
-                    url = "signup.jsp";
-                } else if (!phone.matches("^(032|033|034|035|036|037|038|039|096|097|098|086|083|084|085|081|082|088|091|094|070|079|077|076|078|090|093|089|056|058|092|059|099)[0-9]{7}$")) {
-                    request.setAttribute("notification", "Số điện thoại không hợp lệ");
-                    url = "signup.jsp";
-                } else if (password.length() <= 8 || password.length() > 32) {
-                    request.setAttribute("notification", "Mật khẩu phải từ 8 đến 32 ký tự");
-                    url = "signup.jsp";
-                } else if (userDAO.checkEmailExists(email.toLowerCase())) {
-                    request.setAttribute("notification", "Email đã tồn tại");
-                    url = "signup.jsp";
-                } else {
-                    String token = UUID.randomUUID().toString();
+        int packageId = 1; // Mặc định là gói miễn phí
+        try {
+            if (packageIdStr != null && !packageIdStr.isEmpty()) {
+                packageId = Integer.parseInt(packageIdStr);
+            }
+        } catch (NumberFormatException e) {
+            packageId = 1;
+        }
 
-                    // Tạo user mới không dùng Builder
-                    User newUser = new User();
-                    newUser.setEmail(email);
-                    newUser.setPassword(password);
-                    newUser.setFullname(fullname);
-                    newUser.setPhone(phone);
-                    newUser.setAddress(address);
-                    newUser.setRoleId(1); // Mặc định role user
-                    newUser.setStatus(false); // Chưa kích hoạt
-                    newUser.setVerificationToken(token);
+        try {
+            // Load danh sách gói để giữ lại hiển thị nếu lỗi
+            PackageDAO spDAO = new PackageDAO();
+            List<ServicePackage> packages = spDAO.getAllPackages();
+            request.setAttribute("packages", packages);
 
-                    if (userDAO.register(newUser)) {
-                        String verificationLink = request.getScheme() + "://"
-                                + request.getServerName() + ":"
-                                + request.getServerPort()
-                                + request.getContextPath()
-                                + "/authen?action=verify&token=" + token;
+            // Validate thông tin người dùng
+            if (!password.equals(confirmPassword)) {
+                request.setAttribute("notification", "Nhập lại mật khẩu không giống nhau");
+                return "signup.jsp";
+            }
 
-                        String emailBody = "Xin chào " + fullname + ",<br><br>"
-                                + "<span style='color: green;'>Vui lòng xác minh địa chỉ email của bạn để hoàn tất đăng ký tài khoản PetTech.</span><br><br>"
-                                + "Nhấp vào liên kết sau để xác minh: <a href='" + verificationLink + "'>" + verificationLink + "</a><br><br>"
-                                + "<span style='color: blue;'>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</span>";
+            if (!email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+                request.setAttribute("notification", "Địa chỉ email không hợp lệ");
+                return "signup.jsp";
+            }
 
-                        try {
-                            SendMailOK.send(
-                                    "smtp.gmail.com",
-                                    email,
-                                    "vdc120403@gmail.com",
-                                    "ednn nwbo zbyq gahs",
-                                    "Xác minh email PetTech",
-                                    emailBody
-                            );
-                            request.setAttribute("notification", "Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.");
-                            url = "login.jsp";
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            request.setAttribute("notification", "Đăng ký thành công nhưng gửi email xác nhận thất bại. Vui lòng liên hệ quản trị viên.");
-                            url = "login.jsp";
-                        }
-                    } else {
-                        request.setAttribute("notification", "Đăng ký thất bại. Vui lòng thử lại.");
-                        url = "signup.jsp";
-                    }
+            if (!phone.matches("^(032|033|034|035|036|037|038|039|096|097|098|086|083|084|085|081|082|088|091|094|070|079|077|076|078|090|093|089|056|058|092|059|099)[0-9]{7}$")) {
+                request.setAttribute("notification", "Số điện thoại không hợp lệ");
+                return "signup.jsp";
+            }
+
+            if (password.length() <= 8 || password.length() > 32) {
+                request.setAttribute("notification", "Mật khẩu phải từ 8 đến 32 ký tự");
+                return "signup.jsp";
+            }
+
+            if (userDAO.checkEmailExists(email.toLowerCase())) {
+                request.setAttribute("notification", "Email đã tồn tại");
+                return "signup.jsp";
+            }
+
+            // Tạo user và gửi email xác thực
+            String token = UUID.randomUUID().toString();
+            User newUser = new User();
+            newUser.setEmail(email);
+            newUser.setPassword(password);
+            newUser.setFullname(fullname);
+            newUser.setPhone(phone);
+            newUser.setAddress(address);
+            newUser.setRoleId(1); // user
+            newUser.setStatus(false); // chưa kích hoạt
+            newUser.setVerificationToken(token);
+            newUser.setServicePackageId(packageId);
+
+            if (userDAO.register(newUser)) {
+                String verificationLink = request.getScheme() + "://"
+                        + request.getServerName() + ":"
+                        + request.getServerPort()
+                        + request.getContextPath()
+                        + "/authen?action=verify&token=" + token;
+
+                String emailBody = "Xin chào " + fullname + ",<br><br>"
+                        + "<span style='color: green;'>Vui lòng xác minh địa chỉ email của bạn để hoàn tất đăng ký tài khoản PetTech.</span><br><br>"
+                        + "Nhấp vào liên kết sau để xác minh: <a href='" + verificationLink + "'>" + verificationLink + "</a><br><br>"
+                        + "<span style='color: blue;'>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</span>";
+
+                try {
+                    SendMailOK.send(
+                            "smtp.gmail.com",
+                            email,
+                            "vdc120403@gmail.com",
+                            "ednn nwbo zbyq gahs", // mật khẩu ứng dụng
+                            "Xác minh email PetTech",
+                            emailBody
+                    );
+                    request.setAttribute("notification", "Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.");
+                    url = "login.jsp";
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    request.setAttribute("notification", "Đăng ký thành công nhưng gửi email xác nhận thất bại. Vui lòng liên hệ quản trị viên.");
+                    url = "login.jsp";
                 }
-            } catch (SQLException ex) {
-                request.setAttribute("error", "Lỗi hệ thống: " + ex.getMessage());
+
+            } else {
+                request.setAttribute("notification", "Đăng ký thất bại. Vui lòng thử lại.");
                 url = "signup.jsp";
             }
+
+        } catch (SQLException ex) {
+            request.setAttribute("error", "Lỗi hệ thống: " + ex.getMessage());
+            url = "signup.jsp";
         }
+
         return url;
     }
 

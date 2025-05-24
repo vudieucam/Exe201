@@ -18,14 +18,14 @@ Author     : FPT
 <%@page import="java.util.Date" %>
 
 <%
-System.out.println("JSP - Course object: " + request.getAttribute("course"));
+    System.out.println("JSP - Course object: " + request.getAttribute("course"));
 %>
 
 <%
 // Phần 1: Kiểm tra course có tồn tại không
-Course course = (Course) request.getAttribute("course");
-if (course == null) {
-    String errorMessage = (String) request.getSession().getAttribute("errorMessage");
+    Course course = (Course) request.getAttribute("course");
+    if (course == null) {
+        String errorMessage = (String) request.getSession().getAttribute("errorMessage");
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -56,13 +56,13 @@ if (course == null) {
         </style>
     </head>
     <body>
-        <% if (errorMessage != null) { %>
+        <% if (errorMessage != null) {%>
         <div class="alert alert-danger" style="padding: 15px; background: #ffebee; color: #c62828; margin: 15px;">
-            <%= errorMessage %>
+            <%= errorMessage%>
         </div>
-        <% 
-            request.getSession().removeAttribute("errorMessage");
-        } 
+        <%
+                request.getSession().removeAttribute("errorMessage");
+            }
         %>
         <div class="error-container">
             <h3>Không tìm thấy khóa học</h3>
@@ -73,44 +73,44 @@ if (course == null) {
     </body>
 </html>
 <%
-    return;
-}
+        return;
+    }
 
 // Phần 2: Xử lý dữ liệu khi course tồn tại
 // Định dạng ngày đăng
-String formattedDate = "Đang cập nhật";
-try {
-    if (course.getPostDate() != null && !course.getPostDate().isEmpty()) {
-        SimpleDateFormat dbFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date date = dbFormat.parse(course.getPostDate());
-        SimpleDateFormat displayFormat = new SimpleDateFormat("dd/MM/yyyy");
-        formattedDate = displayFormat.format(date);
+    String formattedDate = "Đang cập nhật";
+    try {
+        if (course.getPostDate() != null && !course.getPostDate().isEmpty()) {
+            SimpleDateFormat dbFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Date date = dbFormat.parse(course.getPostDate());
+            SimpleDateFormat displayFormat = new SimpleDateFormat("dd/MM/yyyy");
+            formattedDate = displayFormat.format(date);
+        }
+    } catch (Exception e) {
+        System.out.println("Lỗi định dạng ngày: " + e.getMessage());
     }
-} catch (Exception e) {
-    System.out.println("Lỗi định dạng ngày: " + e.getMessage());
-}
 
 // Xử lý đường dẫn ảnh
-String imageUrl = course.getImageUrl();
-String defaultImage = request.getContextPath() + "/images/corgi-course.jpg";
-String finalImagePath;
+    String imageUrl = course.getImageUrl();
+    String defaultImage = request.getContextPath() + "/images/corgi-course.jpg";
+    String finalImagePath;
 
-if (imageUrl != null && !imageUrl.isEmpty()) {
-    if (imageUrl.startsWith("/") || imageUrl.startsWith("http")) {
-        finalImagePath = imageUrl.startsWith("/") ? request.getContextPath() + imageUrl : imageUrl;
+    if (imageUrl != null && !imageUrl.isEmpty()) {
+        if (imageUrl.startsWith("/") || imageUrl.startsWith("http")) {
+            finalImagePath = imageUrl.startsWith("/") ? request.getContextPath() + imageUrl : imageUrl;
+        } else {
+            finalImagePath = request.getContextPath() + "/" + imageUrl;
+        }
     } else {
-        finalImagePath = request.getContextPath() + "/" + imageUrl;
+        finalImagePath = defaultImage;
     }
-} else {
-    finalImagePath = defaultImage;
-}
 %>
 
 
 <!DOCTYPE html>
 <html lang="vi">
     <head>
-        <title><%= course.getTitle() != null ? course.getTitle() : "Chi tiết khóa học" %> | PetTech</title>
+        <title><%= course.getTitle() != null ? course.getTitle() : "Chi tiết khóa học"%> | PetTech</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -915,8 +915,8 @@ if (imageUrl != null && !imageUrl.isEmpty()) {
                 transform: translateY(-2px);
                 box-shadow: 0 6px 15px rgba(210, 105, 30, 0.4);
             }
-            
-            
+
+
 
         </style>
 
@@ -933,11 +933,11 @@ if (imageUrl != null && !imageUrl.isEmpty()) {
                         </p>
                     </div>
                     <div class="col-md-6 d-flex justify-content-md-end align-items-center">
-                        <a href="#" class="login-link d-flex align-items-center mr-3">
+                        <a href="authen?action=login" class="login-link d-flex align-items-center mr-3">
                             <i class="fa fa-sign-in mr-2"></i>
                             <span>Đăng Nhập</span>
                         </a>
-                        <a href="#" class="login-link d-flex align-items-center">
+                        <a href="authen?action=signup" class="login-link d-flex align-items-center">
                             <i class="fa fa-user-plus mr-2"></i>
                             <span>Đăng Ký</span>
                         </a>
@@ -981,7 +981,7 @@ if (imageUrl != null && !imageUrl.isEmpty()) {
                         <li class="nav-item"><a href="vet.jsp" class="nav-link">Chuyên gia</a></li>
                         <li class="nav-item"><a href="service.jsp" class="nav-link">Sản phẩm</a></li>
                         <li class="nav-item"><a href="gallery.jsp" class="nav-link">Thú cưng</a></li>
-                        <li class="nav-item"><a href="pricing.jsp" class="nav-link">Gói dịch vụ</a></li>
+                        <li class="nav-item"><a href="package" class="nav-link">Gói dịch vụ</a></li>
                         <li class="nav-item"><a href="blog.jsp" class="nav-link">Tin tức</a></li>
                         <li class="nav-item"><a href="contact.jsp" class="nav-link">Liên hệ</a></li>
                     </ul>
@@ -1010,8 +1010,8 @@ if (imageUrl != null && !imageUrl.isEmpty()) {
                 <div class="container">
                     <div class="row align-items-center">
                         <div class="col-lg-7">
-                            <% if (course != null) { %>
-                            <title><%= course.getTitle() != null ? course.getTitle() : "Chi tiết khóa học" %> | PetTech</title>
+                            <% if (course != null) {%>
+                            <title><%= course.getTitle() != null ? course.getTitle() : "Chi tiết khóa học"%> | PetTech</title>
 
                             <!-- Tiêu đề khóa học -->
                             <h1 class="course-title" style="
@@ -1023,7 +1023,7 @@ if (imageUrl != null && !imageUrl.isEmpty()) {
                                 font-family: 'Montserrat', cursive;
                                 ">
                                 🐶 <span style="color: #FFA630;">
-                                    <%= course.getTitle() != null ? course.getTitle().toUpperCase() : "KHÓA HỌC THÚ CƯNG" %>
+                                    <%= course.getTitle() != null ? course.getTitle().toUpperCase() : "KHÓA HỌC THÚ CƯNG"%>
                                 </span> 🐱
                             </h1>
 
@@ -1039,7 +1039,7 @@ if (imageUrl != null && !imageUrl.isEmpty()) {
                                  align-items: center;
                                  font-family: 'Montserrat', sans-serif;
                                  ">
-                                <% if (course.getResearcher() != null && !course.getResearcher().isEmpty()) { %>
+                                <% if (course.getResearcher() != null && !course.getResearcher().isEmpty()) {%>
                                 <div class="meta-item" style="
                                      background-color: #FFE8CC;
                                      border: 2px dashed #FF9F1C;
@@ -1051,9 +1051,9 @@ if (imageUrl != null && !imageUrl.isEmpty()) {
                                      gap: 6px;
                                      ">
                                     <i class="fa fa-user" style="color: #FF6B35; font-size: 1.1rem;"></i>
-                                    <span><strong>Giảng viên:</strong> <span style="color: #FF6B35; font-size: 1rem;"><%= course.getResearcher() %></span></span>
+                                    <span><strong>Giảng viên:</strong> <span style="color: #FF6B35; font-size: 1rem;"><%= course.getResearcher()%></span></span>
                                 </div>
-                                <% } %>
+                                <% }%>
 
                                 <div class="meta-item" style="
                                      background-color: #FFE8CC;
@@ -1066,10 +1066,10 @@ if (imageUrl != null && !imageUrl.isEmpty()) {
                                      gap: 6px;
                                      ">
                                     <i class="fa fa-calendar" style="color: #FF6B35; font-size: 1.1rem;"></i>
-                                    <span><strong>Ngày đăng:</strong> <span style="color: #FF6B35; font-size: 1rem;"><%= formattedDate %></span></span>
+                                    <span><strong>Ngày đăng:</strong> <span style="color: #FF6B35; font-size: 1rem;"><%= formattedDate%></span></span>
                                 </div>
 
-                                <% if (course.getTime() != null && !course.getTime().isEmpty()) { %>
+                                <% if (course.getTime() != null && !course.getTime().isEmpty()) {%>
                                 <div class="meta-item" style="
                                      background-color: #FFE8CC;
                                      border: 2px dashed #FF9F1C;
@@ -1081,9 +1081,9 @@ if (imageUrl != null && !imageUrl.isEmpty()) {
                                      gap: 6px;
                                      ">
                                     <i class="fa fa-clock-o" style="color: #FF6B35; font-size: 1.1rem;"></i>
-                                    <span><strong>Thời lượng:</strong> <span style="color: #FF6B35; font-size: 1rem;"><%= course.getTime() %></span></span>
+                                    <span><strong>Thời lượng:</strong> <span style="color: #FF6B35; font-size: 1rem;"><%= course.getTime()%></span></span>
                                 </div>
-                                <% } %>
+                                <% }%>
 
                                 <div class="meta-item" style="
                                      background-color: #FFE8CC;
@@ -1102,8 +1102,8 @@ if (imageUrl != null && !imageUrl.isEmpty()) {
                         </div>
 
                         <div class="col-lg-5">
-                            <img src="<%= finalImagePath %>" 
-                                 alt="<%= course.getTitle() != null ? course.getTitle() : "Khóa học thú cưng" %>" 
+                            <img src="<%= finalImagePath%>" 
+                                 alt="<%= course.getTitle() != null ? course.getTitle() : "Khóa học thú cưng"%>" 
                                  class="course-hero-image"
                                  style="
                                  border: 4px solid #FFA630;
@@ -1113,7 +1113,7 @@ if (imageUrl != null && !imageUrl.isEmpty()) {
                                  object-fit: cover;
                                  width: 100%;
                                  "
-                                 onerror="this.onerror=null; this.src='<%= defaultImage %>'">
+                                 onerror="this.onerror=null; this.src='<%= defaultImage%>'">
                         </div>
                     </div>
                 </div>

@@ -1,4 +1,5 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
@@ -108,6 +109,7 @@
                 <label for="confirm_password"><i class="fas fa-lock"></i> Nhập lại mật khẩu</label>
             </div>
             <div class="d-grid mb-3">
+                <input type="hidden" name="packageId" value="${param.packageId != null ? param.packageId : 1}">
                 <button class="btn btn-orange" type="submit"><i class="fas fa-user-plus"></i> Đăng ký</button>
             </div>
             <div class="text-center">

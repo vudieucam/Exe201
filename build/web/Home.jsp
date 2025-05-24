@@ -7,6 +7,16 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@page import="model.User" %>
+
+<%@page import="model.Course" %>
+<%@page import="model.Course" %>
+<%@page import="model.CourseModule" %>
+<%@page import="model.CourseLesson" %>
+<%@page import="dal.CourseDAO" %>
+<%@page import="java.util.List" %>
+<%@page import="java.text.SimpleDateFormat" %>
+<%@page import="java.util.Date" %>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -24,12 +34,15 @@
         <link rel="stylesheet" href="css/owl.theme.default.min.css">
         <link rel="stylesheet" href="css/magnific-popup.css">
 
-
         <link rel="stylesheet" href="css/bootstrap-datepicker.css">
         <link rel="stylesheet" href="css/jquery.timepicker.css">
 
         <link rel="stylesheet" href="css/flaticon.css">
         <link rel="stylesheet" href="css/style.css">
+
+
+        <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
 
         <style>
             .login-link {
@@ -97,7 +110,97 @@
                 font-size: 1rem;
                 box-shadow: none;
             }
+
+            /* css profile */
+
+            body {
+                font-family: 'Poppins', sans-serif;
+            }
+
+            .login-link.dropdown-toggle {
+                font-weight: 600;
+                font-size: 1.05rem;
+                color: #4a2c82;
+                padding: 6px 12px;
+                border-radius: 30px;
+                transition: background 0.3s ease;
+                background-color: transparent;
+            }
+
+            .login-link.dropdown-toggle:hover {
+                background-color: #f5f0ff;
+                color: #6d4aff;
+            }
+
+            /* Dropdown đẹp nhẹ nhàng */
+            .dropdown-menu {
+                min-width: 220px;
+                background-color: #fef6fb;
+                border: 1px solid #ecd9f9;
+                border-radius: 16px;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+                padding: 0;
+                animation: fadeDown 0.25s ease;
+            }
+
+            /* Menu item */
+            .dropdown-item {
+                padding: 10px 16px;
+                font-size: 0.95rem;
+                font-weight: 500;
+                color: #5a3e85;
+                display: flex;
+                align-items: center;
+                transition: all 0.2s ease;
+                background-color: transparent;
+            }
+
+            .dropdown-item i {
+                width: 20px;
+                margin-right: 10px;
+                color: #6d4aff;
+            }
+
+            .dropdown-item:hover {
+                background-color: #f3edff;
+                color: #6d4aff;
+                padding-left: 22px;
+            }
+
+            .dropdown-divider {
+                border-color: #eee;
+            }
+
+            .dropdown-item.text-danger {
+                color: #d9534f;
+            }
+
+            .dropdown-item.text-danger:hover {
+                background-color: #fff5f5;
+                color: #c9302c;
+            }
+
+            @keyframes fadeDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
         </style>
+        <script>
+            $(document).ready(function () {
+                $('#userDropdown').on('click', function (e) {
+                    e.preventDefault();
+                    $(this).next('.dropdown-menu').toggleClass('show');
+                });
+            });
+        </script>
+
     </head>
     <body>
 
@@ -111,15 +214,40 @@
                         </p>
                     </div>
                     <div class="col-md-6 d-flex justify-content-md-end align-items-center">
-                        <a href="authen?action=login" class="login-link d-flex align-items-center mr-3">
-                            <i class="fa fa-sign-in mr-2"></i>
-                            <span>Đăng Nhập</span>
-                        </a>
-                        <a href="authen?action=signup" class="login-link d-flex align-items-center">
-                            <i class="fa fa-user-plus mr-2"></i>
-                            <span>Đăng Ký</span>
-                        </a>
+                        <c:choose>
+                            <c:when test="${not empty sessionScope.user}">
+                                <!-- Hiển thị tên và avatar -->
+                                <div class="dropdown">
+                                    <a class="login-link dropdown-toggle d-flex align-items-center" href="#" role="button"
+                                       id="userDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fa fa-user-circle mr-2" style="font-size: 1.4rem; color: #6d4aff;"></i>
+                                        <span style="font-weight: 600;">${sessionScope.user.fullname}</span>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                                        <a class="dropdown-item" href="profile.jsp"><i class="fa fa-id-card mr-2"></i> Thông tin cá nhân</a>
+                                        <a class="dropdown-item" href="mycourses.jsp"><i class="fa fa-book mr-2"></i> Khóa học</a>
+                                        <a class="dropdown-item" href="orders.jsp"><i class="fa fa-shopping-bag mr-2"></i> Đơn hàng</a>
+                                        <a class="dropdown-item" href="package.jsp"><i class="fa fa-box-open mr-2"></i> Gói dịch vụ</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item text-danger" href="authen?action=logout"><i class="fa fa-sign-out mr-2"></i> Đăng xuất</a>
+                                    </div>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <!-- Nếu chưa đăng nhập, hiển thị nút đăng nhập/đăng ký -->
+                                <a href="authen?action=login" class="login-link d-flex align-items-center mr-3">
+                                    <i class="fa fa-sign-in mr-2"></i>
+                                    <span>Đăng Nhập</span>
+                                </a>
+                                <a href="authen?action=signup" class="login-link d-flex align-items-center">
+                                    <i class="fa fa-user-plus mr-2"></i>
+                                    <span>Đăng Ký</span>
+                                </a>
+                            </c:otherwise>
+                        </c:choose>
+
                     </div>
+
                 </div>
             </div>
         </div>
@@ -158,7 +286,7 @@
                         <li class="nav-item"><a href="vet.jsp" class="nav-link">Chuyên gia</a></li>
                         <li class="nav-item"><a href="service.jsp" class="nav-link">Sản phẩm</a></li>
                         <li class="nav-item"><a href="gallery.jsp" class="nav-link">Thú cưng</a></li>
-                        <li class="nav-item"><a href="pricing.jsp" class="nav-link">Gói dịch vụ</a></li>
+                        <li class="nav-item"><a href="package" class="nav-link">Gói dịch vụ</a></li>
                         <li class="nav-item"><a href="blog.jsp" class="nav-link">Tin tức</a></li>
                         <li class="nav-item"><a href="contact.jsp" class="nav-link">Liên hệ</a></li>
                     </ul>
@@ -711,6 +839,16 @@
 
         <!-- loader -->
         <div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00"/></svg></div>
+
+
+        <script>
+            $(document).ready(function () {
+                $('#userDropdown').on('click', function (e) {
+                    e.preventDefault();
+                    console.log("Click ok");
+                });
+            });
+        </script>
 
 
         <script src="js/jquery.min.js"></script>

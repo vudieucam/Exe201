@@ -11,6 +11,7 @@ import java.security.Timestamp;
  * @author FPT
  */
 public class User {
+
     private int id;
     private String email;
     private String password;
@@ -21,12 +22,12 @@ public class User {
     private boolean status;
     private String verificationToken;
     private Timestamp createdAt; // thêm nếu muốn theo dõi ngày tạo
-    private int servicePackageId; // liên kết với bảng service_packages
+    private Integer servicePackageId;
 
     public User() {
     }
 
-    public User(int id, String email, String password, String fullname, String phone, String address, int roleId, boolean status, String verificationToken, Timestamp createdAt, int servicePackageId) {
+    public User(int id, String email, String password, String fullname, String phone, String address, int roleId, boolean status, String verificationToken, Timestamp createdAt, Integer servicePackageId) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -120,13 +121,12 @@ public class User {
         this.createdAt = createdAt;
     }
 
-    public int getServicePackageId() {
+    public Integer getServicePackageId() {
         return servicePackageId;
     }
 
-    public void setServicePackageId(int servicePackageId) {
+    public void setServicePackageId(Integer servicePackageId) {
         this.servicePackageId = servicePackageId;
     }
-    
-    
+
 }

@@ -439,11 +439,11 @@
                         </p>
                     </div>
                     <div class="col-md-6 d-flex justify-content-md-end align-items-center">
-                        <a href="#" class="login-link d-flex align-items-center mr-3">
+                        <a href="authen?action=login" class="login-link d-flex align-items-center mr-3">
                             <i class="fa fa-sign-in mr-2"></i>
                             <span>Đăng Nhập</span>
                         </a>
-                        <a href="#" class="login-link d-flex align-items-center">
+                        <a href="authen?action=signup" class="login-link d-flex align-items-center">
                             <i class="fa fa-user-plus mr-2"></i>
                             <span>Đăng Ký</span>
                         </a>
@@ -488,7 +488,7 @@
                         <li class="nav-item"><a href="vet.jsp" class="nav-link">Chuyên gia</a></li>
                         <li class="nav-item"><a href="service.jsp" class="nav-link">Sản phẩm</a></li>
                         <li class="nav-item"><a href="gallery.jsp" class="nav-link">Thú cưng</a></li>
-                        <li class="nav-item"><a href="pricing.jsp" class="nav-link">Gói dịch vụ</a></li>
+                        <li class="nav-item"><a href="package" class="nav-link">Gói dịch vụ</a></li>
                         <li class="nav-item"><a href="blog.jsp" class="nav-link">Tin tức</a></li>
                         <li class="nav-item"><a href="contact.jsp" class="nav-link">Liên hệ</a></li>
                     </ul>
