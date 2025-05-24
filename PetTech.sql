@@ -59,13 +59,17 @@ CREATE TABLE service_packages (
 -- 2. Người dùng
 CREATE TABLE users (
     id INT IDENTITY(1,1) PRIMARY KEY,
-    email NVARCHAR(100) UNIQUE NOT NULL,
-    password NVARCHAR(255) NOT NULL,
-    phone NVARCHAR(20),
-    address NVARCHAR(MAX),
-    role NVARCHAR(20) CHECK (role IN (N'customer', N'partner', N'admin')) DEFAULT N'customer',
-    service_package_id INT,
+    email NVARCHAR(100) NOT NULL UNIQUE,
+    password NVARCHAR(100) NOT NULL,
+    fullname NVARCHAR(100) NOT NULL,
+    phone NVARCHAR(20) NOT NULL,
+    address NVARCHAR(255) NOT NULL,
+    role_id INT DEFAULT 1, -- 1: user, 2: staff, 3: admin
+    status BIT DEFAULT 1,  -- 1: active, 0: inactive
     created_at DATETIME DEFAULT GETDATE(),
+    verification_token NVARCHAR(255),
+    service_package_id INT, -- Bổ sung cột này để làm khóa ngoại
+    CONSTRAINT chk_email CHECK (email LIKE '%@%.%'),
     FOREIGN KEY (service_package_id) REFERENCES service_packages(id)
 );
 
@@ -243,15 +247,12 @@ VALUES
 (N'GÓI CHUYÊN NGHIỆP', N'Toàn quyền truy cập nội dung + ưu đãi đối tác', 199000, N'pro');
 
 -- 2. Người dùng
-INSERT INTO users (email, password, phone, address, role, service_package_id)
-VALUES 
-('alice@gmail.com', 'hashed_pw_1', '0901234567', N'Hà Nội', 'customer', 1),
-('bob@gmail.com', 'hashed_pw_2', '0934567890', N'TP HCM', 'customer', 2),
-('charlie@gmail.com', 'hashed_pw_3', '0912345678', N'Đà Nẵng', 'customer', 3),
-('partner1@shop.vn', 'hashed_pw_4', '0987654321', N'Hải Phòng', 'partner', NULL),
-('partner2@shop.vn', 'hashed_pw_5', '0888888888', N'Cần Thơ', 'partner', NULL),
-('admin@pettech.vn', 'hashed_admin_pw', NULL, NULL, 'admin', NULL);
-
+INSERT INTO users (email, password, fullname, phone, address, role_id, status, verification_token, service_package_id)
+VALUES
+(N'user1@example.com', N'123456', N'Nguyễn Văn A', N'0901234567', N'Hà Nội', 1, 1, NULL, 1),
+(N'user2@example.com', N'123456', N'Trần Thị B', N'0937654321', N'Hồ Chí Minh', 1, 1, NULL, 2),
+(N'staff1@example.com', N'123456', N'Lê Văn C', N'0912345678', N'Đà Nẵng', 2, 1, NULL, 2),
+(N'admin@example.com', N'123456', N'Phạm Thị D', N'0987654321', N'Cần Thơ', 3, 1, NULL, 3);
 
 
 -- 6. Sản phẩm và danh mục

@@ -6,6 +6,7 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -29,7 +30,7 @@
 
         <link rel="stylesheet" href="css/flaticon.css">
         <link rel="stylesheet" href="css/style.css">
-        
+
         <style>
             .login-link {
                 color: #fff;
@@ -49,6 +50,53 @@
             .login-link:hover {
                 text-decoration: underline;
             }
+            /* Dropdown đơn giản - chỉ hiển thị title */
+            .dropdown-menu {
+                min-width: 250px;
+                border: none;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                border-radius: 8px;
+                padding: 0;
+            }
+
+            .dropdown-header {
+                color: #6d4aff;
+                font-weight: 600;
+                padding: 10px 15px;
+                background-color: #f8f5ff;
+                border-bottom: 1px solid #e2d9ff;
+            }
+
+            .dropdown-item {
+                padding: 10px 15px;
+                color: #4a2c82;
+                transition: all 0.2s;
+                border-bottom: 1px solid #f0f0f0;
+            }
+
+            .dropdown-item:hover {
+                background-color: #f3edff;
+                color: #6d4aff;
+                padding-left: 20px;
+            }
+
+            .view-all-btn {
+                color: #e67e22 !important; /* Màu cam */
+                font-weight: 600;
+                background-color: #fff4e6;
+            }
+
+            .view-all-btn:hover {
+                background-color: #ffe8cc !important;
+            }
+            /* Style cho input search */
+            .search-form .form-control {
+                border-radius: 50px 0 0 50px;
+                border: 1px solid #FFD6A0;
+                padding: 10px 20px;
+                font-size: 1rem;
+                box-shadow: none;
+            }
         </style>
     </head>
     <body>
@@ -63,11 +111,11 @@
                         </p>
                     </div>
                     <div class="col-md-6 d-flex justify-content-md-end align-items-center">
-                        <a href="#" class="login-link d-flex align-items-center mr-3">
+                        <a href="authen?action=login" class="login-link d-flex align-items-center mr-3">
                             <i class="fa fa-sign-in mr-2"></i>
                             <span>Đăng Nhập</span>
                         </a>
-                        <a href="#" class="login-link d-flex align-items-center">
+                        <a href="authen?action=signup" class="login-link d-flex align-items-center">
                             <i class="fa fa-user-plus mr-2"></i>
                             <span>Đăng Ký</span>
                         </a>
@@ -78,14 +126,35 @@
 
         <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
             <div class="container">
-                <a class="navbar-brand" href="index.html"><span class="flaticon-pawprint-1 mr-2"></span>PetTech</a>
+                <a class="navbar-brand" href="Home.jsp"><span class="flaticon-pawprint-1 mr-2"></span>PetTech</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="fa fa-bars"></span> Menu
                 </button>
                 <div class="collapse navbar-collapse" id="ftco-nav">
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item active"><a href="Home.jsp" class="nav-link">Trang chủ</a></li>
-                        <li class="nav-item"><a href="course" class="nav-link">Khóa học</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="course" id="coursesDropdown" role="button" 
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Khóa học
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="coursesDropdown">
+                                <div class="dropdown-header">
+                                    <i class="fa fa-book mr-2"></i>Danh mục khóa học
+                                </div>
+
+                                <c:forEach items="${featuredCourses}" var="course" end="8">
+                                    <a class="dropdown-item" href="coursedetail?id=${course.id}">
+                                        ${fn:substring(course.title, 0, 50)}${fn:length(course.title) > 50 ? '...' : ''}
+                                    </a>
+                                </c:forEach>
+
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item text-center view-all-btn" href="course">
+                                    <i class="fa fa-arrow-right mr-2"></i>Xem tất cả
+                                </a>
+                            </div>
+                        </li>
                         <li class="nav-item"><a href="vet.jsp" class="nav-link">Chuyên gia</a></li>
                         <li class="nav-item"><a href="service.jsp" class="nav-link">Sản phẩm</a></li>
                         <li class="nav-item"><a href="gallery.jsp" class="nav-link">Thú cưng</a></li>
@@ -353,7 +422,7 @@
             </div>
         </section>
 
-        
+
 
         <section class="ftco-section bg-light">
             <div class="container">

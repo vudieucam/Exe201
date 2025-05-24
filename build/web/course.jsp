@@ -484,7 +484,7 @@
                                 </a>
                             </div>
                         </li>
-                        </li>
+                        
                         <li class="nav-item"><a href="vet.jsp" class="nav-link">Chuyên gia</a></li>
                         <li class="nav-item"><a href="service.jsp" class="nav-link">Sản phẩm</a></li>
                         <li class="nav-item"><a href="gallery.jsp" class="nav-link">Thú cưng</a></li>

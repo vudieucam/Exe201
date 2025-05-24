@@ -16,6 +16,10 @@
         <servlet-name>CourseDetailServlet</servlet-name>
         <servlet-class>customer.Course.CourseDetailServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>AuthenServlet</servlet-name>
+        <servlet-class>AuthenController.AuthenServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/login</url-pattern>
@@ -31,5 +35,9 @@
     <servlet-mapping>
         <servlet-name>CourseDetailServlet</servlet-name>
         <url-pattern>/coursedetail</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AuthenServlet</servlet-name>
+        <url-pattern>/authen</url-pattern>
     </servlet-mapping>
 </web-app>
