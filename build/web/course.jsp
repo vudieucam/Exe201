@@ -164,24 +164,29 @@
             }
 
             .course-btn {
-                background: linear-gradient(90deg, #6d4aff 0%, #a37aff 100%);
+                background: linear-gradient(135deg, #FF9E57, #FF6B35, #D2691E);
                 border: none;
                 border-radius: 50px;
                 padding: 10px 25px;
                 color: white;
-                font-weight: 600;
+                font-weight: 700;
                 text-transform: uppercase;
+                font-size: 0.85rem;
                 letter-spacing: 1px;
-                font-size: 0.8rem;
-                transition: all 0.3s ease;
+                transition: all 0.4s ease;
                 align-self: flex-start;
+                box-shadow: 0 4px 12px rgba(255, 153, 51, 0.3);
+                background-size: 200% auto;
             }
 
             .course-btn:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 5px 15px rgba(109, 74, 255, 0.4);
-                color: white;
+                background-position: right center;
+                box-shadow: 0 6px 18px rgba(255, 107, 53, 0.5);
+                transform: scale(1.05);
+                color: #fff;
             }
+
+
 
             /* Responsive */
             @media (max-width: 768px) {
@@ -380,6 +385,36 @@
             }
 
 
+            /* Cute Brown-Orange Pagination Style */
+            .pagination .page-link {
+                color: #B25C1D;
+                background-color: #FFF3E0;
+                border: 1px solid #FFB74D;
+                border-radius: 50% !important;
+                width: 42px;
+                height: 42px;
+                text-align: center;
+                line-height: 38px;
+                font-weight: bold;
+                margin: 0 5px;
+                transition: all 0.3s ease-in-out;
+                box-shadow: 0 4px 8px rgba(178, 92, 29, 0.2);
+            }
+
+            .pagination .page-link:hover {
+                background-color: #FFB74D;
+                color: white;
+                transform: translateY(-2px);
+            }
+
+            .pagination .page-item.active .page-link {
+                background-color: #D2691E;
+                color: white;
+                border-color: #D2691E;
+                box-shadow: 0 4px 10px rgba(210, 105, 30, 0.3);
+                transform: scale(1.05);
+            }
+
         </style>
 
         <script>
@@ -428,7 +463,7 @@
                         <li class="nav-item active"><a href="Home.jsp" class="nav-link">Trang chủ</a></li>
 
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="coursesDropdown" role="button" 
+                            <a class="nav-link dropdown-toggle" href="course" id="coursesDropdown" role="button" 
                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Khóa học
                             </a>
@@ -518,7 +553,7 @@
                                      class="course-img"
                                      onerror="this.onerror=null; this.src='<%= defaultImage %>'">
 
-                                
+
 
 
                             </div>
