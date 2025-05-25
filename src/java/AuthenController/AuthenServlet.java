@@ -43,16 +43,7 @@ public class AuthenServlet extends HttpServlet {
             case "logout":
                 url = logout(request, response);
                 break;
-            case "signup":
-                try {
-                PackageDAO spDAO = new PackageDAO();
-                List<ServicePackage> packages = spDAO.getAllPackages();
-                request.setAttribute("packages", packages);
-            } catch (SQLException e) {
-                request.setAttribute("error", "Không thể load gói dịch vụ: " + e.getMessage());
-            }
-            url = "signup.jsp";
-            break;
+
             case "editprofile":
                 url = "editProfile.jsp";
                 break;
@@ -83,9 +74,6 @@ public class AuthenServlet extends HttpServlet {
         switch (action) {
             case "login":
                 url = login(request, response);
-                break;
-            case "register":
-                url = register(request, response);
                 break;
             case "editprofile":
                 url = updateProfile(request, response);
@@ -167,131 +155,6 @@ public class AuthenServlet extends HttpServlet {
         return "Home.jsp";
     }
 
-// Xóa method showPaymentBeforeRegister
-// Sửa lại method register như sau:
-    private String register(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        request.setCharacterEncoding("UTF-8");
-        response.setCharacterEncoding("UTF-8");
-
-        String url = "signup.jsp";
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
-        String fullname = request.getParameter("fullname");
-        String phone = request.getParameter("phone");
-        String address = request.getParameter("address");
-        String confirmPassword = request.getParameter("confirm_password");
-        String packageIdStr = request.getParameter("packageId");
-
-        // Giữ lại dữ liệu đã nhập khi có lỗi
-        request.setAttribute("oldEmail", email);
-        request.setAttribute("oldFullname", fullname);
-        request.setAttribute("oldPhone", phone);
-        request.setAttribute("oldAddress", address);
-
-        int packageId = 1; // Mặc định là gói miễn phí
-        try {
-            if (packageIdStr != null && !packageIdStr.isEmpty()) {
-                packageId = Integer.parseInt(packageIdStr);
-            }
-        } catch (NumberFormatException e) {
-            packageId = 1;
-        }
-
-        try {
-            // Load danh sách gói để giữ lại hiển thị nếu lỗi
-            PackageDAO spDAO = new PackageDAO();
-            List<ServicePackage> packages = spDAO.getAllPackages();
-            request.setAttribute("packages", packages);
-
-            // Validate thông tin người dùng
-            boolean hasError = false;
-
-            // Validate password
-            if (!password.equals(confirmPassword)) {
-                request.setAttribute("passwordError", "Nhập lại mật khẩu không giống nhau");
-                hasError = true;
-            }
-
-            // Validate email
-            if (!email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
-                request.setAttribute("emailError", "Địa chỉ email không hợp lệ");
-                hasError = true;
-            }
-
-            // Validate phone
-            if (!phone.matches("^(032|033|034|035|036|037|038|039|096|097|098|086|083|084|085|081|082|088|091|094|070|079|077|076|078|090|093|089|056|058|092|059|099)[0-9]{7}$")) {
-                request.setAttribute("phoneError", "Số điện thoại không hợp lệ");
-                hasError = true;
-            }
-
-            // Validate password length
-            if (password.length() < 8 || password.length() > 32) {
-                request.setAttribute("passwordError", "Mật khẩu phải từ 8 đến 32 ký tự");
-                hasError = true;
-            }
-
-            // Check email exists
-            if (userDAO.checkEmailExists(email.toLowerCase())) {
-                request.setAttribute("emailError", "Email đã tồn tại");
-                hasError = true;
-            }
-
-            if (hasError) {
-                return url;
-            }
-
-            // Tạo user và gửi email xác thực
-            String token = UUID.randomUUID().toString();
-            User newUser = new User();
-            newUser.setEmail(email);
-            newUser.setPassword(password);
-            newUser.setFullname(fullname);
-            newUser.setPhone(phone);
-            newUser.setAddress(address);
-            newUser.setRoleId(1); // user
-            newUser.setStatus(false); // chưa kích hoạt
-            newUser.setVerificationToken(token);
-            newUser.setServicePackageId(packageId);
-
-            if (userDAO.register(newUser)) {
-                String verificationLink = request.getScheme() + "://"
-                        + request.getServerName() + ":"
-                        + request.getServerPort()
-                        + request.getContextPath()
-                        + "/authen?action=verify&token=" + token;
-
-                String emailBody = "Xin chào " + fullname + ",<br><br>"
-                        + "<span style='color: green;'>Vui lòng xác minh địa chỉ email của bạn để hoàn tất đăng ký tài khoản PetTech.</span><br><br>"
-                        + "Nhấp vào liên kết sau để xác minh: <a href='" + verificationLink + "'>" + verificationLink + "</a><br><br>"
-                        + "<span style='color: blue;'>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</span>";
-
-                try {
-                    SendMailOK.send(
-                            "smtp.gmail.com",
-                            email,
-                            "vdc120403@gmail.com",
-                            "ednn nwbo zbyq gahs", // mật khẩu ứng dụng
-                            "Xác minh email PetTech",
-                            emailBody
-                    );
-                    request.setAttribute("notification", "Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.");
-                    url = "login.jsp";
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    request.setAttribute("notification", "Đăng ký thành công nhưng gửi email xác nhận thất bại. Vui lòng liên hệ quản trị viên.");
-                    url = "login.jsp";
-                }
-            } else {
-                request.setAttribute("notification", "Đăng ký thất bại. Vui lòng thử lại.");
-            }
-        } catch (SQLException ex) {
-            request.setAttribute("error", "Lỗi hệ thống: " + ex.getMessage());
-        }
-
-        return url;
-    }
 
     private String updateProfile(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

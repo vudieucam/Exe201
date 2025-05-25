@@ -76,12 +76,65 @@
                 font-size: 1.5rem;
                 margin-right: 10px;
             }
+            .btn-back {
+                background-color: #f8f9fa;
+                color: #6c757d;
+                border: 1px solid #dee2e6;
+                padding: 8px 20px;
+                border-radius: 8px;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .btn-back:hover {
+                background-color: #e9ecef;
+                color: #495057;
+                border-color: #ced4da;
+                transform: translateY(-2px);
+            }
+
+            .btn-back i {
+                font-size: 14px;
+            }
+
+            /* Đảm bảo nút xác nhận vẫn đẹp */
+            .btn-confirm {
+                background-color: #ff6b6b;
+                color: white;
+                padding: 10px 25px;
+                border-radius: 8px;
+                transition: all 0.3s ease;
+            }
+
+            .btn-confirm:hover {
+                background-color: #ff5252;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+
+            /* Căn chỉnh layout */
+            .d-flex.justify-content-between.align-items-center.mb-4 {
+                margin-bottom: 1.5rem !important;
+            }
+
+            .flex-grow-1 {
+                flex-grow: 1;
+                text-align: center;
+                margin-right: 40px; /* Bù lại khoảng trống của nút back */
+            }
         </style>
     </head>
     <body>
         <div class="container">
             <div class="payment-container">
-                <h2 class="text-center mb-4"><i class="fas fa-paw pet-paw"></i> Thanh Toán Nâng Cấp Gói</h2>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <button onclick="window.history.back()" class="btn btn-back">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </button>
+                    <h2 class="text-center mb-0 flex-grow-1"><i class="fas fa-paw pet-paw"></i> Thanh Toán Nâng Cấp Gói</h2>
+                </div>
 
                 <div class="package-card">
                     <h4><i class="fas fa-box-open"></i> Gói Đang Nâng Cấp</h4>
@@ -98,9 +151,8 @@
                     </div>
                 </div>
 
-                <form action="package" method="post">
+                <form action="payment_success.jsp" method="post">
                     <input type="hidden" name="action" value="${fromRegistration ? 'payAndRegister' : 'upgrade'}">
-
                     <input type="hidden" name="packageId" value="${pkg.id}">
 
                     <h4 class="mt-4 mb-3"><i class="fas fa-credit-card pet-paw"></i> Phương Thức Thanh Toán</h4>
@@ -134,7 +186,7 @@
                         </label>
                     </div>
 
-                    <div class="text-center mt-4">
+                    <div class="d-flex justify-content-between mt-4">
                         <button type="submit" class="btn btn-confirm">
                             <i class="fas fa-check-circle"></i> Xác Nhận Thanh Toán
                         </button>

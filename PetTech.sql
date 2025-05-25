@@ -1099,5 +1099,77 @@ DBCC CHECKIDENT ('course_modules', RESEED, 0);
 
 
 
+-- Bảng loại tin tức
+CREATE TABLE BlogCategories (
+    category_id INT PRIMARY KEY IDENTITY(1,1),
+    category_name NVARCHAR(100) NOT NULL,
+    description NVARCHAR(255),
+    created_at DATETIME DEFAULT GETDATE()
+);
 
+-- Bảng tin tức
+CREATE TABLE Blogs (
+    blog_id INT PRIMARY KEY IDENTITY(1,1),
+    title NVARCHAR(255) NOT NULL,
+    content NVARCHAR(MAX) NOT NULL,
+    short_description NVARCHAR(500),
+    image_url NVARCHAR(255),
+    category_id INT FOREIGN KEY REFERENCES BlogCategories(category_id),
+    author_id INT, -- Có thể tham chiếu đến bảng Users nếu cần
+    author_name NVARCHAR(100) DEFAULT 'Admin',
+    view_count INT DEFAULT 0,
+    is_featured BIT DEFAULT 0,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
 
+-- Bảng bình luận (nếu cần)
+CREATE TABLE BlogComments (
+    comment_id INT PRIMARY KEY IDENTITY(1,1),
+    blog_id INT FOREIGN KEY REFERENCES Blogs(blog_id),
+    user_id INT, -- Tham chiếu đến bảng Users
+    content NVARCHAR(1000) NOT NULL,
+    created_at DATETIME DEFAULT GETDATE()
+);
+
+-- Thêm dữ liệu loại tin tức
+INSERT INTO BlogCategories (category_name, description) VALUES
+(N'Chăm sóc thú cưng', N'Các bài viết hướng dẫn chăm sóc thú cưng hàng ngày'),
+(N'Dinh dưỡng', N'Chế độ ăn uống và dinh dưỡng cho thú cưng'),
+(N'Y tế - Sức khỏe', N'Các vấn đề về sức khỏe và y tế thú cưng'),
+(N'Đào tạo', N'Cách huấn luyện và đào tạo thú cưng'),
+(N'Giống loài', N'Thông tin về các giống thú cưng phổ biến'),
+(N'Phụ kiện', N'Đánh giá và giới thiệu phụ kiện cho thú cưng'),
+(N'Câu chuyện', N'Những câu chuyện cảm động về thú cưng'),
+(N'Sự kiện', N'Các sự kiện liên quan đến thú cưng'),
+(N'Kiến thức chung', N'Kiến thức tổng hợp về thú cưng'),
+(N'Tin tức PetTech', N'Các bệnh về da thường gặp ở chó');
+
+-- Thêm dữ liệu tin tức (20 bài để test phân trang)
+-- Lưu ý: Đoạn này chỉ là ví dụ, bạn có thể thêm nhiều hơn
+INSERT INTO Blogs (title, content, short_description, image_url, category_id, is_featured) VALUES
+(N'10 cách chăm sóc mèo đúng cách', N'Mèo là loài thú cưng phổ biến tại Việt Nam nhờ vào sự thân thiện và dễ nuôi. Tuy nhiên, để mèo luôn khỏe mạnh và vui vẻ, bạn cần tuân thủ một số nguyên tắc chăm sóc cơ bản. Bài viết này giới thiệu 10 cách đơn giản nhưng hiệu quả để chăm sóc mèo đúng cách như: duy trì chế độ ăn uống hợp lý, lịch tẩy giun định kỳ, giữ vệ sinh khay cát, dành thời gian chơi cùng mèo để tránh stress... Ngoài ra, bạn cũng nên chú ý đến các biểu hiện bất thường để kịp thời đưa mèo đến bác sĩ thú y. Những mẹo nhỏ này sẽ giúp thú cưng của bạn luôn khỏe mạnh và gắn bó hơn với bạn.', N'Hướng dẫn chăm sóc mèo đúng cách', 'images/Blog/blog1.jpg', 1, 1),
+
+(N'Thức ăn tốt nhất cho chó con', N'Chó con trong giai đoạn phát triển cần một chế độ dinh dưỡng đặc biệt, giàu protein và các vi chất thiết yếu để hình thành xương chắc khỏe và hệ miễn dịch vững mạnh. Trong bài viết này, PetTech sẽ giới thiệu những loại thức ăn được các chuyên gia khuyên dùng, bao gồm cả thức ăn khô và ướt phù hợp với từng giống chó. Bên cạnh đó là các lưu ý khi lựa chọn thức ăn: đọc kỹ thành phần, tránh chất bảo quản, không dùng thực phẩm của người. Đảm bảo dinh dưỡng đúng cách từ nhỏ giúp chó con phát triển khỏe mạnh và thông minh.', N'Chọn thức ăn phù hợp cho chó con', 'images/Blog/blog2.jpg', 2, 1),
+
+(N'Dấu hiệu bệnh thường gặp ở mèo', N'Mèo là loài thường che giấu bệnh tật rất khéo, do đó người nuôi cần tinh ý quan sát những thay đổi nhỏ như: mèo ăn ít đi, nôn mửa, tiêu chảy, hay trốn tránh, lười vận động... Bài viết cung cấp danh sách các triệu chứng thường gặp và gợi ý bước đầu để xử lý tại nhà cũng như khi nào nên đưa mèo đến bác sĩ thú y. Sự chủ động phát hiện bệnh sớm không chỉ giúp tiết kiệm chi phí điều trị mà còn bảo vệ sức khỏe lâu dài cho thú cưng của bạn.', N'Nhận biết các dấu hiệu bệnh ở mèo', 'images/Blog/blog3.jpg', 3, 0),
+
+(N'Cách huấn luyện chó đi vệ sinh đúng chỗ', N'Huấn luyện chó đi vệ sinh đúng nơi quy định là một trong những bước quan trọng đầu tiên khi nhận nuôi chó. Bài viết hướng dẫn các bước thực hiện từ cơ bản đến nâng cao: xác định vị trí cố định, tạo thói quen vào khung giờ cố định, dùng tín hiệu lệnh, thưởng thức ăn để khuyến khích... Bên cạnh đó, cũng chia sẻ cách xử lý khi chó đi sai chỗ, giúp chủ nuôi kiên nhẫn và hiệu quả hơn trong quá trình huấn luyện.', N'Hướng dẫn huấn luyện chó cơ bản', 'images/Blog/blog4.jpg', 4, 0),
+
+(N'Giống mèo Anh lông ngắn - Đặc điểm và cách chăm sóc', N'Mèo Anh lông ngắn (British Shorthair) nổi bật với vẻ ngoài mũm mĩm, bộ lông dày mượt và tính cách hiền lành, thân thiện. Đây là giống mèo lý tưởng cho gia đình có trẻ nhỏ hoặc sống trong căn hộ. Bài viết cung cấp cái nhìn toàn diện về đặc điểm giống, nhu cầu vận động, chế độ ăn phù hợp, cũng như lưu ý khi chăm sóc bộ lông và phòng bệnh di truyền. Nếu bạn đang tìm một người bạn bốn chân đáng yêu, mèo Anh lông ngắn chắc chắn là lựa chọn sáng giá.', N'Tìm hiểu về giống mèo Anh lông ngắn', 'images/Blog/blog5.jpg', 5, 1),
+
+(N'Đánh giá 5 loại dây dắt chó tốt nhất 2025', N'Việc chọn dây dắt phù hợp cho chó không chỉ đảm bảo an toàn cho thú cưng mà còn tạo cảm giác thoải mái cho cả người nuôi lẫn vật nuôi trong quá trình dạo chơi. Trong năm 2025, thị trường dây dắt chứng kiến nhiều cải tiến về chất liệu, thiết kế và tính năng. Bài viết này tổng hợp và đánh giá 5 mẫu dây dắt được cộng đồng nuôi thú cưng đánh giá cao nhất, từ loại dây rút tự động, dây chống sốc cho đến dây tích hợp đèn LED dành cho đi bộ buổi tối. Mỗi sản phẩm đều được phân tích về ưu điểm, nhược điểm, giá cả và độ bền, giúp bạn lựa chọn sản phẩm phù hợp với giống chó và nhu cầu sử dụng hàng ngày.', N'Top 5 dây dắt chó chất lượng', 'images/Blog/blog6.jpg', 6, 0),
+
+(N'Chú chó cứu em bé thoát khỏi đám cháy', N'Một câu chuyện cảm động đã xảy ra tại TP. Hồ Chí Minh khi một chú chó giống Labrador đã dũng cảm cứu sống một em bé 2 tuổi mắc kẹt trong đám cháy lớn xảy ra vào rạng sáng. Theo lời kể của người dân, chú chó sủa dữ dội để báo động, sau đó lao vào căn phòng đầy khói và kéo em bé ra ngoài an toàn. Hành động dũng cảm này đã khiến nhiều người xúc động và càng khẳng định vai trò đặc biệt của thú cưng trong đời sống gia đình. Câu chuyện không chỉ lan truyền mạnh mẽ trên mạng xã hội mà còn truyền đi thông điệp đầy nhân văn về tình cảm giữa con người và động vật.', N'Câu chuyện cảm động về chú chó anh hùng', 'images/Blog/blog7.jpg', 7, 1),
+
+(N'Hội chợ thú cưng Hà Nội 2025', N'Hội chợ thú cưng Hà Nội 2025 sẽ chính thức diễn ra từ ngày 15–17/08 tại Trung tâm Triển lãm Giảng Võ, quy tụ hàng trăm gian hàng đến từ các thương hiệu nổi tiếng trong ngành thú cưng. Sự kiện năm nay hứa hẹn mang đến nhiều hoạt động sôi nổi như trình diễn thời trang thú cưng, thi ảnh đẹp thú cưng, khu vực tư vấn sức khỏe miễn phí từ bác sĩ thú y, và đặc biệt là khu vực nhận nuôi miễn phí cho những thú cưng đang cần mái ấm mới. Đây là dịp để cộng đồng yêu thú cưng gặp gỡ, giao lưu và cập nhật xu hướng chăm sóc thú cưng mới nhất năm 2025.', N'Thông tin về hội chợ thú cưng sắp tới', 'images/Blog/blog8.jpg', 8, 0),
+
+(N'10 điều thú vị về loài mèo có thể bạn chưa biết', N'Mèo không chỉ dễ thương mà còn sở hữu rất nhiều đặc điểm độc đáo mà không phải ai cũng biết. Bạn có biết rằng mèo có thể nhảy cao gấp 5 lần chiều dài cơ thể mình? Hay tiếng kêu “meo” mà bạn nghe mỗi ngày thực ra là công cụ giao tiếp chủ yếu dành riêng cho con người, chứ không phải giữa các con mèo với nhau? Bài viết này tổng hợp 10 sự thật thú vị và khoa học về mèo mà chắc chắn sẽ khiến bạn ngạc nhiên và thêm yêu loài động vật đáng yêu này.', N'Khám phá những điều thú vị về loài mèo', 'images/Blog/blog9.jpg', 9, 0),
+
+(N'Các bệnh về da thường gặp ở chó', N'Da là cơ quan nhạy cảm và dễ bị tổn thương ở chó, đặc biệt khi điều kiện thời tiết thay đổi hoặc khi môi trường sống không đảm bảo vệ sinh. Trong thực tế, bệnh da chiếm tỉ lệ cao trong số các ca bệnh thú y. Một số bệnh phổ biến bao gồm: viêm da dị ứng, nấm da, ghẻ, viêm da do ký sinh trùng như ve, bọ chét, và rụng lông từng mảng.
+
+Biểu hiện thường thấy là chó gãi nhiều, liếm liên tục ở một vị trí, da mẩn đỏ, có vảy hoặc nổi mụn nước, lông rụng không đều. Nguyên nhân có thể do môi trường bẩn, dị ứng với thực phẩm, tiếp xúc hóa chất, hoặc do ký sinh trùng ngoài da.
+
+Việc phát hiện sớm và điều trị kịp thời là yếu tố then chốt. Chủ nuôi nên đưa thú cưng đến bác sĩ thú y khi thấy dấu hiệu bất thường, đồng thời giữ gìn vệ sinh chỗ ở, thường xuyên tắm rửa bằng sữa tắm chuyên dụng và sử dụng thuốc chống ký sinh trùng định kỳ.
+
+Ngoài ra, chế độ ăn uống đủ dinh dưỡng, giàu Omega-3 và kẽm sẽ hỗ trợ sức khỏe làn da và bộ lông của chó. Nếu được chăm sóc đúng cách, chó sẽ ít bị bệnh da và luôn có một bộ lông mượt mà, khỏe mạnh.', N'Nhận biết và điều trị bệnh da ở chó', 'images/Blog/blog10.jpg', 3, 0);

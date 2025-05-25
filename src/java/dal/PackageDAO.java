@@ -80,6 +80,26 @@ public class PackageDAO extends DBConnect {
         return null;
     }
 
+    public String getServicePackageNameById(int id) {
+        String name = "";
+        try {
+            // hoặc cách bạn kết nối CSDL
+            String sql = "SELECT name FROM service_packages WHERE id = ?";
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                name = rs.getString("name");
+            }
+            rs.close();
+            ps.close();
+            connection.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return name;
+    }
+
     public boolean checkCurrentPackage(int userId, int packageId) throws SQLException {
         String sql = "SELECT 1 FROM user_packages "
                 + "WHERE user_id = ? AND service_package_id = ? "

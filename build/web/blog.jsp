@@ -30,7 +30,7 @@
 
         <link rel="stylesheet" href="css/flaticon.css">
         <link rel="stylesheet" href="css/style.css">
-        
+
         <style>
             .navbar-brand {
                 font-weight: 800;
@@ -68,7 +68,7 @@
             .navbar-nav .nav-link:hover::after {
                 width: 100%;
             }
-/* Responsive */
+            /* Responsive */
             @media (max-width: 768px) {
                 .course-header h2 {
                     font-size: 2rem;
@@ -243,8 +243,471 @@
                 --accent-color: #FF8C00; /* Màu cam đậm */
                 --light-color: #FFF8DC; /* Màu nền nhẹ */
             }
+            /* Hover: nâu cam sáng + hiệu ứng nhún */
+            .ftco-footer-social a:hover span {
+                color: #D99863 !important;
+                transform: scale(1.2);
+            }
+            .footer-heading {
+                position: relative;
+                display: inline-block;
+                padding-bottom: 10px;
+                font-weight: 700;
+                font-size: 1.2rem;
+                color: #8B5E3C !important; /* Ghi đè màu xanh */
+            }
+
+            .footer-heading::after {
+                content: "";
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 50px;
+                height: 3px;
+                background: linear-gradient(90deg, #8B5E3C, #D99863) !important;
+            }
+            /* Blog */
+            /* Blog styles */
+            .blog-entry {
+                background: #fff;
+                border-radius: 15px;
+                overflow: hidden;
+                transition: all 0.3s ease;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+                margin-bottom: 30px;
+            }
+
+            .blog-entry:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            }
+
+            .blog-entry .block-20 {
+                height: 250px;
+                background-size: cover;
+                background-position: center center;
+                transition: all 0.3s ease;
+            }
+
+            .blog-entry:hover .block-20 {
+                transform: scale(1.05);
+            }
+
+            .blog-entry .text {
+                padding: 25px;
+            }
+
+            .blog-entry .text .meta {
+                margin-bottom: 15px;
+            }
+
+            .blog-entry .text .meta div {
+                display: inline-block;
+                margin-right: 15px;
+                color: #8B5E3C;
+                font-size: 14px;
+            }
+
+            .blog-entry .text .meta div a {
+                color: #8B5E3C;
+                text-decoration: none;
+            }
+
+            .blog-entry .text .meta div a:hover {
+                color: #D99863;
+            }
+
+            .blog-entry .text .meta-chat {
+                color: #D99863;
+            }
+
+            .blog-entry .text .heading {
+                font-size: 18px;
+                margin-bottom: 15px;
+            }
+
+            .blog-entry .text .heading a {
+                color: #333;
+                text-decoration: none;
+                transition: all 0.3s ease;
+            }
+
+            .blog-entry .text .heading a:hover {
+                color: #D99863;
+            }
+
+            /* Pagination */
+            .block-27 ul {
+                padding: 0;
+                margin: 0;
+            }
+
+            .block-27 ul li {
+                display: inline-block;
+                margin: 0 5px;
+                list-style: none;
+            }
+
+            .block-27 ul li a,
+            .block-27 ul li span {
+                display: inline-block;
+                width: 40px;
+                height: 40px;
+                line-height: 40px;
+                text-align: center;
+                border-radius: 50%;
+                background: #f8f5ff;
+                color: #8B5E3C;
+                text-decoration: none;
+                transition: all 0.3s ease;
+            }
+
+            .block-27 ul li a:hover,
+            .block-27 ul li span.active {
+                background: #D99863;
+                color: #fff;
+            }
+
+            /* Blog detail */
+            .ftco-degree-bg {
+                padding: 5rem 0;
+            }
+
+            .blog-detail img.img-fluid {
+                border-radius: 15px;
+                margin-bottom: 30px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            }
+
+            .blog-detail h2 {
+                color: #8B5E3C;
+                margin-bottom: 20px;
+            }
+
+            .blog-detail p {
+                margin-bottom: 20px;
+                line-height: 1.8;
+                color: #555;
+            }
+
+            .tag-widget .tagcloud a {
+                display: inline-block;
+                padding: 8px 15px;
+                background: #f8f5ff;
+                color: #8B5E3C;
+                border-radius: 20px;
+                margin: 0 5px 10px 0;
+                text-decoration: none;
+                transition: all 0.3s ease;
+            }
+
+            .tag-widget .tagcloud a:hover {
+                background: #D99863;
+                color: #fff;
+            }
+
+            .about-author {
+                border-radius: 15px;
+                padding: 30px;
+                margin: 50px 0;
+            }
+
+            .about-author .bio img {
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 5px solid #f8f5ff;
+            }
+
+            .about-author .desc h3 {
+                color: #8B5E3C;
+                margin-bottom: 15px;
+            }
+
+            .comment-list {
+                padding: 0;
+                margin: 0;
+                list-style: none;
+            }
+
+            .comment-list .comment {
+                margin-bottom: 30px;
+            }
+
+            .comment-list .vcard {
+                width: 80px;
+                float: left;
+            }
+
+            .comment-list .vcard img {
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 5px solid #f8f5ff;
+            }
+
+            .comment-list .comment-body {
+                margin-left: 100px;
+            }
+
+            .comment-list .comment-body h3 {
+                color: #8B5E3C;
+                margin-bottom: 10px;
+            }
+
+            .comment-list .comment-body .meta {
+                color: #999;
+                margin-bottom: 15px;
+                font-size: 14px;
+            }
+
+            .comment-list .comment-body .reply {
+                color: #D99863;
+                text-decoration: none;
+                font-weight: 600;
+            }
+
+            .comment-list .comment-body .reply:hover {
+                text-decoration: underline;
+            }
+
+            .comment-list .children {
+                padding-left: 80px;
+                margin-top: 30px;
+                list-style: none;
+            }
+
+            /* Sidebar */
+            .sidebar-box {
+                margin-bottom: 30px;
+                padding: 25px;
+                background: #fff;
+                border-radius: 15px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            }
+
+            .sidebar-box h3 {
+                color: #8B5E3C;
+                margin-bottom: 20px;
+                font-size: 20px;
+            }
+
+            .search-form .form-group {
+                position: relative;
+            }
+
+            .search-form .form-group input {
+                padding-left: 40px;
+                border-radius: 20px;
+                border: 1px solid #f0f0f0;
+                background: #f8f5ff;
+            }
+
+            .search-form .form-group .fa {
+                position: absolute;
+                top: 12px;
+                left: 15px;
+                color: #8B5E3C;
+            }
+
+            .categories li {
+                margin-bottom: 10px;
+                padding-bottom: 10px;
+                border-bottom: 1px dashed #f0f0f0;
+            }
+
+            .categories li:last-child {
+                margin-bottom: 0;
+                padding-bottom: 0;
+                border-bottom: none;
+            }
+
+            .categories li a {
+                color: #555;
+                text-decoration: none;
+                transition: all 0.3s ease;
+            }
+
+            .categories li a:hover {
+                color: #D99863;
+            }
+
+            .categories li .fa {
+                color: #D99863;
+                float: right;
+                margin-top: 5px;
+            }
+
+            .block-21 {
+                display: flex;
+                margin-bottom: 20px;
+            }
+
+            .block-21 .blog-img {
+                width: 100px;
+                height: 80px;
+                border-radius: 10px;
+                background-size: cover;
+                background-position: center center;
+            }
+
+            .block-21 .text {
+                width: calc(100% - 100px);
+                padding-left: 15px;
+            }
+
+            .block-21 .text .heading {
+                font-size: 16px;
+                margin-bottom: 10px;
+            }
+
+            .block-21 .text .heading a {
+                color: #333;
+                text-decoration: none;
+                transition: all 0.3s ease;
+            }
+
+            .block-21 .text .heading a:hover {
+                color: #D99863;
+            }
+
+            .block-21 .text .meta {
+                font-size: 12px;
+                color: #999;
+            }
+
+            .block-21 .text .meta a {
+                color: #999;
+                text-decoration: none;
+            }
+
+            .block-21 .text .meta a:hover {
+                color: #D99863;
+            }
+
+            .tagcloud a {
+                display: inline-block;
+                padding: 5px 12px;
+                background: #f8f5ff;
+                color: #8B5E3C;
+                border-radius: 20px;
+                margin: 0 5px 10px 0;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                font-size: 12px !important;
+            }
+
+            .tagcloud a:hover {
+                background: #D99863;
+                color: #fff;
+            }
+
+            /* Dropdown menu for blog categories in navbar */
+            .navbar-nav .dropdown-menu.blog-dropdown {
+                min-width: 250px;
+                border: none;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                border-radius: 10px;
+                padding: 15px;
+            }
+
+            .navbar-nav .dropdown-menu.blog-dropdown .dropdown-item {
+                padding: 8px 15px;
+                border-radius: 5px;
+                margin-bottom: 5px;
+                transition: all 0.3s;
+            }
+
+            .navbar-nav .dropdown-menu.blog-dropdown .dropdown-item:hover {
+                background-color: #f8f5ff;
+                padding-left: 20px;
+            }
+
+            .navbar-nav .dropdown-menu.blog-dropdown .dropdown-item:last-child {
+                margin-bottom: 0;
+            }
+
+            .navbar-nav .dropdown-menu.blog-dropdown .view-all {
+                display: block;
+                text-align: center;
+                margin-top: 10px;
+                color: #D99863;
+                font-weight: 600;
+                text-decoration: none;
+            }
+
+            .navbar-nav .dropdown-menu.blog-dropdown .view-all:hover {
+                text-decoration: underline;
+            }
+            /* Tùy chỉnh nút chính (btn-primary) thành màu nâu cam cute */
+            .btn-primary {
+                background-color: var(--primary-color);
+                border-color: var(--primary-color);
+                color: #fff;
+                font-weight: 600;
+                border-radius: 25px;
+                padding: 10px 20px;
+                transition: all 0.3s ease;
+                font-family: 'Montserrat', sans-serif;
+            }
+
+            .btn-primary:hover {
+                background-color: var(--accent-color);
+                border-color: var(--accent-color);
+                transform: scale(1.05);
+                color: #fff;
+            }
+
+            /* Tùy chỉnh nút phụ hoặc các nút khác */
+            .btn-secondary,
+            .btn-outline-primary {
+                background-color: var(--secondary-color);
+                color: #8B5E3C;
+                border: 2px solid var(--primary-color);
+                font-weight: 500;
+                border-radius: 25px;
+                padding: 8px 18px;
+                font-family: 'Montserrat', sans-serif;
+            }
+
+            .btn-secondary:hover,
+            .btn-outline-primary:hover {
+                background-color: var(--accent-color);
+                color: white;
+                transform: translateY(-2px);
+            }
+            :root {
+                --primary-color: #D2691E;  /* Nâu cam chủ đạo */
+                --secondary-color: #FFDAB9; /* Cam đào nhạt dễ thương */
+                --accent-color: #FF8C00;   /* Cam đậm rực rỡ */
+                --light-color: #FFF8DC;    /* Màu nền nhẹ */
+            }
+
+            /* Ghi đè Bootstrap mặc định cho nút btn-primary */
+            .btn-primary {
+                background-color: var(--primary-color) !important;  /* #D2691E */
+                border-color: var(--primary-color) !important;
+                color: #fff !important;
+                font-weight: 600;
+                border-radius: 25px;
+                padding: 8px 20px;
+                font-family: 'Montserrat', sans-serif;
+                transition: all 0.3s ease;
+            }
+
+            .btn-primary:hover {
+                background-color: var(--accent-color) !important;  /* #FF8C00 */
+                border-color: var(--accent-color) !important;
+                color: #fff !important;
+                transform: scale(1.05);
+            }
+
+
+
         </style>
-        
+
     </head>
     <body>
 
@@ -261,21 +724,16 @@
                     <div class="col-md-6 d-flex justify-content-md-end align-items-center">
                         <c:choose>
                             <c:when test="${not empty sessionScope.user}">
-                                <!-- Hiển thị tên và avatar -->
-                                <div class="dropdown">
-                                    <a class="login-link dropdown-toggle d-flex align-items-center" href="authen?action=editprofile" role="button"
-                                       id="userDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <!-- Hiển thị tên người dùng và nút đăng xuất -->
+                                <div class="d-flex align-items-center">
+                                    <a class="login-link d-flex align-items-center mr-3" href="authen?action=editprofile">
                                         <i class="fa fa-user-circle mr-2" style="font-size: 1.4rem; color: #6d4aff;"></i>
                                         <span style="font-weight: 600;">${sessionScope.user.fullname}</span>
                                     </a>
-                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
-                                        <a class="dropdown-item" href="authen?action=editprofile"><i class="fa fa-id-card mr-2"></i> Thông tin cá nhân</a>
-                                        <a class="dropdown-item" href="mycourses.jsp"><i class="fa fa-book mr-2"></i> Khóa học</a>
-                                        <a class="dropdown-item" href="orders.jsp"><i class="fa fa-shopping-bag mr-2"></i> Đơn hàng</a>
-                                        <a class="dropdown-item" href="package"><i class="fa fa-box-open mr-2"></i> Gói dịch vụ</a>
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item text-danger" href="authen?action=logout"><i class="fa fa-sign-out mr-2"></i> Đăng xuất</a>
-                                    </div>
+                                    <a class="login-link text-danger d-flex align-items-center" href="authen?action=logout">
+                                        <i class="fa fa-sign-out mr-2"></i>
+                                        <span>Đăng Xuất</span>
+                                    </a>
                                 </div>
                             </c:when>
                             <c:otherwise>
@@ -290,6 +748,7 @@
                                 </a>
                             </c:otherwise>
                         </c:choose>
+
                     </div>
                 </div>
             </div>
@@ -328,120 +787,98 @@
                         <li class="nav-item"><a href="service.jsp" class="nav-link">Sản phẩm</a></li>
                         <li class="nav-item"><a href="gallery.jsp" class="nav-link">Thú cưng</a></li>
                         <li class="nav-item"><a href="package" class="nav-link">Gói dịch vụ</a></li>
-                        <li class="nav-item"><a href="blog.jsp" class="nav-link">Tin tức</a></li>
-                        <li class="nav-item"><a href="contact.jsp" class="nav-link">Liên hệ</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="blog" id="blogDropdown" role="button" data-toggle="dropdown">
+                                Tin tức
+                            </a>
+                            <div class="dropdown-menu blog-dropdown" aria-labelledby="blogDropdown">
+                                <c:forEach items="${featuredCategories}" var="category">
+                                    <a class="dropdown-item" href="blog?categoryId=${category.categoryId}">
+                                        <i class="fa fa-paw mr-2"></i>${category.categoryName}
+                                    </a>
+                                </c:forEach>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item view-all" href="blog">
+                                    <i class="fa fa-arrow-right mr-2"></i>Xem tất cả
+                                </a>
+                            </div>
+                        </li>
+
+                        <li class="nav-item"><a href="contact" class="nav-link">Liên hệ</a></li>
                     </ul>
                 </div>
             </div>
         </nav>
         <!-- END nav -->
-        
+
         <section class="ftco-section bg-light">
             <div class="container">
-                <div class="row d-flex">
-                    <div class="col-md-4 d-flex ftco-animate">
-                        <div class="blog-entry align-self-stretch">
-                            <a href="blog-single.jsp" class="block-20 rounded" style="background-image: url('images/image_1.jpg');">
-                            </a>
-                            <div class="text p-4">
-                                <div class="meta mb-2">
-                                    <div><a href="#">April 07, 2020</a></div>
-                                    <div><a href="#">Admin</a></div>
-                                    <div><a href="#" class="meta-chat"><span class="fa fa-comment"></span> 3</a></div>
-                                </div>
-                                <h3 class="heading"><a href="#">Even the all-powerful Pointing has no control about the blind texts</a></h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 d-flex ftco-animate">
-                        <div class="blog-entry align-self-stretch">
-                            <a href="blog-single.html" class="block-20 rounded" style="background-image: url('images/image_2.jpg');">
-                            </a>
-                            <div class="text p-4">
-                                <div class="meta mb-2">
-                                    <div><a href="#">April 07, 2020</a></div>
-                                    <div><a href="#">Admin</a></div>
-                                    <div><a href="#" class="meta-chat"><span class="fa fa-comment"></span> 3</a></div>
-                                </div>
-                                <h3 class="heading"><a href="#">Even the all-powerful Pointing has no control about the blind texts</a></h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 d-flex ftco-animate">
-                        <div class="blog-entry align-self-stretch">
-                            <a href="blog-single.html" class="block-20 rounded" style="background-image: url('images/image_3.jpg');">
-                            </a>
-                            <div class="text p-4">
-                                <div class="meta mb-2">
-                                    <div><a href="#">April 07, 2020</a></div>
-                                    <div><a href="#">Admin</a></div>
-                                    <div><a href="#" class="meta-chat"><span class="fa fa-comment"></span> 3</a></div>
-                                </div>
-                                <h3 class="heading"><a href="#">Even the all-powerful Pointing has no control about the blind texts</a></h3>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4 d-flex ftco-animate">
-                        <div class="blog-entry align-self-stretch">
-                            <a href="blog-single.html" class="block-20 rounded" style="background-image: url('images/image_4.jpg');">
-                            </a>
-                            <div class="text p-4">
-                                <div class="meta mb-2">
-                                    <div><a href="#">April 07, 2020</a></div>
-                                    <div><a href="#">Admin</a></div>
-                                    <div><a href="#" class="meta-chat"><span class="fa fa-comment"></span> 3</a></div>
-                                </div>
-                                <h3 class="heading"><a href="#">Even the all-powerful Pointing has no control about the blind texts</a></h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 d-flex ftco-animate">
-                        <div class="blog-entry align-self-stretch">
-                            <a href="blog-single.html" class="block-20 rounded" style="background-image: url('images/image_5.jpg');">
-                            </a>
-                            <div class="text p-4">
-                                <div class="meta mb-2">
-                                    <div><a href="#">April 07, 2020</a></div>
-                                    <div><a href="#">Admin</a></div>
-                                    <div><a href="#" class="meta-chat"><span class="fa fa-comment"></span> 3</a></div>
-                                </div>
-                                <h3 class="heading"><a href="#">Even the all-powerful Pointing has no control about the blind texts</a></h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 d-flex ftco-animate">
-                        <div class="blog-entry align-self-stretch">
-                            <a href="blog-single.html" class="block-20 rounded" style="background-image: url('images/image_6.jpg');">
-                            </a>
-                            <div class="text p-4">
-                                <div class="meta mb-2">
-                                    <div><a href="#">April 07, 2020</a></div>
-                                    <div><a href="#">Admin</a></div>
-                                    <div><a href="#" class="meta-chat"><span class="fa fa-comment"></span> 3</a></div>
-                                </div>
-                                <h3 class="heading"><a href="#">Even the all-powerful Pointing has no control about the blind texts</a></h3>
-                            </div>
-                        </div>
+                <div class="row justify-content-center mb-5 pb-3">
+                    <div class="col-md-7 heading-section text-center ftco-animate">
+                        <h2 class="mb-4" style="color: #8B5E3C;">Tin Tức Về Thú Cưng</h2>
+                        <p>Cập nhật những tin tức mới nhất, kiến thức bổ ích về chăm sóc và nuôi dưỡng thú cưng</p>
                     </div>
                 </div>
+                <c:if test="${not empty blogs}">
+                    <div class="row d-flex">
+                        <c:forEach items="${blogs}" var="blog">
+                            <div class="col-md-4 d-flex ftco-animate">
+                                <div class="blog-entry align-self-stretch">
+                                    <a href="blogdetail?id=${blog.blogId}" class="block-20 rounded" style="background-image: url('${blog.imageUrl}');">
+                                    </a>
+                                    <div class="text p-4">
+                                        <div class="meta mb-2">
+                                            <div><a href="#">${blog.createdAt}</a></div>
+                                            <div><a href="#">${blog.authorName}</a></div>
+                                            <div><a href="#" class="meta-chat"><span class="fa fa-comment"></span> 3</a></div>
+                                        </div>
+                                        <h3 class="heading"><a href="blogdetail?id=${blog.blogId}">${blog.title}</a></h3>
+                                        <p>${blog.shortDescription}</p>
+                                        <a href="blogdetail?id=${blog.blogId}" class="btn btn-primary">Đọc tiếp</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </c:forEach>
+                    </div>
+                </c:if>
+
+                <c:if test="${empty blogs}">
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            <p class="text-danger">Không tìm thấy bài viết phù hợp.</p>
+                        </div>
+                    </div>
+                </c:if>
+
                 <div class="row mt-5">
                     <div class="col text-center">
                         <div class="block-27">
                             <ul>
-                                <li><a href="#">&lt;</a></li>
-                                <li class="active"><span>1</span></li>
-                                <li><a href="#">2</a></li>
-                                <li><a href="#">3</a></li>
-                                <li><a href="#">4</a></li>
-                                <li><a href="#">5</a></li>
-                                <li><a href="#">&gt;</a></li>
+                                <c:if test="${currentPage > 1}">
+                                    <li><a href="blog?page=${currentPage - 1}">&lt;</a></li>
+                                    </c:if>
+
+                                <c:forEach begin="1" end="${totalPages}" var="i">
+                                    <c:choose>
+                                        <c:when test="${i == currentPage}">
+                                            <li class="active"><span>${i}</span></li>
+                                                </c:when>
+                                                <c:otherwise>
+                                            <li><a href="blog?page=${i}">${i}</a></li>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </c:forEach>
+
+                                <c:if test="${currentPage < totalPages}">
+                                    <li><a href="blog?page=${currentPage + 1}">&gt;</a></li>
+                                    </c:if>
                             </ul>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
+
 
         <!-- Newsletter -->
         <section class="newsletter-section">

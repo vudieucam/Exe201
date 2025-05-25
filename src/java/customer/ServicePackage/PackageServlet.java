@@ -26,37 +26,26 @@ public class PackageServlet extends HttpServlet {
         String action = request.getParameter("action");
 
         try {
-            // Trong doGet method, thêm xử lý khi chọn gói
             if (action != null && action.equals("select")) {
                 int packageId = Integer.parseInt(request.getParameter("packageId"));
-                response.sendRedirect("authen?action=signup&packageId=" + packageId);
+                response.sendRedirect("signup.jsp?packageId=" + packageId);
                 return;
             }
+
             if (action != null && action.equals("upgrade")) {
-                // Lấy ID gói
                 int packageId = Integer.parseInt(request.getParameter("packageId"));
                 ServicePackage pkg = PackageDAO.getPackageById(packageId);
 
                 if (pkg != null) {
-                    // Gán gói cho request để hiển thị
                     request.setAttribute("pkg", pkg);
-
-                    // Nếu đang trong quá trình đăng ký (chưa login), gán fromRegistration = true
                     HttpSession session = request.getSession();
                     User pendingUser = (User) session.getAttribute("pendingUser");
-                    if (pendingUser != null) {
-                        request.setAttribute("fromRegistration", true);
-                    } else {
-                        request.setAttribute("fromRegistration", false);
-                    }
-
-                    // Chuyển tới trang thanh toán
+                    request.setAttribute("fromRegistration", pendingUser != null);
                     request.getRequestDispatcher("payment.jsp").forward(request, response);
                     return;
                 }
             }
 
-            // Load danh sách gói như bình thường
             List<ServicePackage> packages = PackageDAO.getAllPackages();
             request.setAttribute("packages", packages);
 
@@ -65,7 +54,6 @@ public class PackageServlet extends HttpServlet {
             e.printStackTrace();
         }
 
-        // Hiển thị trang pricing nếu không phải upgrade
         request.getRequestDispatcher("pricing.jsp").forward(request, response);
     }
 
@@ -89,7 +77,6 @@ public class PackageServlet extends HttpServlet {
             case "payAndRegister":
                 payAndRegister(request, response);
                 break;
-
             default:
                 response.sendRedirect("pricing.jsp");
         }
@@ -101,7 +88,6 @@ public class PackageServlet extends HttpServlet {
         User user = (User) session.getAttribute("user");
 
         if (user == null) {
-            // Chuyển hướng đến trang đăng ký với packageId
             int packageId = Integer.parseInt(request.getParameter("packageId"));
             response.sendRedirect("signup.jsp?packageId=" + packageId);
             return;
@@ -110,36 +96,32 @@ public class PackageServlet extends HttpServlet {
         try {
             int packageId = Integer.parseInt(request.getParameter("packageId"));
 
-            // Kiểm tra nếu user đã đăng ký gói này rồi
             if (user.getServicePackageId() != null && user.getServicePackageId() == packageId) {
-                request.setAttribute("notification", "Bạn đã đăng ký gói này rồi!");
+                session.setAttribute("notification", "Bạn đã đăng ký gói này rồi!");
                 reloadPackages(request, response);
                 return;
             }
 
-            // Kiểm tra nếu user đang cố downgrade gói
             if (user.getServicePackageId() != null && user.getServicePackageId() > packageId) {
-                request.setAttribute("notification", "Bạn không thể chuyển xuống gói thấp hơn!");
+                session.setAttribute("notification", "Bạn không thể chuyển xuống gói thấp hơn!");
                 reloadPackages(request, response);
                 return;
             }
 
-            // Đăng ký gói mới
             boolean success = PackageDAO.registerPackage(user.getId(), packageId);
 
             if (success) {
-                // Cập nhật thông tin user trong session
                 user.setServicePackageId(packageId);
                 session.setAttribute("user", user);
-                request.setAttribute("notification", "Đăng ký gói dịch vụ thành công!");
+                session.setAttribute("notification", "Đăng ký gói dịch vụ thành công!");
             } else {
-                request.setAttribute("notification", "Đăng ký gói dịch vụ thất bại. Vui lòng thử lại!");
+                session.setAttribute("notification", "Đăng ký gói dịch vụ thất bại. Vui lòng thử lại!");
             }
 
             reloadPackages(request, response);
 
         } catch (NumberFormatException | SQLException e) {
-            request.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
+            session.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
             reloadPackages(request, response);
         }
     }
@@ -158,42 +140,36 @@ public class PackageServlet extends HttpServlet {
             int packageId = Integer.parseInt(request.getParameter("packageId"));
             String paymentMethod = request.getParameter("paymentMethod");
 
-            // Kiểm tra nếu user đã đăng ký gói này rồi
             if (user.getServicePackageId() != null && user.getServicePackageId() == packageId) {
-                request.setAttribute("notification", "Bạn đã đăng ký gói này rồi!");
+                session.setAttribute("notification", "Bạn đã đăng ký gói này rồi!");
                 reloadPackages(request, response);
                 return;
             }
 
-            // Kiểm tra nếu user đang cố downgrade gói
             if (user.getServicePackageId() != null && user.getServicePackageId() > packageId) {
-                request.setAttribute("notification", "Bạn không thể chuyển xuống gói thấp hơn!");
+                session.setAttribute("notification", "Bạn không thể chuyển xuống gói thấp hơn!");
                 reloadPackages(request, response);
                 return;
             }
 
-            // Thực hiện nâng cấp gói
             boolean success = PackageDAO.registerPackage(user.getId(), packageId);
 
             if (success) {
-                // Cập nhật thông tin user trong session
                 user.setServicePackageId(packageId);
                 session.setAttribute("user", user);
-
-                // Chuyển đến trang thành công
-                request.setAttribute("successMessage", "Nâng cấp gói dịch vụ thành công!");
-                request.setAttribute("package", PackageDAO.getPackageById(packageId));
-                request.setAttribute("paymentMethod", paymentMethod);
-                request.getRequestDispatcher("payment_success.jsp").forward(request, response);
+                session.setAttribute("successMessage", "Nâng cấp gói dịch vụ thành công!");
+                session.setAttribute("pkg", PackageDAO.getPackageById(packageId));
+                session.setAttribute("paymentMethod", paymentMethod);
+                response.sendRedirect("payment_success.jsp");
                 return;
             } else {
-                request.setAttribute("notification", "Nâng cấp gói dịch vụ thất bại. Vui lòng thử lại!");
+                session.setAttribute("notification", "Nâng cấp gói dịch vụ thất bại. Vui lòng thử lại!");
             }
 
             reloadPackages(request, response);
 
         } catch (NumberFormatException | SQLException e) {
-            request.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
+            session.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
             reloadPackages(request, response);
         }
     }
@@ -209,40 +185,149 @@ public class PackageServlet extends HttpServlet {
         request.getRequestDispatcher("pricing.jsp").forward(request, response);
     }
 
+
+
     private void payAndRegister(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
         User pendingUser = (User) session.getAttribute("pendingUser");
 
         if (pendingUser == null) {
-            response.sendRedirect("signup.jsp");
-            return;
+            // Lấy dữ liệu từ form
+            String email = request.getParameter("email");
+            String password = request.getParameter("password");
+            String confirmPassword = request.getParameter("confirm_password");
+            String fullname = request.getParameter("fullname");
+            String phone = request.getParameter("phone");
+            String address = request.getParameter("address"); // Thêm dòng này
+            int packageId = Integer.parseInt(request.getParameter("packageId"));
+            String paymentMethod = request.getParameter("paymentMethod");
+
+            // Validate dữ liệu
+            boolean hasError = false;
+
+            if (!password.equals(confirmPassword)) {
+                session.setAttribute("passwordError", "Mật khẩu nhập lại không khớp");
+                hasError = true;
+            }
+
+            if (!email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+                session.setAttribute("emailError", "Email không hợp lệ");
+                hasError = true;
+            }
+
+            if (!phone.matches("^(032|033|034|035|036|037|038|039|096|097|098|086|083|084|085|081|082|088|091|094|070|079|077|076|078|090|093|089|056|058|092|059|099)[0-9]{7}$")) {
+                session.setAttribute("phoneError", "Số điện thoại không hợp lệ");
+                hasError = true;
+            }
+
+            if (password.length() < 8 || password.length() > 32) {
+                session.setAttribute("passwordError", "Mật khẩu phải từ 8-32 ký tự");
+                hasError = true;
+            }
+
+            if (address == null || address.trim().isEmpty()) {
+                session.setAttribute("addressError", "Địa chỉ không được để trống");
+                hasError = true;
+            }
+
+            try {
+                if (userDAO.checkEmailExists(email)) {
+                    session.setAttribute("emailError", "Email đã tồn tại");
+                    hasError = true;
+                }
+            } catch (SQLException e) {
+                session.setAttribute("error", "Lỗi kiểm tra email: " + e.getMessage());
+                hasError = true;
+            }
+
+            if (hasError) {
+                // Lưu lại giá trị đã nhập
+                session.setAttribute("oldEmail", email);
+                session.setAttribute("oldFullname", fullname);
+                session.setAttribute("oldPhone", phone);
+                session.setAttribute("oldAddress", address);
+                response.sendRedirect("signup.jsp?packageId=" + packageId);
+                return;
+            }
+
+            // Tạo user tạm
+            pendingUser = new User();
+            pendingUser.setEmail(email);
+            pendingUser.setPassword(password);
+            pendingUser.setFullname(fullname);
+            pendingUser.setPhone(phone);
+            pendingUser.setAddress(address); // Thêm dòng này
+            pendingUser.setServicePackageId(packageId);
+            session.setAttribute("pendingUser", pendingUser);
+        }
+        // Xử lý thanh toán hoặc đăng ký trực tiếp
+        if (pendingUser.getServicePackageId() > 1) { // Giả sử gói free có ID = 1
+            try {
+                ServicePackage pkg = PackageDAO.getPackageById(pendingUser.getServicePackageId());
+                request.setAttribute("pkg", pkg);
+                request.setAttribute("fromRegistration", true);
+                request.getRequestDispatcher("payment.jsp").forward(request, response);
+                return;
+            } catch (SQLException e) {
+                session.setAttribute("error", "Lỗi khi lấy thông tin gói: " + e.getMessage());
+                response.sendRedirect("signup.jsp?packageId=" + pendingUser.getServicePackageId());
+                return;
+            }
         }
 
-        String paymentMethod = request.getParameter("paymentMethod");
-
+        // Xử lý đăng ký gói free
         try {
-            // Đăng ký tài khoản
             String token = UUID.randomUUID().toString();
             pendingUser.setVerificationToken(token);
             pendingUser.setStatus(false);
             pendingUser.setRoleId(1);
 
             if (userDAO.register(pendingUser)) {
-                // Gửi email xác nhận
+                // Gửi email xác minh
                 String verificationLink = request.getScheme() + "://"
                         + request.getServerName() + ":"
                         + request.getServerPort()
                         + request.getContextPath()
                         + "/authen?action=verify&token=" + token;
 
-                String emailBody = "Xin chào " + pendingUser.getFullname() + ",<br><br>"
-                        + "Cảm ơn bạn đã đăng ký gói dịch vụ PetTech.<br><br>"
-                        + "Nhấp vào liên kết sau để xác minh tài khoản: <a href='" + verificationLink + "'>Xác minh</a><br><br>"
-                        + "Thông tin gói dịch vụ:<br>"
-                        + "- Tên gói: " + pendingUser.getServicePackageId() + "<br>"
-                        + "- Phương thức thanh toán: " + paymentMethod + "<br><br>"
-                        + "Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!";
+                PackageDAO spDAO = new PackageDAO();
+                String packageName = spDAO.getServicePackageNameById(pendingUser.getServicePackageId());
+
+                String emailBody = "<!DOCTYPE html>"
+                        + "<html lang='vi'>"
+                        + "<head>"
+                        + "<meta charset='UTF-8'>"
+                        + "<style>"
+                        + "body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fffaf4; color: #333; padding: 20px; }"
+                        + ".container { max-width: 600px; margin: auto; background-color: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; }"
+                        + "h2 { color: #ff6600; }"
+                        + ".button { display: inline-block; background-color: #ff9966; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; }"
+                        + ".footer { font-size: 13px; color: #888; margin-top: 30px; line-height: 1.6; }"
+                        + ".footer strong { color: #555; }"
+                        + "</style>"
+                        + "</head>"
+                        + "<body>"
+                        + "<div class='container'>"
+                        + "<h2>🎉 Chào mừng bạn đến với PetTech! 🐾</h2>"
+                        + "<p>Xin chào <strong>" + pendingUser.getFullname() + "</strong>,</p>"
+                        + "<p>Cảm ơn bạn đã đăng ký <strong>gói dịch vụ PetTech</strong>! 💖</p>"
+                        + "<p>Vui lòng nhấp vào nút dưới đây để xác minh tài khoản của bạn:</p>"
+                        + "<p><a class='button' href='" + verificationLink + "'>🔐 Xác minh tài khoản</a></p>"
+                        + "<p><strong>Thông tin gói dịch vụ của bạn:</strong><br>"
+                        + "- Tên gói: <strong>" + packageName + "</strong></p>"
+                        + "<p>Chúng tôi rất vui khi được đồng hành cùng bạn và thú cưng trên hành trình sắp tới! 🐶🐱<br>"
+                        + "Hy vọng bạn sẽ có những trải nghiệm thật tuyệt vời cùng PetTech. 🌟</p>"
+                        + "<div class='footer'>"
+                        + "<strong>📞 Liên hệ hỗ trợ:</strong><br>"
+                        + "SĐT: <a href='tel:0352138596'>0352 138 596</a><br>"
+                        + "Địa chỉ: Khu Công nghệ cao Hòa Lạc, Thạch Thất, Hà Nội<br><br>"
+                        + "Nếu bạn có bất kỳ câu hỏi nào, đừng ngần ngại liên hệ với chúng tôi nhé! 🧡<br>"
+                        + "<strong>❤️ PetTech Team</strong>"
+                        + "</div>"
+                        + "</div>"
+                        + "</body>"
+                        + "</html>";
 
                 SendMailOK.send(
                         "smtp.gmail.com",
@@ -253,16 +338,24 @@ public class PackageServlet extends HttpServlet {
                         emailBody
                 );
 
-                // Chuyển đến trang thông báo thành công
+                // Xóa session tạm
                 session.removeAttribute("pendingUser");
-                request.setAttribute("successMessage", "Đăng ký và thanh toán thành công! Vui lòng kiểm tra email để xác minh tài khoản.");
-                request.getRequestDispatcher("payment_success.jsp").forward(request, response);
+                session.removeAttribute("oldEmail");
+                session.removeAttribute("oldFullname");
+                session.removeAttribute("oldPhone");
+
+                session.setAttribute("notification", "Đăng ký thành công! Vui lòng kiểm tra email để xác minh tài khoản.");
+                response.sendRedirect("login.jsp");
+                return;
+            } else {
+                session.setAttribute("error", "Đăng ký thất bại. Vui lòng thử lại.");
+                response.sendRedirect("signup.jsp?packageId=" + pendingUser.getServicePackageId());
             }
+
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
-            request.getRequestDispatcher("signup.jsp").forward(request, response);
+            session.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
+            response.sendRedirect("signup.jsp?packageId=" + pendingUser.getServicePackageId());
         }
     }
-
 }
