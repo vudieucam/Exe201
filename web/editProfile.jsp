@@ -1,4 +1,8 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -83,7 +87,7 @@
                 <h2 class="title fw-bold">Chỉnh sửa hồ sơ cá nhân</h2>
                 <p class="text-muted">Cập nhật thông tin để thú cưng luôn nhận diện bạn nhé!</p>
             </div>
-            <form action="profile?action=update" method="post" class="px-2">
+            <form action="home" method="post" class="px-2">
                 <div class="mb-3 form-floating">
                     <input type="email" class="form-control" id="email" name="email" value="${user.email}" readonly>
                     <label for="email"><i class="fas fa-envelope"></i> Email</label>
@@ -103,7 +107,7 @@
 
                 <!-- Nút điều hướng sang trang đổi mật khẩu -->
                 <div class="text-end">
-                    <a href="changePassword.jsp" class="toggle-btn">
+                    <a href="authen?action=changepassword" class="toggle-btn">
                         <i class="fas fa-key"></i> Thay đổi mật khẩu
                     </a>
                 </div>

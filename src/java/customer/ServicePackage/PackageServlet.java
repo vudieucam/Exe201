@@ -20,13 +20,18 @@ public class PackageServlet extends HttpServlet {
     private PackageDAO PackageDAO = new PackageDAO();
     private UserDAO userDAO = new UserDAO();
 
-   
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
 
         try {
+            // Trong doGet method, thêm xử lý khi chọn gói
+            if (action != null && action.equals("select")) {
+                int packageId = Integer.parseInt(request.getParameter("packageId"));
+                response.sendRedirect("authen?action=signup&packageId=" + packageId);
+                return;
+            }
             if (action != null && action.equals("upgrade")) {
                 // Lấy ID gói
                 int packageId = Integer.parseInt(request.getParameter("packageId"));
@@ -210,49 +215,49 @@ public class PackageServlet extends HttpServlet {
         User pendingUser = (User) session.getAttribute("pendingUser");
 
         if (pendingUser == null) {
-            request.setAttribute("notification", "Thông tin đăng ký không hợp lệ hoặc đã hết hạn. Vui lòng thử lại.");
-            request.getRequestDispatcher("signup.jsp").forward(request, response);
+            response.sendRedirect("signup.jsp");
             return;
         }
 
         String paymentMethod = request.getParameter("paymentMethod");
 
-        // Đăng ký tài khoản như AuthenServlet.register()
         try {
-            // Kiểm tra lại email
-            if (userDAO.checkEmailExists(pendingUser.getEmail())) {
-                request.setAttribute("notification", "Email đã tồn tại. Vui lòng dùng email khác.");
-                request.getRequestDispatcher("signup.jsp").forward(request, response);
-                return;
-            }
-
-            // Gửi email xác minh
+            // Đăng ký tài khoản
             String token = UUID.randomUUID().toString();
             pendingUser.setVerificationToken(token);
             pendingUser.setStatus(false);
-            pendingUser.setRoleId(1); // user
+            pendingUser.setRoleId(1);
 
             if (userDAO.register(pendingUser)) {
-                String link = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
-                        + request.getContextPath() + "/authen?action=verify&token=" + token;
+                // Gửi email xác nhận
+                String verificationLink = request.getScheme() + "://"
+                        + request.getServerName() + ":"
+                        + request.getServerPort()
+                        + request.getContextPath()
+                        + "/authen?action=verify&token=" + token;
 
-                String content = "Xin chào " + pendingUser.getFullname() + ",<br>"
-                        + "Cảm ơn bạn đã đăng ký. Nhấp vào liên kết để xác minh: <a href='" + link + "'>Xác minh</a>";
+                String emailBody = "Xin chào " + pendingUser.getFullname() + ",<br><br>"
+                        + "Cảm ơn bạn đã đăng ký gói dịch vụ PetTech.<br><br>"
+                        + "Nhấp vào liên kết sau để xác minh tài khoản: <a href='" + verificationLink + "'>Xác minh</a><br><br>"
+                        + "Thông tin gói dịch vụ:<br>"
+                        + "- Tên gói: " + pendingUser.getServicePackageId() + "<br>"
+                        + "- Phương thức thanh toán: " + paymentMethod + "<br><br>"
+                        + "Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!";
 
-                SendMailOK.send("smtp.gmail.com", pendingUser.getEmail(),
-                        "vdc120403@gmail.com", "ednn nwbo zbyq gahs",
-                        "Xác minh tài khoản PetTech", content);
+                SendMailOK.send(
+                        "smtp.gmail.com",
+                        pendingUser.getEmail(),
+                        "vdc120403@gmail.com",
+                        "ednn nwbo zbyq gahs",
+                        "Xác minh tài khoản PetTech",
+                        emailBody
+                );
 
+                // Chuyển đến trang thông báo thành công
                 session.removeAttribute("pendingUser");
-                request.setAttribute("notification", "🎉 Đăng ký thành công! Vui lòng kiểm tra email để xác minh.");
-                request.setAttribute("package", PackageDAO.getPackageById(pendingUser.getServicePackageId()));
-                request.setAttribute("paymentMethod", paymentMethod);
+                request.setAttribute("successMessage", "Đăng ký và thanh toán thành công! Vui lòng kiểm tra email để xác minh tài khoản.");
                 request.getRequestDispatcher("payment_success.jsp").forward(request, response);
-            } else {
-                request.setAttribute("notification", "Đăng ký thất bại. Vui lòng thử lại.");
-                request.getRequestDispatcher("signup.jsp").forward(request, response);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());

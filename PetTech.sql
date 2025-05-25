@@ -240,11 +240,40 @@ CREATE TABLE user_progress (
 -- ===========================================
 
 -- 1. Gói dịch vụ
+-- Insert dữ liệu các gói dịch vụ
 INSERT INTO service_packages (name, description, price, type)
 VALUES 
-(N'GÓI MIỄN PHÍ', N'Truy cập cơ bản vào diễn đàn cộng đồng', 0, N'free'),
-(N'GÓI TIÊU CHUẨN', N'Truy cập video hướng dẫn & tư vấn định kỳ', 99000, N'standard'),
-(N'GÓI CHUYÊN NGHIỆP', N'Toàn quyền truy cập nội dung + ưu đãi đối tác', 199000, N'pro');
+(N'GÓI MIỄN PHÍ', 
+N'Phù hợp với người mới bắt đầu nuôi thú cưng hoặc đang tìm hiểu.
+Lợi ích:
+- Truy cập miễn phí vào các bài viết cơ bản về chăm sóc thú cưng có giới hạn thông tin nội dung.
+- Tham gia diễn đàn cộng đồng để thảo luận với người nuôi thú cưng khác.', 
+0, N'free'),
+
+(N'GÓI TIÊU CHUẨN', 
+N'Dành cho người nuôi thú cưng có nhu cầu chăm sóc tốt hơn và học hỏi thêm.
+Lợi ích:
+- Truy cập miễn phí vào các bài viết cơ bản về chăm sóc thú cưng.
+- Tham gia diễn đàn cộng đồng để thảo luận với người nuôi thú cưng khác.
+- Truy cập không giới hạn tất cả video hướng dẫn chất lượng cao.
+- Truy cập vào thư viện bài viết nâng cao theo loại thú cưng (chó, mèo, hamster…).
+- Tham gia các khóa học cơ bản (chăm sóc, dinh dưỡng, vệ sinh…).
+- Tư vấn trực tuyến với chuyên gia định kỳ 1 lần/tháng.', 
+99000, N'standard'),
+
+(N'GÓI CHUYÊN NGHIỆP', 
+N'Phù hợp với người yêu thú cưng nghiêm túc hoặc kinh doanh nhỏ (pet shop, grooming).
+Lợi ích:
+- Truy cập miễn phí vào các bài viết cơ bản về chăm sóc thú cưng.
+- Tham gia diễn đàn cộng đồng để thảo luận với người nuôi thú cưng khác.
+- Truy cập không giới hạn tất cả video hướng dẫn chất lượng cao.
+- Truy cập vào thư viện bài viết nâng cao theo loại thú cưng (chó, mèo, hamster...).
+- Tham gia các khóa học cơ bản (chăm sóc, dinh dưỡng, vệ sinh…).
+- Truy cập vào khóa học chuyên sâu (phòng bệnh, huấn luyện hành vi, sơ cứu…).
+- Tư vấn 1-1 không giới hạn với bác sĩ thú y / chuyên gia huấn luyện.
+- Nhận tài liệu độc quyền (PDF, infographic…).
+- Ưu đãi giảm giá 10% khi mua khóa học nâng cao hoặc sản phẩm từ đối tác.', 
+199000, N'pro');
 
 -- 2. Người dùng
 INSERT INTO users (email, password, fullname, phone, address, role_id, status, verification_token, service_package_id)

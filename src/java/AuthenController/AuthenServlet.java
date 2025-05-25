@@ -54,19 +54,19 @@ public class AuthenServlet extends HttpServlet {
             url = "signup.jsp";
             break;
             case "editprofile":
-                url = "editprofile.jsp";
+                url = "editProfile.jsp";
                 break;
             case "changepassword":
-                url = "changepassword.jsp";
+                url = "changePassword.jsp";
                 break;
             case "resetpassword":
-                url = "resetpassword.jsp";
+                url = "resetPassword.jsp";
                 break;
             case "verify":
                 url = verifyEmail(request, response);
                 break;
             default:
-                url = "Home.jsp";
+                url = "home";
         }
 
         request.getRequestDispatcher(url).forward(request, response);
@@ -87,7 +87,7 @@ public class AuthenServlet extends HttpServlet {
             case "register":
                 url = register(request, response);
                 break;
-            case "update":
+            case "editprofile":
                 url = updateProfile(request, response);
                 break;
             case "changepassword":
@@ -96,12 +96,8 @@ public class AuthenServlet extends HttpServlet {
             case "resetpassword":
                 url = resetPassword(request, response);
                 break;
-            case "confirmRegister":
-                url = showPaymentBeforeRegister(request, response);
-                break;
-
             default:
-                url = "Home.jsp";
+                url = "home";
         }
 
         request.getRequestDispatcher(url).forward(request, response);
@@ -171,13 +167,15 @@ public class AuthenServlet extends HttpServlet {
         return "Home.jsp";
     }
 
+// Xóa method showPaymentBeforeRegister
+// Sửa lại method register như sau:
     private String register(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
 
-        String url;
+        String url = "signup.jsp";
         String email = request.getParameter("email");
         String password = request.getParameter("password");
         String fullname = request.getParameter("fullname");
@@ -185,6 +183,12 @@ public class AuthenServlet extends HttpServlet {
         String address = request.getParameter("address");
         String confirmPassword = request.getParameter("confirm_password");
         String packageIdStr = request.getParameter("packageId");
+
+        // Giữ lại dữ liệu đã nhập khi có lỗi
+        request.setAttribute("oldEmail", email);
+        request.setAttribute("oldFullname", fullname);
+        request.setAttribute("oldPhone", phone);
+        request.setAttribute("oldAddress", address);
 
         int packageId = 1; // Mặc định là gói miễn phí
         try {
@@ -202,29 +206,40 @@ public class AuthenServlet extends HttpServlet {
             request.setAttribute("packages", packages);
 
             // Validate thông tin người dùng
+            boolean hasError = false;
+
+            // Validate password
             if (!password.equals(confirmPassword)) {
-                request.setAttribute("notification", "Nhập lại mật khẩu không giống nhau");
-                return "signup.jsp";
+                request.setAttribute("passwordError", "Nhập lại mật khẩu không giống nhau");
+                hasError = true;
             }
 
+            // Validate email
             if (!email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
-                request.setAttribute("notification", "Địa chỉ email không hợp lệ");
-                return "signup.jsp";
+                request.setAttribute("emailError", "Địa chỉ email không hợp lệ");
+                hasError = true;
             }
 
+            // Validate phone
             if (!phone.matches("^(032|033|034|035|036|037|038|039|096|097|098|086|083|084|085|081|082|088|091|094|070|079|077|076|078|090|093|089|056|058|092|059|099)[0-9]{7}$")) {
-                request.setAttribute("notification", "Số điện thoại không hợp lệ");
-                return "signup.jsp";
+                request.setAttribute("phoneError", "Số điện thoại không hợp lệ");
+                hasError = true;
             }
 
-            if (password.length() <= 8 || password.length() > 32) {
-                request.setAttribute("notification", "Mật khẩu phải từ 8 đến 32 ký tự");
-                return "signup.jsp";
+            // Validate password length
+            if (password.length() < 8 || password.length() > 32) {
+                request.setAttribute("passwordError", "Mật khẩu phải từ 8 đến 32 ký tự");
+                hasError = true;
             }
 
+            // Check email exists
             if (userDAO.checkEmailExists(email.toLowerCase())) {
-                request.setAttribute("notification", "Email đã tồn tại");
-                return "signup.jsp";
+                request.setAttribute("emailError", "Email đã tồn tại");
+                hasError = true;
+            }
+
+            if (hasError) {
+                return url;
             }
 
             // Tạo user và gửi email xác thực
@@ -268,15 +283,11 @@ public class AuthenServlet extends HttpServlet {
                     request.setAttribute("notification", "Đăng ký thành công nhưng gửi email xác nhận thất bại. Vui lòng liên hệ quản trị viên.");
                     url = "login.jsp";
                 }
-
             } else {
                 request.setAttribute("notification", "Đăng ký thất bại. Vui lòng thử lại.");
-                url = "signup.jsp";
             }
-
         } catch (SQLException ex) {
             request.setAttribute("error", "Lỗi hệ thống: " + ex.getMessage());
-            url = "signup.jsp";
         }
 
         return url;
@@ -302,7 +313,7 @@ public class AuthenServlet extends HttpServlet {
         // Kiểm tra số điện thoại hợp lệ
         if (!phone.matches("^(032|033|034|035|036|037|038|039|096|097|098|086|083|084|085|081|082|088|091|094|070|079|077|076|078|090|093|089|056|058|092|059|099)[0-9]{7}$")) {
             request.setAttribute("notification", "Số điện thoại không hợp lệ");
-            return "editprofile.jsp";
+            return "editProfile.jsp";
         }
 
         // Cập nhật đối tượng người dùng
@@ -323,10 +334,10 @@ public class AuthenServlet extends HttpServlet {
             } else {
                 request.setAttribute("notification", "Cập nhật thông tin thất bại");
             }
-            return "editprofile.jsp";
+            return "editProfile.jsp";
         } catch (SQLException ex) {
             request.setAttribute("error", "Lỗi hệ thống: " + ex.getMessage());
-            return "editprofile.jsp";
+            return "editProfile.jsp";
         }
     }
 
@@ -346,7 +357,7 @@ public class AuthenServlet extends HttpServlet {
         // Validate inputs
         if (!newPassword.equals(confirmPassword)) {
             request.setAttribute("notification", "Mật khẩu mới không khớp");
-            return "changepassword.jsp";
+            return "changePassword.jsp";
         }
 
         try {
@@ -354,23 +365,49 @@ public class AuthenServlet extends HttpServlet {
             User user = userDAO.login(currentUser.getEmail(), oldPassword);
             if (user == null) {
                 request.setAttribute("notification", "Mật khẩu cũ không đúng");
-                return "changepassword.jsp";
+                return "changePassword.jsp";
+            }
+// Validate inputs
+            if (!newPassword.equals(confirmPassword)) {
+                request.setAttribute("notification", "Mật khẩu mới không khớp");
+                return "changePassword.jsp";
+            }
+
+            if (newPassword.equals(oldPassword)) {
+                request.setAttribute("notification", "Mật khẩu mới không được trùng với mật khẩu cũ");
+                return "changePassword.jsp";
+            }
+
+            if (!isValidPassword(newPassword)) {
+                request.setAttribute("notification", "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường và số");
+                return "changePassword.jsp";
             }
 
             if (userDAO.changePassword(currentUser.getId(), newPassword)) {
-                request.setAttribute("notification", "Đổi mật khẩu thành công");
-                // Update session with new password
                 currentUser.setPassword(newPassword);
                 session.setAttribute("user", currentUser);
+                session.invalidate(); // bắt buộc đăng nhập lại
+
+                // Chuyển hướng đến changepassword.jsp và gắn cờ thành công
+                request.setAttribute("success", true);
+                request.setAttribute("notification", "Đổi mật khẩu thành công. Vui lòng đăng nhập lại sau vài giây...");
+                return "changePassword.jsp";
+
             } else {
                 request.setAttribute("notification", "Đổi mật khẩu thất bại");
             }
 
-            return "changepassword.jsp";
+            return "changePassword.jsp";
         } catch (SQLException ex) {
             request.setAttribute("error", "Lỗi hệ thống: " + ex.getMessage());
-            return "changepassword.jsp";
+            return "changePassword.jsp";
         }
+    }
+
+    private boolean isValidPassword(String password) {
+        // Ví dụ: ít nhất 8 ký tự, 1 chữ hoa, 1 chữ thường, 1 số
+        String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$";
+        return password != null && password.matches(regex);
     }
 
     private String resetPassword(HttpServletRequest request, HttpServletResponse response)
@@ -450,33 +487,6 @@ public class AuthenServlet extends HttpServlet {
         }
 
         return sb.toString();
-    }
-
-    private String showPaymentBeforeRegister(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        // Lưu thông tin tạm vào session
-        HttpSession session = request.getSession();
-
-        User tempUser = new User();
-        tempUser.setEmail(request.getParameter("email"));
-        tempUser.setPassword(request.getParameter("password"));
-        tempUser.setFullname(request.getParameter("fullname"));
-        tempUser.setPhone(request.getParameter("phone"));
-        tempUser.setAddress(request.getParameter("address"));
-        tempUser.setServicePackageId(Integer.parseInt(request.getParameter("packageId")));
-        session.setAttribute("pendingUser", tempUser);
-
-        // Lấy gói dịch vụ
-        int packageId = tempUser.getServicePackageId();
-        try {
-            ServicePackage pkg = new PackageDAO().getPackageById(packageId);
-            request.setAttribute("package", pkg);
-            request.setAttribute("fromRegistration", true); // đánh dấu là đăng ký
-            return "payment.jsp";
-        } catch (SQLException ex) {
-            request.setAttribute("error", "Không tìm thấy gói dịch vụ: " + ex.getMessage());
-            return "signup.jsp";
-        }
     }
 
     /**

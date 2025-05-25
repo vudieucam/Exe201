@@ -21,6 +21,193 @@
         <link rel="stylesheet" href="css/style.css">
 
         <style>
+            .navbar-brand {
+                font-weight: 800;
+                font-size: 1.6rem;
+                background: linear-gradient(90deg, #8B5E3C, #D99863);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+
+            /* Màu chữ trong menu */
+            .navbar-nav .nav-link {
+                color: #8B5E3C !important;
+                font-weight: 600;
+                position: relative;
+            }
+
+            .navbar-nav .nav-link:hover,
+            .navbar-nav .nav-item.active .nav-link {
+                color: #D99863 !important;
+            }
+
+            /* Hiệu ứng gạch chân khi hover */
+            .navbar-nav .nav-link::after {
+                content: "";
+                display: block;
+                width: 0;
+                height: 2px;
+                background: #D99863;
+                transition: width 0.3s;
+                position: absolute;
+                bottom: 0;
+                left: 0;
+            }
+
+            .navbar-nav .nav-link:hover::after {
+                width: 100%;
+            }
+/* Responsive */
+            @media (max-width: 768px) {
+                .course-header h2 {
+                    font-size: 2rem;
+                }
+
+                .course-header h2:after,
+                .course-header h2:before {
+                    font-size: 1.5rem;
+                    top: -10px;
+                }
+
+                .course-header h2:after {
+                    right: -30px;
+                }
+
+                .course-header h2:before {
+                    left: -30px;
+                }
+            }
+
+            .course-card {
+                transition: all 0.3s ease;
+                transform: translateY(0);
+            }
+
+            .course-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+                z-index: 10;
+            }
+            /* Dropdown Mega Menu - PetTech */
+            .mega-menu {
+                width: 850px;
+                left: -200px !important;
+                border: none;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+                border-radius: 0 0 15px 15px;
+                overflow: hidden;
+            }
+
+            .course-item {
+                transition: all 0.3s ease;
+                border-radius: 8px;
+                margin: 3px;
+            }
+
+            .course-item:hover {
+                background-color: #f8f5ff;
+                transform: translateY(-3px);
+                box-shadow: 0 5px 15px rgba(109, 74, 255, 0.1);
+            }
+
+            .course-thumbnail {
+                width: 60px;
+                height: 60px;
+                object-fit: cover;
+                border-radius: 8px;
+                border: 2px solid #e2d9ff;
+            }
+
+            .course-title {
+                font-size: 14px;
+                font-weight: 600;
+                color: #4a2c82;
+                line-height: 1.3;
+            }
+
+            .course-author {
+                font-size: 12px;
+                color: #a37aff;
+            }
+
+            .text-purple {
+                color: #6d4aff !important;
+            }
+
+            .btn-view-all {
+                display: inline-block;
+                color: #e67e22 !important; /* Màu cam */
+                font-weight: 600;
+                padding: 5px 15px;
+                border-radius: 20px;
+                transition: all 0.3s;
+                text-decoration: none;
+                background-color: #fff4e6;
+            }
+
+            .btn-view-all:hover {
+                color: #d35400 !important;
+                background-color: #ffe8cc;
+                transform: translateX(5px);
+            }
+
+            /* Mobile responsive */
+            @media (max-width: 992px) {
+                .mega-menu {
+                    width: 100% !important;
+                    left: 0 !important;
+                }
+
+                .course-item {
+                    border-bottom: 1px solid #eee;
+                    border-radius: 0;
+                    margin: 0;
+                }
+
+                .course-thumbnail {
+                    width: 50px;
+                    height: 50px;
+                }
+            }
+            /* Dropdown đơn giản - chỉ hiển thị title */
+            .dropdown-menu {
+                min-width: 250px;
+                border: none;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                border-radius: 8px;
+                padding: 0;
+            }
+
+            .dropdown-header {
+                color: #6d4aff;
+                font-weight: 600;
+                padding: 10px 15px;
+                background-color: #f8f5ff;
+                border-bottom: 1px solid #e2d9ff;
+            }
+
+            .dropdown-item {
+                padding: 10px 15px;
+                color: #4a2c82;
+                transition: all 0.2s;
+                border-bottom: 1px solid #f0f0f0;
+            }
+
+            .dropdown-item:hover {
+                background-color: #f3edff;
+                color: #6d4aff;
+                padding-left: 20px;
+            }
+
+            .view-all-btn {
+                color: #e67e22 !important; /* Màu cam */
+                font-weight: 600;
+                background-color: #fff4e6;
+            }
+
+            .view-all-btn:hover {
+                background-color: #ffe8cc !important;
+            }
             .login-link {
                 color: #fff;
                 font-weight: 600;
@@ -214,6 +401,7 @@
         </style>
     </head>
     <body>
+        <!-- Top bar -->
         <div class="wrap">
             <div class="container">
                 <div class="row">
@@ -228,7 +416,7 @@
                             <c:when test="${not empty sessionScope.user}">
                                 <!-- Hiển thị tên và avatar -->
                                 <div class="dropdown">
-                                    <a class="login-link dropdown-toggle d-flex align-items-center" href="#" role="button"
+                                    <a class="login-link dropdown-toggle d-flex align-items-center" href="authen?action=editprofile" role="button"
                                        id="userDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         <i class="fa fa-user-circle mr-2" style="font-size: 1.4rem; color: #6d4aff;"></i>
                                         <span style="font-weight: 600;">${sessionScope.user.fullname}</span>
@@ -237,7 +425,7 @@
                                         <a class="dropdown-item" href="authen?action=editprofile"><i class="fa fa-id-card mr-2"></i> Thông tin cá nhân</a>
                                         <a class="dropdown-item" href="mycourses.jsp"><i class="fa fa-book mr-2"></i> Khóa học</a>
                                         <a class="dropdown-item" href="orders.jsp"><i class="fa fa-shopping-bag mr-2"></i> Đơn hàng</a>
-                                        <a class="dropdown-item" href="package.jsp"><i class="fa fa-box-open mr-2"></i> Gói dịch vụ</a>
+                                        <a class="dropdown-item" href="package"><i class="fa fa-box-open mr-2"></i> Gói dịch vụ</a>
                                         <div class="dropdown-divider"></div>
                                         <a class="dropdown-item text-danger" href="authen?action=logout"><i class="fa fa-sign-out mr-2"></i> Đăng xuất</a>
                                     </div>
@@ -249,7 +437,7 @@
                                     <i class="fa fa-sign-in mr-2"></i>
                                     <span>Đăng Nhập</span>
                                 </a>
-                                <a href="authen?action=signup" class="login-link d-flex align-items-center">
+                                <a href="package" class="login-link d-flex align-items-center">
                                     <i class="fa fa-user-plus mr-2"></i>
                                     <span>Đăng Ký</span>
                                 </a>
@@ -260,6 +448,7 @@
             </div>
         </div>
 
+        <!-- Navbar -->
         <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
             <div class="container">
                 <a class="navbar-brand" href="home"><span class="flaticon-pawprint-1 mr-2"></span>PetTech</a>
@@ -268,8 +457,26 @@
                 </button>
                 <div class="collapse navbar-collapse" id="ftco-nav">
                     <ul class="navbar-nav ml-auto">
-                        <li class="nav-item"><a href="home" class="nav-link">Trang chủ</a></li>
-                        <li class="nav-item active"><a href="course.jsp" class="nav-link">Khóa học</a></li>
+                        <li class="nav-item active"><a href="home" class="nav-link">Trang chủ</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="course" id="coursesDropdown" role="button" data-toggle="dropdown">
+                                Khóa học
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="coursesDropdown">
+                                <div class="dropdown-header">
+                                    <i class="fa fa-book mr-2"></i>Danh mục khóa học
+                                </div>
+                                <c:forEach items="${featuredCourses}" var="course" end="8">
+                                    <a class="dropdown-item" href="coursedetail?id=${course.id}">
+                                        ${fn:substring(course.title, 0, 50)}${fn:length(course.title) > 50 ? '...' : ''}
+                                    </a>
+                                </c:forEach>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item text-center view-all-btn" href="course">
+                                    <i class="fa fa-arrow-right mr-2"></i>Xem tất cả
+                                </a>
+                            </div>
+                        </li>
                         <li class="nav-item"><a href="vet.jsp" class="nav-link">Chuyên gia</a></li>
                         <li class="nav-item"><a href="service.jsp" class="nav-link">Sản phẩm</a></li>
                         <li class="nav-item"><a href="gallery.jsp" class="nav-link">Thú cưng</a></li>
@@ -280,7 +487,6 @@
                 </div>
             </div>
         </nav>
-
 
         <section class="ftco-section bg-light">
             <div class="container">
@@ -362,7 +568,7 @@
                                              <div class="package-actions">
                                                  <c:choose>
                                                      <c:when test="${sessionScope.user == null}">
-                                                         <a href="authen?action=signup" class="btn btn-package btn-block py-3">
+                                                         <a href="package?action=select&packageId=${pkg.id}" class="btn btn-package btn-block py-3">
                                                              <i class="fas fa-user-plus mr-2"></i>Đăng ký tài khoản
                                                          </a>
                                                      </c:when>
@@ -378,7 +584,7 @@
                                                                      <i class="fas fa-arrow-up mr-2"></i>Đăng ký ngay
                                                                  </a>
                                                              </c:when>
-                                                             
+
                                                              <c:when test="${currentPackageId != null && pkg.id > currentPackageId}">
                                                                  <a href="package?action=upgrade&packageId=${pkg.id}" class="btn btn-package btn-block py-3">
                                                                      <i class="fas fa-arrow-up mr-2"></i>Đăng ký ngay
@@ -389,8 +595,8 @@
                                                                      <input type="hidden" name="action" value="register">
                                                                      <input type="hidden" name="packageId" value="${pkg.id}">
                                                                      <a href="package?action=upgrade&packageId=${pkg.id}" class="btn btn-package btn-block py-3">
-                                                                     <i class="fas fa-arrow-up mr-2"></i> Đăng ký ngay
-                                                                 </a>
+                                                                         <i class="fas fa-arrow-up mr-2"></i> Đăng ký ngay
+                                                                     </a>
                                                                  </form>
                                                              </c:otherwise>
                                                          </c:choose>
@@ -406,56 +612,44 @@
                 </div>
         </section>
 
+        <!-- Footer -->
         <footer class="footer">
             <div class="container">
                 <div class="row">
                     <div class="col-md-6 col-lg-3 mb-4 mb-md-0">
                         <h2 class="footer-heading">PetTech</h2>
-                        <p>Chúng tôi mang đến giải pháp toàn diện cho thú cưng của bạn.</p>
+                        <p>Hệ thống đào tạo và cung cấp giải pháp chăm sóc thú cưng hàng đầu Việt Nam.</p>
                         <ul class="ftco-footer-social p-0">
-                            <li class="ftco-animate"><a href="#" data-toggle="tooltip" data-placement="top" title="Twitter"><span class="fa fa-twitter"></span></a></li>
-                            <li class="ftco-animate"><a href="#" data-toggle="tooltip" data-placement="top" title="Facebook"><span class="fa fa-facebook"></span></a></li>
-                            <li class="ftco-animate"><a href="#" data-toggle="tooltip" data-placement="top" title="Instagram"><span class="fa fa-instagram"></span></a></li>
+                            <li class="ftco-animate"><a href="#"><span class="fab fa-facebook-f"></span></a></li>
+                            <li class="ftco-animate"><a href="#"><span class="fab fa-instagram"></span></a></li>
+                            <li class="ftco-animate"><a href="#"><span class="fab fa-youtube"></span></a></li>
                         </ul>
                     </div>
                     <div class="col-md-6 col-lg-3 mb-4 mb-md-0">
-                        <h2 class="footer-heading">Tin tức mới nhất</h2>
-                        <div class="block-21 mb-4 d-flex">
-                            <a class="img mr-4 rounded" style="background-image: url(images/image_1.jpg);"></a>
-                            <div class="text">
-                                <h3 class="heading"><a href="#">Cách chăm sóc thú cưng mùa hè</a></h3>
-                                <div class="meta">
-                                    <div><a href="#"><span class="icon-calendar"></span> 21/05/2025</a></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="block-21 mb-4 d-flex">
-                            <a class="img mr-4 rounded" style="background-image: url(images/image_2.jpg);"></a>
-                            <div class="text">
-                                <h3 class="heading"><a href="#">Khóa học huấn luyện thú cưng mới</a></h3>
-                                <div class="meta">
-                                    <div><a href="#"><span class="icon-calendar"></span> 15/05/2025</a></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 pl-lg-5 mb-4 mb-md-0">
                         <h2 class="footer-heading">Liên kết nhanh</h2>
                         <ul class="list-unstyled">
-                            <li><a href="Home.jsp" class="py-2 d-block">Trang chủ</a></li>
-                            <li><a href="course.jsp" class="py-2 d-block">Khóa học</a></li>
-                            <li><a href="vet.jsp" class="py-2 d-block">Chuyên gia</a></li>
-                            <li><a href="service.jsp" class="py-2 d-block">Sản phẩm</a></li>
-                            <li><a href="contact.jsp" class="py-2 d-block">Liên hệ</a></li>
+                            <li><a href="home" class="py-2 d-block">Trang chủ</a></li>
+                            <li><a href="course" class="py-2 d-block">Khóa học</a></li>
+                            <li><a href="products" class="py-2 d-block">Sản phẩm</a></li>
+                            <li><a href="pricing" class="py-2 d-block">Gói dịch vụ</a></li>
                         </ul>
                     </div>
                     <div class="col-md-6 col-lg-3 mb-4 mb-md-0">
-                        <h2 class="footer-heading">Câu hỏi?</h2>
+                        <h2 class="footer-heading">Hỗ trợ</h2>
+                        <ul class="list-unstyled">
+                            <li><a href="faq" class="py-2 d-block">Câu hỏi thường gặp</a></li>
+                            <li><a href="contact" class="py-2 d-block">Liên hệ</a></li>
+                            <li><a href="policy" class="py-2 d-block">Chính sách bảo mật</a></li>
+                            <li><a href="terms" class="py-2 d-block">Điều khoản dịch vụ</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-4 mb-md-0">
+                        <h2 class="footer-heading">Liên hệ</h2>
                         <div class="block-23 mb-3">
                             <ul>
-                                <li><span class="icon fa fa-map"></span><span class="text">Số 1, Đại Cồ Việt, Hà Nội</span></li>
+                                <li><span class="icon fa fa-map"></span><span class="text">Khu CNC Láng Hòa Lạc</span></li>
                                 <li><a href="#"><span class="icon fa fa-phone"></span><span class="text">+84 352 138 596</span></a></li>
-                                <li><a href="#"><span class="icon fa fa-paper-plane"></span><span class="text">info@pettech.com</span></a></li>
+                                <li><a href="#"><span class="icon fa fa-paper-plane"></span><span class="text">pettech@email.com</span></a></li>
                             </ul>
                         </div>
                     </div>
@@ -463,7 +657,7 @@
                 <div class="row mt-5">
                     <div class="col-md-12 text-center">
                         <p class="copyright">
-                            Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | PetTech <i class="fa fa-heart" aria-hidden="true"></i>
+                            Copyright &copy;<script>document.write(new Date().getFullYear());</script> Bản quyền thuộc về PetTech
                         </p>
                     </div>
                 </div>

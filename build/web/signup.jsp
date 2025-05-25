@@ -1,5 +1,5 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
@@ -83,7 +83,7 @@
                 <h2 class="title fw-bold">Đăng ký tài khoản PetTech</h2>
                 <p class="text-muted">Yêu thương thú cưng từ hôm nay!</p>
             </div>
-            
+
             <c:if test="${param.packageId != null}">
                 <div class="package-info mb-4 p-3 rounded" style="background-color: #FFF8DC; border-left: 5px solid #ff6f61;">
                     <h5><i class="fas fa-box-open"></i> Đăng ký với gói:</h5>
@@ -105,24 +105,42 @@
             </c:if>
             <form action="authen?action=confirmRegister" method="post">
                 <div class="mb-3 form-floating">
-                    <input type="email" class="form-control" id="email" name="email" placeholder="ten@example.com" required>
+                    <input type="email" class="form-control ${not empty emailError ? 'is-invalid' : ''}" 
+                           id="email" name="email" placeholder="ten@example.com" 
+                           value="${oldEmail}" required>
                     <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                    <c:if test="${not empty emailError}">
+                        <div class="invalid-feedback">${emailError}</div>
+                    </c:if>
                 </div>
+
                 <div class="mb-3 form-floating">
-                    <input type="text" class="form-control" id="fullname" name="fullname" placeholder="Họ và tên" required>
+                    <input type="text" class="form-control ${not empty fullnameError ? 'is-invalid' : ''}" 
+                           id="fullname" name="fullname" placeholder="Họ và tên" 
+                           value="${oldFullname}" required>
                     <label for="fullname"><i class="fas fa-user"></i> Họ và tên</label>
+                    <c:if test="${not empty fullnameError}">
+                        <div class="invalid-feedback">${fullnameError}</div>
+                    </c:if>
                 </div>
+
                 <div class="mb-3 form-floating">
-                    <input type="text" class="form-control" id="phone" name="phone" placeholder="Số điện thoại" required>
+                    <input type="text" class="form-control ${not empty phoneError ? 'is-invalid' : ''}" 
+                           id="phone" name="phone" placeholder="Số điện thoại" 
+                           value="${oldPhone}" required>
                     <label for="phone"><i class="fas fa-phone"></i> Số điện thoại</label>
+                    <c:if test="${not empty phoneError}">
+                        <div class="invalid-feedback">${phoneError}</div>
+                    </c:if>
                 </div>
+
                 <div class="mb-3 form-floating">
-                    <input type="text" class="form-control" id="address" name="address" placeholder="Địa chỉ" required>
-                    <label for="address"><i class="fas fa-home"></i> Địa chỉ</label>
-                </div>
-                <div class="mb-3 form-floating">
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Mật khẩu" required>
+                    <input type="password" class="form-control ${not empty passwordError ? 'is-invalid' : ''}" 
+                           id="password" name="password" placeholder="Mật khẩu" required>
                     <label for="password"><i class="fas fa-lock"></i> Mật khẩu</label>
+                    <c:if test="${not empty passwordError}">
+                        <div class="invalid-feedback">${passwordError}</div>
+                    </c:if>
                 </div>
                 <div class="mb-3 form-floating">
                     <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Nhập lại mật khẩu" required>
@@ -139,7 +157,7 @@
                             </c:forEach>
                         </select>
                     </div>
-                    
+
                     <button class="btn btn-orange" type="submit"><i class="fas fa-user-plus"></i> Đăng ký</button>
                 </div>
                 <div class="text-center">

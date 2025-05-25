@@ -1,4 +1,5 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
@@ -75,9 +76,9 @@
             
             <div class="package-info">
                 <h4><i class="fas fa-box-open"></i> Gói Dịch Vụ Mới</h4>
-                <h3 class="text-warning">${package.name}</h3>
-                <p><i class="fas fa-paw"></i> ${package.description}</p>
-                <h4 class="text-success">${package.price}₫</h4>
+                <h3 class="text-warning">${pkg.name}</h3>
+                <p><i class="fas fa-paw"></i> ${pkg.description}</p>
+                <h4 class="text-success">${pkg.price}₫</h4>
                 
                 <hr>
                 
@@ -93,7 +94,7 @@
             
             <p>Bạn có thể bắt đầu sử dụng các tính năng mới ngay bây giờ!</p>
             
-            <a href="package" class="btn btn-back">
+            <a href="authen?action=login" class="btn btn-back">
                 <i class="fas fa-home"></i> Quay Về Trang Gói Dịch Vụ
             </a>
         </div>

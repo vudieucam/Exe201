@@ -7,7 +7,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+
 <%@page import="model.User" %>
 
 <%@page import="model.Course" %>
@@ -139,14 +139,6 @@
             .view-all-btn:hover {
                 background-color: #ffe8cc !important;
             }
-            /* Style cho input search */
-            .search-form .form-control {
-                border-radius: 50px 0 0 50px;
-                border: 1px solid #FFD6A0;
-                padding: 10px 20px;
-                font-size: 1rem;
-                box-shadow: none;
-            }
 
             /* css profile */
 
@@ -227,6 +219,17 @@
                     transform: translateY(0);
                 }
             }
+            /* Style cho input search */
+            .search-form .form-control {
+                border-radius: 50px 0 0 50px;
+                border: 1px solid #FFD6A0;
+                padding: 10px 20px;
+                font-size: 1rem;
+                box-shadow: none;
+            }
+
+
+
             /* Style tổng thể */
             .course-section {
                 background-color: #f9f5ff;
@@ -647,14 +650,7 @@
             }
 
         </style>
-        <script>
-            $(document).ready(function () {
-                $('#userDropdown').on('click', function (e) {
-                    e.preventDefault();
-                    $(this).next('.dropdown-menu').toggleClass('show');
-                });
-            });
-        </script>
+
 
     </head>
     <body>
@@ -674,7 +670,7 @@
                             <c:when test="${not empty sessionScope.user}">
                                 <!-- Hiển thị tên và avatar -->
                                 <div class="dropdown">
-                                    <a class="login-link dropdown-toggle d-flex align-items-center" href="#" role="button"
+                                    <a class="login-link dropdown-toggle d-flex align-items-center" href="authen?action=editprofile" role="button"
                                        id="userDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         <i class="fa fa-user-circle mr-2" style="font-size: 1.4rem; color: #6d4aff;"></i>
                                         <span style="font-weight: 600;">${sessionScope.user.fullname}</span>
@@ -683,7 +679,7 @@
                                         <a class="dropdown-item" href="authen?action=editprofile"><i class="fa fa-id-card mr-2"></i> Thông tin cá nhân</a>
                                         <a class="dropdown-item" href="mycourses.jsp"><i class="fa fa-book mr-2"></i> Khóa học</a>
                                         <a class="dropdown-item" href="orders.jsp"><i class="fa fa-shopping-bag mr-2"></i> Đơn hàng</a>
-                                        <a class="dropdown-item" href="package.jsp"><i class="fa fa-box-open mr-2"></i> Gói dịch vụ</a>
+                                        <a class="dropdown-item" href="package"><i class="fa fa-box-open mr-2"></i> Gói dịch vụ</a>
                                         <div class="dropdown-divider"></div>
                                         <a class="dropdown-item text-danger" href="authen?action=logout"><i class="fa fa-sign-out mr-2"></i> Đăng xuất</a>
                                     </div>
@@ -695,7 +691,7 @@
                                     <i class="fa fa-sign-in mr-2"></i>
                                     <span>Đăng Nhập</span>
                                 </a>
-                                <a href="authen?action=signup" class="login-link d-flex align-items-center">
+                                <a href="package" class="login-link d-flex align-items-center">
                                     <i class="fa fa-user-plus mr-2"></i>
                                     <span>Đăng Ký</span>
                                 </a>
@@ -949,9 +945,9 @@
                             <h2>Đăng ký nhận khóa học</h2>
                             <p>Nhận thông tin mới nhất về khóa học, sản phẩm và ưu đãi đặc biệt từ PetTech</p>
                         </div>
-                        <form class="form-inline justify-content-center">
+                        <form class="form-inline justify-content-center" action="package" method="get">
                             <div class="form-group mx-sm-3 mb-2">
-                                <input type="email" class="form-control" placeholder="Nhập email của bạn">
+                                <input type="email" class="form-control" name="email" placeholder="Nhập email của bạn">
                             </div>
                             <button type="submit" class="btn btn-primary mb-2">Đăng ký ngay</button>
                         </form>
