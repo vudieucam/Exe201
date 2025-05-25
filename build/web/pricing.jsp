@@ -224,14 +224,37 @@
                         </p>
                     </div>
                     <div class="col-md-6 d-flex justify-content-md-end align-items-center">
-                        <a href="authen?action=login" class="login-link d-flex align-items-center mr-3">
-                            <i class="fa fa-sign-in mr-2"></i>
-                            <span>Đăng Nhập</span>
-                        </a>
-                        <a href="authen?action=signup" class="login-link d-flex align-items-center">
-                            <i class="fa fa-user-plus mr-2"></i>
-                            <span>Đăng Ký</span>
-                        </a>
+                        <c:choose>
+                            <c:when test="${not empty sessionScope.user}">
+                                <!-- Hiển thị tên và avatar -->
+                                <div class="dropdown">
+                                    <a class="login-link dropdown-toggle d-flex align-items-center" href="#" role="button"
+                                       id="userDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fa fa-user-circle mr-2" style="font-size: 1.4rem; color: #6d4aff;"></i>
+                                        <span style="font-weight: 600;">${sessionScope.user.fullname}</span>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                                        <a class="dropdown-item" href="authen?action=editprofile"><i class="fa fa-id-card mr-2"></i> Thông tin cá nhân</a>
+                                        <a class="dropdown-item" href="mycourses.jsp"><i class="fa fa-book mr-2"></i> Khóa học</a>
+                                        <a class="dropdown-item" href="orders.jsp"><i class="fa fa-shopping-bag mr-2"></i> Đơn hàng</a>
+                                        <a class="dropdown-item" href="package.jsp"><i class="fa fa-box-open mr-2"></i> Gói dịch vụ</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item text-danger" href="authen?action=logout"><i class="fa fa-sign-out mr-2"></i> Đăng xuất</a>
+                                    </div>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <!-- Nếu chưa đăng nhập, hiển thị nút đăng nhập/đăng ký -->
+                                <a href="authen?action=login" class="login-link d-flex align-items-center mr-3">
+                                    <i class="fa fa-sign-in mr-2"></i>
+                                    <span>Đăng Nhập</span>
+                                </a>
+                                <a href="authen?action=signup" class="login-link d-flex align-items-center">
+                                    <i class="fa fa-user-plus mr-2"></i>
+                                    <span>Đăng Ký</span>
+                                </a>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
                 </div>
             </div>
@@ -239,13 +262,13 @@
 
         <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
             <div class="container">
-                <a class="navbar-brand" href="index.html"><span class="flaticon-pawprint-1 mr-2"></span>PetTech</a>
+                <a class="navbar-brand" href="home"><span class="flaticon-pawprint-1 mr-2"></span>PetTech</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="fa fa-bars"></span> Menu
                 </button>
                 <div class="collapse navbar-collapse" id="ftco-nav">
                     <ul class="navbar-nav ml-auto">
-                        <li class="nav-item"><a href="Home.jsp" class="nav-link">Trang chủ</a></li>
+                        <li class="nav-item"><a href="home" class="nav-link">Trang chủ</a></li>
                         <li class="nav-item active"><a href="course.jsp" class="nav-link">Khóa học</a></li>
                         <li class="nav-item"><a href="vet.jsp" class="nav-link">Chuyên gia</a></li>
                         <li class="nav-item"><a href="service.jsp" class="nav-link">Sản phẩm</a></li>
@@ -271,7 +294,7 @@
                 <c:if test="${sessionScope.user == null}">
                     <div class="cute-banner">
                         <h3><i class="fas fa-paw"></i>Bạn chưa đăng nhập</h3>
-                        <p>Vui lòng <a href="login.jsp">đăng nhập</a> nếu bạn đã có tài khoản, hoặc <a href="signup.jsp">đăng ký</a> tài khoản mới để đăng ký gói dịch vụ.</p>
+                        <p>Vui lòng <a href="authen?action=login">đăng nhập</a> nếu bạn đã có tài khoản, hoặc <a href="signup.jsp">đăng ký</a> tài khoản mới để đăng ký gói dịch vụ.</p>
                     </div>
                 </c:if>
 
@@ -327,7 +350,7 @@
                                                      </c:when>
                                                      <c:otherwise>
                                                          <span class="display-4">${pkg.price}₫</span>
-                                                         <small class="text-muted">/tháng</small>
+                                                         <small class="text-muted">Trọn đời</small>
                                                      </c:otherwise>
                                                  </c:choose>
                                              </div>
@@ -339,38 +362,35 @@
                                              <div class="package-actions">
                                                  <c:choose>
                                                      <c:when test="${sessionScope.user == null}">
-                                                         <a href="signup.jsp" class="btn btn-package btn-block py-3">
+                                                         <a href="authen?action=signup" class="btn btn-package btn-block py-3">
                                                              <i class="fas fa-user-plus mr-2"></i>Đăng ký tài khoản
                                                          </a>
                                                      </c:when>
                                                      <c:otherwise>
                                                          <c:choose>
                                                              <c:when test="${pkg.id == currentPackageId}">
-                                                                 <button class="btn btn-package btn-block py-3" disabled>
-                                                                     <i class="fas fa-check-circle mr-2"></i>Đang sử dụng
-                                                                 </button>
+                                                                 <a href="package?action=upgrade&packageId=${pkg.id}" class="btn btn-package btn-block py-3">
+                                                                     <i class="fas fa-arrow-up mr-2"></i>Đăng ký ngay
+                                                                 </a>
                                                              </c:when>
                                                              <c:when test="${currentPackageId != null && pkg.id < currentPackageId}">
-                                                                 <button class="btn btn-secondary btn-block py-3" disabled>
-                                                                     <i class="fas fa-check mr-2"></i>Đã đăng ký
-                                                                 </button>
+                                                                 <a href="package?action=upgrade&packageId=${pkg.id}" class="btn btn-package btn-block py-3">
+                                                                     <i class="fas fa-arrow-up mr-2"></i>Đăng ký ngay
+                                                                 </a>
                                                              </c:when>
+                                                             
                                                              <c:when test="${currentPackageId != null && pkg.id > currentPackageId}">
-                                                                 <form action="PackageServlet" method="post" class="mb-0">
-                                                                     <input type="hidden" name="action" value="register">
-                                                                     <input type="hidden" name="packageId" value="${pkg.id}">
-                                                                     <button type="submit" class="btn btn-package btn-block py-3">
-                                                                         <i class="fas fa-arrow-up mr-2"></i>Nâng cấp ngay
-                                                                     </button>
-                                                                 </form>
+                                                                 <a href="package?action=upgrade&packageId=${pkg.id}" class="btn btn-package btn-block py-3">
+                                                                     <i class="fas fa-arrow-up mr-2"></i>Đăng ký ngay
+                                                                 </a>
                                                              </c:when>
                                                              <c:otherwise>
-                                                                 <form action="PackageServlet" method="post" class="mb-0">
+                                                                 <form action="package" method="post" class="mb-0">
                                                                      <input type="hidden" name="action" value="register">
                                                                      <input type="hidden" name="packageId" value="${pkg.id}">
-                                                                     <button type="submit" class="btn btn-package btn-block py-3">
-                                                                         <i class="fas fa-shopping-cart mr-2"></i>Đăng ký ngay
-                                                                     </button>
+                                                                     <a href="package?action=upgrade&packageId=${pkg.id}" class="btn btn-package btn-block py-3">
+                                                                     <i class="fas fa-arrow-up mr-2"></i> Đăng ký ngay
+                                                                 </a>
                                                                  </form>
                                                              </c:otherwise>
                                                          </c:choose>

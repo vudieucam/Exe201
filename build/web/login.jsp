@@ -189,7 +189,7 @@
                 <i class="fab fa-google"></i> Đăng nhập với Google
             </a>
         </div>
-      <a href="signup.jsp" class="btn btn-warning w-100 mt-2">
+      <a href="authen?action=signup" class="btn btn-warning w-100 mt-2">
     <i class="fas fa-user-plus"></i> Đăng ký ngay
 </a>
         <!-- Bạn có thể thêm các biểu tượng hoặc nút khác như Facebook, Zalo nếu cần -->

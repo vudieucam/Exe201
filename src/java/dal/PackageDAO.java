@@ -21,8 +21,7 @@ public class PackageDAO extends DBConnect {
         List<ServicePackage> list = new ArrayList<>();
         String sql = "SELECT TOP (1000) id, name, description, price, type FROM service_packages";
 
-        try (PreparedStatement ps = connection.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 ServicePackage pkg = new ServicePackage();
@@ -61,6 +60,24 @@ public class PackageDAO extends DBConnect {
 
             return false;
         }
+    }
+
+    public ServicePackage getPackageById(int packageId) throws SQLException {
+        String sql = "SELECT * FROM service_packages WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, packageId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return new ServicePackage(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("description"),
+                        rs.getBigDecimal("price"),
+                        rs.getString("type")
+                );
+            }
+        }
+        return null;
     }
 
     public boolean checkCurrentPackage(int userId, int packageId) throws SQLException {

@@ -3,13 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/web/course.jsp</file>
-            <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/src/java/dal/CourseDAO.java</file>
-            <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/web/blog.jsp</file>
-            <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/src/java/model/CourseLesson.java</file>
+            <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/src/java/AuthenController/AuthenServlet.java</file>
+            <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/web/pricing.jsp</file>
+            <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/web/login.jsp</file>
             <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/web/Home.jsp</file>
             <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/web/course_detail.jsp</file>
-            <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/src/java/customer/Course/CourseDetailServlet.java</file>
         </group>
     </open-files>
 </project-private>

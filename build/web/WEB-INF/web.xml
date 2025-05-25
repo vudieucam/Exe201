@@ -24,6 +24,10 @@
         <servlet-name>PackageServlet</servlet-name>
         <servlet-class>customer.ServicePackage.PackageServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>HomeServlet</servlet-name>
+        <servlet-class>controller.homepage.HomeServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/login</url-pattern>
@@ -51,5 +55,9 @@
     <servlet-mapping>
         <servlet-name>PackageServlet</servlet-name>
         <url-pattern>/packageservlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>HomeServlet</servlet-name>
+        <url-pattern>/home</url-pattern>
     </servlet-mapping>
 </web-app>

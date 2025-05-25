@@ -37,6 +37,7 @@ Author     : FPT
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
         <style>
+
             .error-container {
                 text-align: center;
                 padding: 100px 20px;
@@ -126,6 +127,42 @@ Author     : FPT
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 
         <style>
+            .navbar-brand {
+                font-weight: 800;
+                font-size: 1.6rem;
+                background: linear-gradient(90deg, #8B5E3C, #D99863);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+
+            /* Màu chữ trong menu */
+            .navbar-nav .nav-link {
+                color: #8B5E3C !important;
+                font-weight: 600;
+                position: relative;
+            }
+
+            .navbar-nav .nav-link:hover,
+            .navbar-nav .nav-item.active .nav-link {
+                color: #D99863 !important;
+            }
+
+            /* Hiệu ứng gạch chân khi hover */
+            .navbar-nav .nav-link::after {
+                content: "";
+                display: block;
+                width: 0;
+                height: 2px;
+                background: #D99863;
+                transition: width 0.3s;
+                position: absolute;
+                bottom: 0;
+                left: 0;
+            }
+
+            .navbar-nav .nav-link:hover::after {
+                width: 100%;
+            }
             /* Main Course Detail Styles */
             .course-detail-header {
                 background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -933,14 +970,37 @@ Author     : FPT
                         </p>
                     </div>
                     <div class="col-md-6 d-flex justify-content-md-end align-items-center">
-                        <a href="authen?action=login" class="login-link d-flex align-items-center mr-3">
-                            <i class="fa fa-sign-in mr-2"></i>
-                            <span>Đăng Nhập</span>
-                        </a>
-                        <a href="authen?action=signup" class="login-link d-flex align-items-center">
-                            <i class="fa fa-user-plus mr-2"></i>
-                            <span>Đăng Ký</span>
-                        </a>
+                        <c:choose>
+                            <c:when test="${not empty sessionScope.user}">
+                                <!-- Hiển thị tên và avatar -->
+                                <div class="dropdown">
+                                    <a class="login-link dropdown-toggle d-flex align-items-center" href="#" role="button"
+                                       id="userDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fa fa-user-circle mr-2" style="font-size: 1.4rem; color: #6d4aff;"></i>
+                                        <span style="font-weight: 600;">${sessionScope.user.fullname}</span>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                                        <a class="dropdown-item" href="authen?action=editprofile"><i class="fa fa-id-card mr-2"></i> Thông tin cá nhân</a>
+                                        <a class="dropdown-item" href="mycourses.jsp"><i class="fa fa-book mr-2"></i> Khóa học</a>
+                                        <a class="dropdown-item" href="orders.jsp"><i class="fa fa-shopping-bag mr-2"></i> Đơn hàng</a>
+                                        <a class="dropdown-item" href="package.jsp"><i class="fa fa-box-open mr-2"></i> Gói dịch vụ</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item text-danger" href="authen?action=logout"><i class="fa fa-sign-out mr-2"></i> Đăng xuất</a>
+                                    </div>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <!-- Nếu chưa đăng nhập, hiển thị nút đăng nhập/đăng ký -->
+                                <a href="authen?action=login" class="login-link d-flex align-items-center mr-3">
+                                    <i class="fa fa-sign-in mr-2"></i>
+                                    <span>Đăng Nhập</span>
+                                </a>
+                                <a href="authen?action=signup" class="login-link d-flex align-items-center">
+                                    <i class="fa fa-user-plus mr-2"></i>
+                                    <span>Đăng Ký</span>
+                                </a>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
 
                 </div>
@@ -949,13 +1009,13 @@ Author     : FPT
 
         <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
             <div class="container">
-                <a class="navbar-brand" href="${pageContext.request.contextPath}/Home.jsp"><span class="flaticon-pawprint-1 mr-2"></span>PetTech</a>
+                <a class="navbar-brand" href="${pageContext.request.contextPath}/home"><span class="flaticon-pawprint-1 mr-2"></span>PetTech</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="fa fa-bars"></span> Menu
                 </button>
                 <div class="collapse navbar-collapse" id="ftco-nav">
                     <ul class="navbar-nav ml-auto">
-                        <li class="nav-item"><a href="Home.jsp" class="nav-link">Trang chủ</a></li>
+                        <li class="nav-item"><a href="home" class="nav-link">Trang chủ</a></li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="coursedetail" id="coursesDropdown" role="button" 
                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

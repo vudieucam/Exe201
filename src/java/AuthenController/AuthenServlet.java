@@ -8,6 +8,7 @@ import dal.PackageDAO;
 import dal.UserDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -43,8 +44,15 @@ public class AuthenServlet extends HttpServlet {
                 url = logout(request, response);
                 break;
             case "signup":
-                url = "signup.jsp";
-                break;
+                try {
+                PackageDAO spDAO = new PackageDAO();
+                List<ServicePackage> packages = spDAO.getAllPackages();
+                request.setAttribute("packages", packages);
+            } catch (SQLException e) {
+                request.setAttribute("error", "Không thể load gói dịch vụ: " + e.getMessage());
+            }
+            url = "signup.jsp";
+            break;
             case "editprofile":
                 url = "editprofile.jsp";
                 break;
@@ -88,6 +96,10 @@ public class AuthenServlet extends HttpServlet {
             case "resetpassword":
                 url = resetPassword(request, response);
                 break;
+            case "confirmRegister":
+                url = showPaymentBeforeRegister(request, response);
+                break;
+
             default:
                 url = "Home.jsp";
         }
@@ -100,6 +112,7 @@ public class AuthenServlet extends HttpServlet {
 
         String email = request.getParameter("email");
         String password = request.getParameter("password");
+        String rememberMe = request.getParameter("remember_me"); // Thêm dòng này để lấy thông tin checkbox remember me
 
         try {
             User user = userDAO.login(email, password);
@@ -118,6 +131,21 @@ public class AuthenServlet extends HttpServlet {
             HttpSession session = request.getSession();
             session.setAttribute("user", user);
 
+            // Thêm phần xử lý cookie khi người dùng chọn "Nhớ mật khẩu"
+            if (rememberMe != null) {
+                // Tạo cookie cho email và password
+                Cookie cEmail = new Cookie("cEmail", email);
+                Cookie cPassword = new Cookie("cPassword", password);
+
+                // Đặt thời gian sống cho cookie là 6 tháng (giống bài mẫu)
+                cEmail.setMaxAge(60 * 60 * 24 * 30 * 6);
+                cPassword.setMaxAge(60 * 60 * 24 * 30 * 6);
+
+                // Thêm cookie vào response
+                response.addCookie(cEmail);
+                response.addCookie(cPassword);
+            }
+
             // In debug ra console (tuỳ môi trường)
             System.out.println("Đăng nhập thành công: " + user.getFullname() + " | Vai trò: " + user.getRoleId());
 
@@ -128,7 +156,7 @@ public class AuthenServlet extends HttpServlet {
                 case 2:
                     return "staff-dashboard.jsp"; // Trang nhân viên
                 default:
-                    return "Home.jsp"; // Người dùng thông thường
+                    return "home"; // Người dùng thông thường
             }
 
         } catch (SQLException ex) {
@@ -422,6 +450,33 @@ public class AuthenServlet extends HttpServlet {
         }
 
         return sb.toString();
+    }
+
+    private String showPaymentBeforeRegister(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        // Lưu thông tin tạm vào session
+        HttpSession session = request.getSession();
+
+        User tempUser = new User();
+        tempUser.setEmail(request.getParameter("email"));
+        tempUser.setPassword(request.getParameter("password"));
+        tempUser.setFullname(request.getParameter("fullname"));
+        tempUser.setPhone(request.getParameter("phone"));
+        tempUser.setAddress(request.getParameter("address"));
+        tempUser.setServicePackageId(Integer.parseInt(request.getParameter("packageId")));
+        session.setAttribute("pendingUser", tempUser);
+
+        // Lấy gói dịch vụ
+        int packageId = tempUser.getServicePackageId();
+        try {
+            ServicePackage pkg = new PackageDAO().getPackageById(packageId);
+            request.setAttribute("package", pkg);
+            request.setAttribute("fromRegistration", true); // đánh dấu là đăng ký
+            return "payment.jsp";
+        } catch (SQLException ex) {
+            request.setAttribute("error", "Không tìm thấy gói dịch vụ: " + ex.getMessage());
+            return "signup.jsp";
+        }
     }
 
     /**
