@@ -40,6 +40,18 @@
         <servlet-name>ContactServlet</servlet-name>
         <servlet-class>controller.contact.ContactServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ProductServlet</servlet-name>
+        <servlet-class>controller.Product.ProductServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>PetServlet</servlet-name>
+        <servlet-class>controller.contact.PetServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ExpertServlet</servlet-name>
+        <servlet-class>controller.contact.ExpertServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/login</url-pattern>
@@ -83,5 +95,17 @@
     <servlet-mapping>
         <servlet-name>ContactServlet</servlet-name>
         <url-pattern>/contact</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ProductServlet</servlet-name>
+        <url-pattern>/product</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PetServlet</servlet-name>
+        <url-pattern>/pet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ExpertServlet</servlet-name>
+        <url-pattern>/expert</url-pattern>
     </servlet-mapping>
 </web-app>

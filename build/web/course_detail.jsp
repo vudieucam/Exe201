@@ -1427,9 +1427,9 @@ Author     : FPT
                                 </a>
                             </div>
                         </li>
-                        <li class="nav-item"><a href="vet.jsp" class="nav-link">Chuyên gia</a></li>
-                        <li class="nav-item"><a href="service.jsp" class="nav-link">Sản phẩm</a></li>
-                        <li class="nav-item"><a href="gallery.jsp" class="nav-link">Thú cưng</a></li>
+                        <li class="nav-item"><a href="expert" class="nav-link">Chuyên gia</a></li>
+                        <li class="nav-item"><a href="product" class="nav-link">Sản phẩm</a></li>
+                        <li class="nav-item"><a href="pet" class="nav-link">Thú cưng</a></li>
                         <li class="nav-item"><a href="package" class="nav-link">Gói dịch vụ</a></li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="blog" id="blogDropdown" role="button" data-toggle="dropdown">
