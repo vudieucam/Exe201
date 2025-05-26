@@ -1138,7 +1138,7 @@
                         <h1 class="mb-4">Chăm sóc thú cưng một cách chuyên nghiệp</h1>
                         <p class="mb-4">PetTech mang đến giải pháp toàn diện cho người yêu thú cưng</p>
                         <p>
-                            <a href="authen?action=login" class="btn btn-primary mr-md-4 py-3 px-4">Khám phá ngay</a>
+                            <a href="course" class="btn btn-primary mr-md-4 py-3 px-4">Khám phá ngay</a>
                             <a href="package" class="btn btn-white py-3 px-4">Gói dịch vụ</a>
                         </p>
                     </div>
@@ -1264,6 +1264,7 @@
             </div>
         </section>
 
+
         <!-- Testimonials -->
         <section class="ftco-section bg-light">
             <div class="container">
@@ -1322,7 +1323,7 @@
             </div>
         </section>
 
-        
+
 
         <!-- Footer -->
         <footer class="footer">

@@ -4,7 +4,6 @@
  */
 package AuthenController;
 
-import dal.PackageDAO;
 import dal.UserDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -14,10 +13,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.UUID;
 import model.SendMailOK;
-import model.ServicePackage;
 import model.User;
 
 /**
@@ -140,6 +137,11 @@ public class AuthenServlet extends HttpServlet {
                 case 2:
                     return "staff-dashboard.jsp"; // Trang nhân viên
                 default:
+                    String redirect = request.getParameter("redirect");
+                    if (redirect != null && !redirect.isEmpty()) {
+                        response.sendRedirect(redirect);
+                        return null; // Ngăn forward
+                    }
                     return "home"; // Người dùng thông thường
             }
 
@@ -154,7 +156,6 @@ public class AuthenServlet extends HttpServlet {
         request.getSession().removeAttribute("user");
         return "Home.jsp";
     }
-
 
     private String updateProfile(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

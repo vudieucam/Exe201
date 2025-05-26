@@ -451,7 +451,7 @@
                 box-shadow: 0 4px 10px rgba(210, 105, 30, 0.3);
                 transform: scale(1.05);
             }
-            
+
             /* Hover: nâu cam sáng + hiệu ứng nhún */
             .ftco-footer-social a:hover span {
                 color: #D99863 !important;
@@ -475,7 +475,7 @@
                 height: 3px;
                 background: linear-gradient(90deg, #8B5E3C, #D99863) !important;
             }
-            
+
             /* Blog */
             /* Blog styles */
             .blog-entry {
@@ -987,88 +987,99 @@
                     <h2>Danh Sách Khóa Học</h2>
                 </div>
 
-                <div class="row">
-                    <% if (courses != null && !courses.isEmpty()) { %>
-                    <% for (Course course : courses) { %>
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="course-card">
+                <div class = row> 
+                    <c:if test="${not empty courses}">
+                        <c:forEach var="course" items="${courses}">
+                            <div class="col-lg-4 col-md-6 mb-4">
+                                <div class="course-card">
+                                    <div class="course-img-container">
+                                        <c:set var="imageUrl" value="${course.imageUrl}" />
+                                        <c:set var="defaultImage" value="${pageContext.request.contextPath}/images/corgin-1.jpg" />
+                                        <c:choose>
+                                            <c:when test="${not empty imageUrl}">
+                                                <c:choose>
+                                                    <c:when test="${fn:startsWith(imageUrl, '/')}">
+                                                        <c:set var="finalImagePath" value="${pageContext.request.contextPath}${imageUrl}" />
+                                                    </c:when>
+                                                    <c:when test="${fn:startsWith(imageUrl, 'http')}">
+                                                        <c:set var="finalImagePath" value="${imageUrl}" />
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <c:set var="finalImagePath" value="${pageContext.request.contextPath}/${imageUrl}" />
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <c:set var="finalImagePath" value="${defaultImage}" />
+                                            </c:otherwise>
+                                        </c:choose>
 
-                            <div class="course-img-container">
-                                <%
-                                    // Xử lý đường dẫn ảnh an toàn
-                                    String imageUrl = course.getImageUrl();
-                                    String defaultImage = request.getContextPath() + "/images/corgin-1.jpg";
+                                        <img src="${finalImagePath}" alt="${course.title}" class="course-img"
+                                             onerror="this.onerror=null; this.src='${defaultImage}'">
+                                    </div>
 
-                                    // Xây dựng đường dẫn ảnh cuối cùng
-                                    String finalImagePath;
-                                    if (imageUrl != null && !imageUrl.isEmpty()) {
-                                        // Nếu URL ảnh đã bắt đầu bằng / hoặc http
-                                        if (imageUrl.startsWith("/") || imageUrl.startsWith("http")) {
-                                            finalImagePath = imageUrl.startsWith("/") ? request.getContextPath() + imageUrl : imageUrl;
-                                        } else {
-                                            // Nếu URL ảnh là relative path không có / đầu
-                                            finalImagePath = request.getContextPath() + "/" + imageUrl;
-                                        }
-                                    } else {
-                                        finalImagePath = defaultImage;
-                                    }
-                                %>
+                                    <div class="course-body">
+                                        <h3 class="course-title">${course.title}</h3>
 
-                                <img src="<%= finalImagePath%>" 
-                                     alt="<%= course.getTitle()%>" 
-                                     class="course-img"
-                                     onerror="this.onerror=null; this.src='<%= defaultImage%>'">
+                                        <div class="course-meta">
+                                            <i class="fa fa-clock-o"></i> 
+                                            <c:out value="${course.time != null ? course.time : 'Đang cập nhật'}" />
+                                        </div>
 
+                                        <c:if test="${not empty course.researcher}">
+                                            <div class="course-meta">
+                                                <i class="fa fa-user"></i> ${course.researcher}
+                                            </div>
+                                        </c:if>
 
+                                        <p class="course-desc">
+                                            <c:choose>
+                                                <c:when test="${not empty course.content}">
+                                                    <c:out value="${fn:length(course.content) > 100 
+                                                                    ? fn:substring(course.content, 0, 100).concat('...') 
+                                                                    : course.content}" />
+                                                </c:when>
+                                                <c:otherwise>
+                                                    Nội dung đang được cập nhật...
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </p>
 
+                                        <div class="course-meta">
+                                            <i class="fa fa-calendar"></i> ${course.time}
+                                        </div>
 
+                                        <c:choose>
+                                            <c:when test="${not empty sessionScope.user}">
+                                                <a href="${pageContext.request.contextPath}/coursedetail?id=${course.id}" class="course-btn">
+                                                    Xem chi tiết <i class="fa fa-arrow-right"></i>
+                                                </a>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <a href="authen?action=login&redirect=${pageContext.request.contextPath}/coursedetail?id=${course.id}"
+                                                   class="course-btn"
+                                                   onclick="return confirm('Bạn cần đăng nhập để xem chi tiết khóa học!');">
+                                                    Xem chi tiết <i class="fa fa-arrow-right"></i>
+                                                </a>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="course-body">
-                                <h3 class="course-title"><%= course.getTitle()%></h3>
+                        </c:forEach>
+                    </c:if>
 
-                                <div class="course-meta">
-                                    <i class="fa fa-clock-o"></i> <%= course.getTime() != null ? course.getTime() : "Đang cập nhật"%>
-                                </div>
-
-                                <% if (course.getResearcher() != null && !course.getResearcher().isEmpty()) {%>
-                                <div class="course-meta">
-                                    <i class="fa fa-user"></i> <%= course.getResearcher()%>
-                                </div>
-                                <% } %>
-
-                                <p class="course-desc">
-                                    <% if (course.getContent() != null) {
-                                            if (course.getContent().length() > 100) {%>
-                                    <%= course.getContent().substring(0, 100)%>...
-                                    <% } else {%>
-                                    <%= course.getContent()%>
-                                    <% }
-                                    } else { %>
-                                    Nội dung đang được cập nhật...
-                                    <% }%>
-                                </p>
-
-                                <div class="course-meta">
-                                    <i class="fa fa-calendar"></i> <%= course.getTime() != null ? course.getTime() : ""%>
-                                </div>
-
-                                <a href="${pageContext.request.contextPath}/coursedetail?id=<%= course.getId()%>" class="course-btn">
-                                    Xem chi tiết <i class="fa fa-arrow-right"></i>
-                                </a>
-
+                    <c:if test="${empty courses}">
+                        <div class="col-12 text-center">
+                            <div class="alert alert-info" style="background-color: #e2d9ff; border-color: #6d4aff; color: #3a3a3a;">
+                                <i class="fa fa-paw"></i> Hiện chưa có khóa học nào. Vui lòng quay lại sau!
                             </div>
                         </div>
-                    </div>
-                    <% } %>
-                    <% } else { %>
-                    <div class="col-12 text-center">
-                        <div class="alert alert-info" style="background-color: #e2d9ff; border-color: #6d4aff; color: #3a3a3a;">
-                            <i class="fa fa-paw"></i> Hiện chưa có khóa học nào. Vui lòng quay lại sau!
-                        </div>
-                    </div>
-                    <% }%>
+                    </c:if>
                 </div>
+
             </div>
+
             <!-- Thêm sau phần hiển thị danh sách khóa học -->
             <div class="row mt-5">
                 <div class="col-12">
@@ -1103,7 +1114,7 @@
 
 
 
-        
+
 
         <!-- Footer -->
         <footer class="footer">
