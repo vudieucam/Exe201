@@ -30,7 +30,7 @@
 
         <link rel="stylesheet" href="css/flaticon.css">
         <link rel="stylesheet" href="css/style.css">
-        
+
         <style>
             .navbar-brand {
                 font-weight: 800;
@@ -68,7 +68,7 @@
             .navbar-nav .nav-link:hover::after {
                 width: 100%;
             }
-/* Responsive */
+            /* Responsive */
             @media (max-width: 768px) {
                 .course-header h2 {
                     font-size: 2rem;
@@ -243,7 +243,7 @@
                 --accent-color: #FF8C00; /* Màu cam đậm */
                 --light-color: #FFF8DC; /* Màu nền nhẹ */
             }
-            
+
             /* Blog */
             /* Blog styles */
             .blog-entry {
@@ -720,7 +720,7 @@
             </div>
         </nav>
         <!-- END nav -->
-        
+
 
         <section class="ftco-section">
             <div class="container">
@@ -732,8 +732,8 @@
                             </a>
                             <div class="desc w-100 px-4">
                                 <div class="text w-100 mb-3">
-                                    <span>Cat</span>
-                                    <h2><a href="work-single.html">Persian Cat</a></h2>
+                                    <span>Mèo</span>
+                                    <h2><a href="work-single.html">Mèo Ba Tư</a></h2>
                                 </div>
                             </div>
                         </div>
@@ -745,8 +745,8 @@
                             </a>
                             <div class="desc w-100 px-4">
                                 <div class="text w-100 mb-3">
-                                    <span>Dog</span>
-                                    <h2><a href="work-single.html">Pomeranian</a></h2>
+                                    <span>Chó</span>
+                                    <h2><a href="work-single.html">Chó Pomeranian</a></h2>
                                 </div>
                             </div>
                         </div>
@@ -758,8 +758,8 @@
                             </a>
                             <div class="desc w-100 px-4">
                                 <div class="text w-100 mb-3">
-                                    <span>Cat</span>
-                                    <h2><a href="work-single.html">Sphynx Cat</a></h2>
+                                    <span>Mèo</span>
+                                    <h2><a href="work-single.html">Mèo Sphynx</a></h2>
                                 </div>
                             </div>
                         </div>
@@ -772,8 +772,8 @@
                             </a>
                             <div class="desc w-100 px-4">
                                 <div class="text w-100 mb-3">
-                                    <span>Cat</span>
-                                    <h2><a href="work-single.html">British Shorthair</a></h2>
+                                    <span>Mèo</span>
+                                    <h2><a href="work-single.html">Mèo Anh Lông Ngắn</a></h2>
                                 </div>
                             </div>
                         </div>
@@ -785,8 +785,8 @@
                             </a>
                             <div class="desc w-100 px-4">
                                 <div class="text w-100 mb-3">
-                                    <span>Dog</span>
-                                    <h2><a href="work-single.html">Beagle</a></h2>
+                                    <span>Chó</span>
+                                    <h2><a href="work-single.html">Chó Beagle</a></h2>
                                 </div>
                             </div>
                         </div>
@@ -798,8 +798,8 @@
                             </a>
                             <div class="desc w-100 px-4">
                                 <div class="text w-100 mb-3">
-                                    <span>Dog</span>
-                                    <h2><a href="work-single.html">Pug</a></h2>
+                                    <span>Chó</span>
+                                    <h2><a href="work-single.html">Chó Pug</a></h2>
                                 </div>
                             </div>
                         </div>
@@ -812,8 +812,8 @@
                             </a>
                             <div class="desc w-100 px-4">
                                 <div class="text w-100 mb-3">
-                                    <span>Cat</span>
-                                    <h2><a href="work-single.html">British Shorthair</a></h2>
+                                    <span>Mèo</span>
+                                    <h2><a href="work-single.html">Mèo Anh Lông Ngắn</a></h2>
                                 </div>
                             </div>
                         </div>
@@ -825,8 +825,8 @@
                             </a>
                             <div class="desc w-100 px-4">
                                 <div class="text w-100 mb-3">
-                                    <span>Dog</span>
-                                    <h2><a href="work-single.html">Beagle</a></h2>
+                                    <span>Chó</span>
+                                    <h2><a href="work-single.html">Chó Beagle</a></h2>
                                 </div>
                             </div>
                         </div>
@@ -838,8 +838,8 @@
                             </a>
                             <div class="desc w-100 px-4">
                                 <div class="text w-100 mb-3">
-                                    <span>Dog</span>
-                                    <h2><a href="work-single.html">Pug</a></h2>
+                                    <span>Chó</span>
+                                    <h2><a href="work-single.html">Chó Pug</a></h2>
                                 </div>
                             </div>
                         </div>
@@ -858,26 +858,6 @@
                                 <li><a href="#">&gt;</a></li>
                             </ul>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Newsletter -->
-        <section class="newsletter-section">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-md-8 text-center">
-                        <div class="course-header">
-                            <h2>Đăng ký nhận khóa học</h2>
-                            <p>Nhận thông tin mới nhất về khóa học, sản phẩm và ưu đãi đặc biệt từ PetTech</p>
-                        </div>
-                        <form class="form-inline justify-content-center" action="package" method="get">
-                            <div class="form-group mx-sm-3 mb-2">
-                                <input type="email" class="form-control" name="email" placeholder="Nhập email của bạn">
-                            </div>
-                            <button type="submit" class="btn btn-primary mb-2">Đăng ký ngay</button>
-                        </form>
                     </div>
                 </div>
             </div>

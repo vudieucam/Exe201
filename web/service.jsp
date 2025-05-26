@@ -30,7 +30,7 @@
 
         <link rel="stylesheet" href="css/flaticon.css">
         <link rel="stylesheet" href="css/style.css">
-        
+
         <style>
             .navbar-brand {
                 font-weight: 800;
@@ -68,7 +68,7 @@
             .navbar-nav .nav-link:hover::after {
                 width: 100%;
             }
-/* Responsive */
+            /* Responsive */
             @media (max-width: 768px) {
                 .course-header h2 {
                     font-size: 2rem;
@@ -243,7 +243,7 @@
                 --accent-color: #FF8C00; /* Màu cam đậm */
                 --light-color: #FFF8DC; /* Màu nền nhẹ */
             }
-            
+
             /* Blog */
             /* Blog styles */
             .blog-entry {
@@ -720,154 +720,138 @@
             </div>
         </nav>
         <!-- END nav -->
-        
 
-        <section class="ftco-section ftco-no-pt ftco-no-pb">
-            <div class="container">
-                <div class="row d-flex no-gutters">
-                    <div class="col-md-5 d-flex">
-                        <div class="img img-video d-flex align-self-stretch align-items-center justify-content-center justify-content-md-center mb-4 mb-sm-0" style="background-image:url(images/about-1.jpg);">
-                        </div>
-                    </div>
-                    <div class="col-md-7 pl-md-5 py-md-5">
-                        <div class="heading-section pt-md-5">
-                            <h2 class="mb-4">Why Choose Us?</h2>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 services-2 w-100 d-flex">
-                                <div class="icon d-flex align-items-center justify-content-center"><span class="flaticon-stethoscope"></span></div>
-                                <div class="text pl-3">
-                                    <h4>Care Advices</h4>
-                                    <p>Far far away, behind the word mountains, far from the countries.</p>
-                                </div>
-                            </div>
-                            <div class="col-md-6 services-2 w-100 d-flex">
-                                <div class="icon d-flex align-items-center justify-content-center"><span class="flaticon-customer-service"></span></div>
-                                <div class="text pl-3">
-                                    <h4>Customer Supports</h4>
-                                    <p>Far far away, behind the word mountains, far from the countries.</p>
-                                </div>
-                            </div>
-                            <div class="col-md-6 services-2 w-100 d-flex">
-                                <div class="icon d-flex align-items-center justify-content-center"><span class="flaticon-emergency-call"></span></div>
-                                <div class="text pl-3">
-                                    <h4>Emergency Services</h4>
-                                    <p>Far far away, behind the word mountains, far from the countries.</p>
-                                </div>
-                            </div>
-                            <div class="col-md-6 services-2 w-100 d-flex">
-                                <div class="icon d-flex align-items-center justify-content-center"><span class="flaticon-veterinarian"></span></div>
-                                <div class="text pl-3">
-                                    <h4>Veterinary Help</h4>
-                                    <p>Far far away, behind the word mountains, far from the countries.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
 
         <section class="ftco-section bg-light">
             <div class="container">
-                <div class="row mb-5 pb-5">
-                    <div class="col-md-4 d-flex align-self-stretch px-4 ftco-animate">
-                        <div class="d-block services text-center">
-                            <div class="icon d-flex align-items-center justify-content-center">
-                                <span class="flaticon-blind"></span>
-                            </div>
-                            <div class="media-body p-4">
-                                <h3 class="heading">Dog Walking</h3>
-                                <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove right.</p>
-                                <a href="#" class="btn-custom d-flex align-items-center justify-content-center"><span class="fa fa-chevron-right"></span><i class="sr-only">Read more</i></a>
-                            </div>
-                        </div>      
-                    </div>
-                    <div class="col-md-4 d-flex align-self-stretch px-4 ftco-animate">
-                        <div class="d-block services text-center">
-                            <div class="icon d-flex align-items-center justify-content-center">
-                                <span class="flaticon-dog-eating"></span>
-                            </div>
-                            <div class="media-body p-4">
-                                <h3 class="heading">Pet Daycare</h3>
-                                <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove right.</p>
-                                <a href="#" class="btn-custom d-flex align-items-center justify-content-center"><span class="fa fa-chevron-right"></span><i class="sr-only">Read more</i></a>
-                            </div>
-                        </div>    
-                    </div>
-                    <div class="col-md-4 d-flex align-self-stretch px-4 ftco-animate">
-                        <div class="d-block services text-center">
-                            <div class="icon d-flex align-items-center justify-content-center">
-                                <span class="flaticon-grooming"></span>
-                            </div>
-                            <div class="media-body p-4">
-                                <h3 class="heading">Pet Grooming</h3>
-                                <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove right.</p>
-                                <a href="#" class="btn-custom d-flex align-items-center justify-content-center"><span class="fa fa-chevron-right"></span><i class="sr-only">Read more</i></a>
-                            </div>
-                        </div>      
-                    </div>
+                <div class="text-center mb-5">
+                    <h2 class="font-weight-bold" style="color: #8B5E3C;">Sản phẩm cho thú cưng</h2>
+                    <p class="text-muted">Thức ăn, đồ ăn vặt và phụ kiện dễ thương cho thú cưng của bạn</p>
                 </div>
-                <div class="row mt-5 pt-4">
-                    <div class="col-md-4 d-flex align-self-stretch px-4 ftco-animate">
-                        <div class="d-block services text-center">
-                            <div class="icon d-flex align-items-center justify-content-center">
-                                <span class="flaticon-blind"></span>
+                <div class="row">
+                    <!-- Lặp 9 sản phẩm mẫu -->
+                    <!-- Sản phẩm 1 -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm" style="border-radius: 15px;">
+                            <img src="images/product/product-food.jpg" class="card-img-top" alt="Thức ăn chó" style="height: 250px; object-fit: cover; border-top-left-radius: 15px; border-top-right-radius: 15px;">
+                            <div class="card-body text-center" style="background-color: #FFF8DC;">
+                                <h5 style="color: #8B5E3C;">Thức ăn cho chó Pedigree</h5>
+                                <p class="text-muted">Bổ sung vitamin, giúp lông mượt.</p>
+                                <p class="text-danger font-weight-bold">120.000 đ</p>
+                                <a href="#" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
                             </div>
-                            <div class="media-body p-4">
-                                <h3 class="heading">Dog Walking</h3>
-                                <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove right.</p>
-                                <a href="#" class="btn-custom d-flex align-items-center justify-content-center"><span class="fa fa-chevron-right"></span><i class="sr-only">Read more</i></a>
-                            </div>
-                        </div>      
+                        </div>
                     </div>
-                    <div class="col-md-4 d-flex align-self-stretch px-4 ftco-animate">
-                        <div class="d-block services text-center">
-                            <div class="icon d-flex align-items-center justify-content-center">
-                                <span class="flaticon-dog-eating"></span>
+
+                    <!-- Sản phẩm 2 -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm" style="border-radius: 15px;">
+                            <img src="images/product/product-snack.jpg" class="card-img-top" alt="Snack cho mèo" style="height: 250px; object-fit: cover;">
+                            <div class="card-body text-center" style="background-color: #FFF8DC;">
+                                <h5 style="color: #8B5E3C;">Snack mèo Whiskas vị cá</h5>
+                                <p class="text-muted">Giúp răng khỏe mạnh, thơm miệng.</p>
+                                <p class="text-danger font-weight-bold">55.000 đ</p>
+                                <a href="#" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
                             </div>
-                            <div class="media-body p-4">
-                                <h3 class="heading">Pet Daycare</h3>
-                                <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove right.</p>
-                                <a href="#" class="btn-custom d-flex align-items-center justify-content-center"><span class="fa fa-chevron-right"></span><i class="sr-only">Read more</i></a>
-                            </div>
-                        </div>    
+                        </div>
                     </div>
-                    <div class="col-md-4 d-flex align-self-stretch px-4 ftco-animate">
-                        <div class="d-block services text-center">
-                            <div class="icon d-flex align-items-center justify-content-center">
-                                <span class="flaticon-grooming"></span>
+
+                    <!-- Sản phẩm 3 -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm" style="border-radius: 15px;">
+                            <img src="images/product/product-bowl.jpg" class="card-img-top" alt="Bát ăn" style="height: 250px; object-fit: cover;">
+                            <div class="card-body text-center" style="background-color: #FFF8DC;">
+                                <h5 style="color: #8B5E3C;">Bát ăn mèo con dễ thương</h5>
+                                <p class="text-muted">Nhựa cao cấp, dễ rửa sạch.</p>
+                                <p class="text-danger font-weight-bold">35.000 đ</p>
+                                <a href="#" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
                             </div>
-                            <div class="media-body p-4">
-                                <h3 class="heading">Pet Grooming</h3>
-                                <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove right.</p>
-                                <a href="#" class="btn-custom d-flex align-items-center justify-content-center"><span class="fa fa-chevron-right"></span><i class="sr-only">Read more</i></a>
+                        </div>
+                    </div>
+
+                    <!-- Sản phẩm 4 -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <img src="images/product/product-comb.jpg" class="card-img-top" alt="Lược chải lông">
+                            <div class="card-body text-center" style="background-color: #FFF8DC;">
+                                <h5 style="color: #8B5E3C;">Lược chải lông thú cưng</h5>
+                                <p class="text-muted">Chải êm, không gây rụng lông.</p>
+                                <p class="text-danger font-weight-bold">40.000 đ</p>
+                                <a href="#" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
                             </div>
-                        </div>      
+                        </div>
+                    </div>
+
+                    <!-- Sản phẩm 5 -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <img src="images/product/product-toy.jpg" class="card-img-top" alt="Đồ chơi gặm" style="height: 250px; object-fit: cover;">
+                            <div class="card-body text-center" style="background-color: #FFF8DC;">
+                                <h5 style="color: #8B5E3C;">Đồ chơi gặm cho chó</h5>
+                                <p class="text-muted">Chất liệu cao su bền, an toàn.</p>
+                                <p class="text-danger font-weight-bold">60.000 đ</p>
+                                <a href="#" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sản phẩm 6 -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <img src="images/product/product-spray.jpg" class="card-img-top" alt="Xịt khử mùi thú cưng">
+                            <div class="card-body text-center" style="background-color: #FFF8DC;">
+                                <h5 style="color: #8B5E3C;">Xịt khử mùi thú cưng</h5>
+                                <p class="text-muted">Thơm dịu nhẹ, không kích ứng.</p>
+                                <p class="text-danger font-weight-bold">75.000 đ</p>
+                                <a href="#" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sản phẩm 7 -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <img src="images/product/product-bed.jpg" class="card-img-top" alt="Giường thú cưng">
+                            <div class="card-body text-center" style="background-color: #FFF8DC;">
+                                <h5 style="color: #8B5E3C;">Giường thú cưng bông mềm</h5>
+                                <p class="text-muted">Êm ái, giữ ấm mùa đông.</p>
+                                <p class="text-danger font-weight-bold">250.000 đ</p>
+                                <a href="#" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sản phẩm 8 -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <img src="images/product/product-leash.jpg" class="card-img-top" alt="Dây dắt thú cưng">
+                            <div class="card-body text-center" style="background-color: #FFF8DC;">
+                                <h5 style="color: #8B5E3C;">Dây dắt thú cưng co giãn</h5>
+                                <p class="text-muted">Chắc chắn, chống trượt tay.</p>
+                                <p class="text-danger font-weight-bold">95.000 đ</p>
+                                <a href="#" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sản phẩm 9 -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <img src="images/product/product-shampoo.jpg" class="card-img-top" alt="Dầu gội chó mèo">
+                            <div class="card-body text-center" style="background-color: #FFF8DC;">
+                                <h5 style="color: #8B5E3C;">Dầu gội thảo mộc cho thú cưng</h5>
+                                <p class="text-muted">Làm sạch, khử mùi, dịu da.</p>
+                                <p class="text-danger font-weight-bold">85.000 đ</p>
+                                <a href="#" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Newsletter -->
-        <section class="newsletter-section">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-md-8 text-center">
-                        <div class="course-header">
-                            <h2>Đăng ký nhận khóa học</h2>
-                            <p>Nhận thông tin mới nhất về khóa học, sản phẩm và ưu đãi đặc biệt từ PetTech</p>
-                        </div>
-                        <form class="form-inline justify-content-center" action="package" method="get">
-                            <div class="form-group mx-sm-3 mb-2">
-                                <input type="email" class="form-control" name="email" placeholder="Nhập email của bạn">
-                            </div>
-                            <button type="submit" class="btn btn-primary mb-2">Đăng ký ngay</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </section>
+
+        
 
         <!-- Footer -->
         <footer class="footer">

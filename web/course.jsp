@@ -1103,26 +1103,7 @@
 
 
 
-        <!-- Newsletter -->
-        <section class="newsletter-section">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-md-8 text-center">
-                        <div class="course-header">
-                            <h2>Đăng ký nhận khóa học</h2>
-                            <p>Nhận thông tin mới nhất về khóa học, sản phẩm và ưu đãi đặc biệt từ PetTech</p>
-                        </div>
-                        <form class="form-inline justify-content-center" action="package" method="get">
-                            <div class="form-group mx-sm-3 mb-2">
-                                <input type="email" class="form-control" name="email" placeholder="Nhập email của bạn">
-                            </div>
-                            <button type="submit" class="btn btn-primary mb-2">Đăng ký ngay</button>
-                        </form>
-
-                    </div>
-                </div>
-            </div>
-        </section>
+        
 
         <!-- Footer -->
         <footer class="footer">

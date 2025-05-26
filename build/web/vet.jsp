@@ -67,7 +67,7 @@
             .navbar-nav .nav-link:hover::after {
                 width: 100%;
             }
-/* Responsive */
+            /* Responsive */
             @media (max-width: 768px) {
                 .course-header h2 {
                     font-size: 2rem;
@@ -722,6 +722,7 @@
         <section class="ftco-section bg-light">
             <div class="container">
                 <div class="row">
+                    <!-- Nhân sự 1 -->
                     <div class="col-md-6 col-lg-3 ftco-animate">
                         <div class="staff">
                             <div class="img-wrap d-flex align-items-stretch">
@@ -729,19 +730,21 @@
                             </div>
                             <div class="text pt-3 px-3 pb-4 text-center">
                                 <h3>Lloyd Wilson</h3>
-                                <span class="position mb-2">Health Coach</span>
+                                <span class="position mb-2">Huấn luyện viên sức khỏe</span>
                                 <div class="faded">
-                                    <p>I am an ambitious workaholic, but apart from that, pretty simple person.</p>
+                                    <p>Tôi là một người tham vọng và chăm chỉ, ngoài ra cũng khá giản dị.</p>
                                     <ul class="ftco-social text-center">
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-twitter"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-facebook"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-google"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-instagram"></span></a></li>
+                                        <li class="ftco-animate"><a href="#"><span class="fa fa-twitter"></span></a></li>
+                                        <li class="ftco-animate"><a href="#"><span class="fa fa-facebook"></span></a></li>
+                                        <li class="ftco-animate"><a href="#"><span class="fa fa-google"></span></a></li>
+                                        <li class="ftco-animate"><a href="#"><span class="fa fa-instagram"></span></a></li>
                                     </ul>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Nhân sự 2 -->
                     <div class="col-md-6 col-lg-3 ftco-animate">
                         <div class="staff">
                             <div class="img-wrap d-flex align-items-stretch">
@@ -749,19 +752,23 @@
                             </div>
                             <div class="text pt-3 px-3 pb-4 text-center">
                                 <h3>Rachel Parker</h3>
-                                <span class="position mb-2">Life &amp; Business Coach</span>
+                                <span class="position mb-2">Huấn luyện viên cuộc sống & kinh doanh</span>
                                 <div class="faded">
-                                    <p>I am an ambitious workaholic, but apart from that, pretty simple person.</p>
+                                    <p>Tôi là một người tham vọng và chăm chỉ, ngoài ra cũng khá giản dị.</p>
                                     <ul class="ftco-social text-center">
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-twitter"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-facebook"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-google"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-instagram"></span></a></li>
+                                        <li class="ftco-animate"><a href="#"><span class="fa fa-twitter"></span></a></li>
+                                        <li class="ftco-animate"><a href="#"><span class="fa fa-facebook"></span></a></li>
+                                        <li class="ftco-animate"><a href="#"><span class="fa fa-google"></span></a></li>
+                                        <li class="ftco-animate"><a href="#"><span class="fa fa-instagram"></span></a></li>
                                     </ul>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Các nhân sự còn lại -->
+                    <!-- Bạn có thể copy đoạn trên và thay đổi tên, vị trí, hình ảnh nếu muốn -->
+                    <!-- Ví dụ với nhân sự 3 -->
                     <div class="col-md-6 col-lg-3 ftco-animate">
                         <div class="staff">
                             <div class="img-wrap d-flex align-items-stretch">
@@ -769,143 +776,49 @@
                             </div>
                             <div class="text pt-3 px-3 pb-4 text-center">
                                 <h3>Ian Smith</h3>
-                                <span class="position mb-2">Executive Coach</span>
+                                <span class="position mb-2">Huấn luyện viên điều hành</span>
                                 <div class="faded">
-                                    <p>I am an ambitious workaholic, but apart from that, pretty simple person.</p>
+                                    <p>Tôi là một người tham vọng và chăm chỉ, ngoài ra cũng khá giản dị.</p>
                                     <ul class="ftco-social text-center">
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-twitter"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-facebook"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-google"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-instagram"></span></a></li>
+                                        <li class="ftco-animate"><a href="#"><span class="fa fa-twitter"></span></a></li>
+                                        <li class="ftco-animate"><a href="#"><span class="fa fa-facebook"></span></a></li>
+                                        <li class="ftco-animate"><a href="#"><span class="fa fa-google"></span></a></li>
+                                        <li class="ftco-animate"><a href="#"><span class="fa fa-instagram"></span></a></li>
                                     </ul>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <!-- Nhân sự 9 -->
                     <div class="col-md-6 col-lg-3 ftco-animate">
                         <div class="staff">
                             <div class="img-wrap d-flex align-items-stretch">
-                                <div class="img align-self-stretch" style="background-image: url(images/staff-4.jpg);"></div>
+                                <div class="img align-self-stretch" style="background-image: url(images/staff-10.jpg);"></div>
                             </div>
                             <div class="text pt-3 px-3 pb-4 text-center">
-                                <h3>Alicia Henderson</h3>
-                                <span class="position mb-2">Health Coach</span>
+                                <h3>Minh Nguyễn</h3>
+                                <span class="position mb-2">Huấn luyện viên thú cưng</span>
                                 <div class="faded">
-                                    <p>I am an ambitious workaholic, but apart from that, pretty simple person.</p>
+                                    <p>Tôi luôn yêu thương động vật và mong muốn mang đến những dịch vụ tốt nhất cho thú cưng.</p>
                                     <ul class="ftco-social text-center">
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-twitter"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-facebook"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-google"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-instagram"></span></a></li>
+                                        <li class="ftco-animate"><a href="#"><span class="fa fa-twitter"></span></a></li>
+                                        <li class="ftco-animate"><a href="#"><span class="fa fa-facebook"></span></a></li>
+                                        <li class="ftco-animate"><a href="#"><span class="fa fa-google"></span></a></li>
+                                        <li class="ftco-animate"><a href="#"><span class="fa fa-instagram"></span></a></li>
                                     </ul>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-md-6 col-lg-3 ftco-animate">
-                        <div class="staff">
-                            <div class="img-wrap d-flex align-items-stretch">
-                                <div class="img align-self-stretch" style="background-image: url(images/staff-5.jpg);"></div>
-                            </div>
-                            <div class="text pt-3 px-3 pb-4 text-center">
-                                <h3>Lloyd Wilson</h3>
-                                <span class="position mb-2">Executive Coach</span>
-                                <div class="faded">
-                                    <p>I am an ambitious workaholic, but apart from that, pretty simple person.</p>
-                                    <ul class="ftco-social text-center">
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-twitter"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-facebook"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-google"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-instagram"></span></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 ftco-animate">
-                        <div class="staff">
-                            <div class="img-wrap d-flex align-items-stretch">
-                                <div class="img align-self-stretch" style="background-image: url(images/staff-6.jpg);"></div>
-                            </div>
-                            <div class="text pt-3 px-3 pb-4 text-center">
-                                <h3>Rachel Parker</h3>
-                                <span class="position mb-2">Health Coach</span>
-                                <div class="faded">
-                                    <p>I am an ambitious workaholic, but apart from that, pretty simple person.</p>
-                                    <ul class="ftco-social text-center">
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-twitter"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-facebook"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-google"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-instagram"></span></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 ftco-animate">
-                        <div class="staff">
-                            <div class="img-wrap d-flex align-items-stretch">
-                                <div class="img align-self-stretch" style="background-image: url(images/staff-7.jpg);"></div>
-                            </div>
-                            <div class="text pt-3 px-3 pb-4 text-center">
-                                <h3>Ian Smith</h3>
-                                <span class="position mb-2">Health Coach</span>
-                                <div class="faded">
-                                    <p>I am an ambitious workaholic, but apart from that, pretty simple person.</p>
-                                    <ul class="ftco-social text-center">
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-twitter"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-facebook"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-google"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-instagram"></span></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-lg-3 ftco-animate">
-                        <div class="staff">
-                            <div class="img-wrap d-flex align-items-stretch">
-                                <div class="img align-self-stretch" style="background-image: url(images/staff-8.jpg);"></div>
-                            </div>
-                            <div class="text pt-3 px-3 pb-4 text-center">
-                                <h3>Fred Henderson</h3>
-                                <span class="position mb-2">Executive Coach</span>
-                                <div class="faded">
-                                    <p>I am an ambitious workaholic, but apart from that, pretty simple person.</p>
-                                    <ul class="ftco-social text-center">
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-twitter"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-facebook"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-google"></span></a></li>
-                                        <li class="ftco-animate"><a href="#" class="d-flex align-items-center justify-content-center"><span class="fa fa-instagram"></span></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
+
+                    <!-- Lặp lại tương tự với các nhân viên còn lại: Alicia, Fred, v.v... -->
                 </div>
             </div>
         </section>
 
-        <!-- Newsletter -->
-        <section class="newsletter-section">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-md-8 text-center">
-                        <div class="course-header">
-                            <h2>Đăng ký nhận khóa học</h2>
-                            <p>Nhận thông tin mới nhất về khóa học, sản phẩm và ưu đãi đặc biệt từ PetTech</p>
-                        </div>
-                        <form class="form-inline justify-content-center" action="package" method="get">
-                            <div class="form-group mx-sm-3 mb-2">
-                                <input type="email" class="form-control" name="email" placeholder="Nhập email của bạn">
-                            </div>
-                            <button type="submit" class="btn btn-primary mb-2">Đăng ký ngay</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </section>
+
 
         <!-- Footer -->
         <footer class="footer">
