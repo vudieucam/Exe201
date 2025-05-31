@@ -1,4 +1,3 @@
-
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -38,6 +37,8 @@
                 color: white;
                 box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
                 transition: all 0.3s;
+                display: flex;
+                flex-direction: column;
             }
 
             .sidebar .nav-link {
@@ -256,6 +257,81 @@
                 animation: fadeIn 0.5s ease-out forwards;
             }
 
+            /* Admin Profile */
+            .admin-profile {
+                margin-top: auto;
+                padding: 15px;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .admin-profile .dropdown-toggle {
+                display: flex;
+                align-items: center;
+                width: 100%;
+                color: white;
+                text-decoration: none;
+                padding: 10px;
+                border-radius: 8px;
+                transition: all 0.3s;
+            }
+
+            .admin-profile .dropdown-toggle:hover {
+                background-color: rgba(255, 255, 255, 0.15);
+            }
+
+            .admin-profile .dropdown-toggle::after {
+                margin-left: auto;
+            }
+
+            .admin-profile .dropdown-menu {
+                width: 100%;
+                border: none;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            .admin-profile .dropdown-item {
+                padding: 10px 15px;
+                color: var(--dark-color);
+            }
+
+            .admin-profile .dropdown-item:hover {
+                background-color: rgba(67, 97, 238, 0.1);
+                color: var(--primary-color);
+            }
+
+            .admin-profile .dropdown-item.logout {
+                color: var(--danger-color);
+            }
+
+            .admin-profile .dropdown-item.logout:hover {
+                background-color: rgba(249, 65, 68, 0.1);
+            }
+
+            .admin-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                object-fit: cover;
+                margin-right: 10px;
+                border: 2px solid rgba(255, 255, 255, 0.3);
+            }
+
+            .admin-info {
+                line-height: 1.2;
+            }
+
+            .admin-name {
+                font-weight: 600;
+                font-size: 0.95rem;
+            }
+
+            .admin-role {
+                font-size: 0.8rem;
+                opacity: 0.8;
+            }
+
             /* Responsive */
             @media (max-width: 768px) {
                 .sidebar {
@@ -275,6 +351,10 @@
 
                 .navbar-toggler {
                     display: block;
+                }
+                
+                .admin-profile {
+                    margin-top: 20px;
                 }
             }
         </style>
@@ -310,36 +390,58 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="ordersAdmin">
+                            <a class="nav-link" href="ordersAdmin.jsp">
                                 <i class="bi bi-receipt"></i>Đơn hàng
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="paymentsAdmin">
+                            <a class="nav-link" href="paymentsAdmin.jsp">
                                 <i class="bi bi-credit-card"></i>Thanh toán
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="blogsAdmin">
+                            <a class="nav-link" href="blogsAdmin.jsp">
                                 <i class="bi bi-newspaper"></i>Blog
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="partnersAdmin">
+                            <a class="nav-link" href="partnersAdmin.jsp">
                                 <i class="bi bi-building"></i>Đối tác
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="reports">
+                            <a class="nav-link" href="reports.jsp">
                                 <i class="bi bi-graph-up"></i>Báo cáo
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="settings">
+                            <a class="nav-link" href="settings.jsp">
                                 <i class="bi bi-gear"></i>Cài đặt
                             </a>
                         </li>
                     </ul>
+                    
+                    <!-- Admin Profile Section -->
+                    <div class="admin-profile">
+                        <div class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="https://via.placeholder.com/40" alt="Admin Avatar" class="admin-avatar">
+                                <div class="admin-info">
+                                    <div class="admin-name">Admin Name</div>
+                                    <div class="admin-role">Quản trị viên</div>
+                                </div>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="editProfile.jsp">
+                                    <i class="bi bi-person me-2"></i>Thông tin cá nhân
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item logout" href="home">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Main Content -->
@@ -718,8 +820,6 @@
                     });
                 });
             });
-
-
         </script>
     </body>
 </html>

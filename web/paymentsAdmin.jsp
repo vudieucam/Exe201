@@ -35,6 +35,9 @@
                 background: linear-gradient(135deg, var(--dark-color), var(--secondary-color));
                 color: white;
                 box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+                transition: all 0.3s;
+                display: flex;
+                flex-direction: column;
             }
 
             .sidebar .nav-link {
@@ -49,6 +52,7 @@
             .sidebar .nav-link.active {
                 color: white;
                 background-color: rgba(255, 255, 255, 0.15);
+                transform: translateX(5px);
             }
 
             .sidebar .nav-link i {
@@ -69,15 +73,57 @@
                 margin-right: 10px;
             }
 
+            .stat-card {
+                border-radius: 15px;
+                transition: all 0.3s;
+                border: none;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+                overflow: hidden;
+                position: relative;
+                z-index: 1;
+            }
+
+            .stat-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .stat-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+                z-index: -1;
+            }
+
             .card {
                 border: none;
-                border-radius: 10px;
+                border-radius: 15px;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+                transition: all 0.3s;
+            }
+
+            .card:hover {
+                box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .card-header {
+                background-color: white;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+                border-radius: 15px 15px 0 0 !important;
+                padding: 15px 20px;
             }
 
             .table-responsive {
-                border-radius: 10px;
+                border-radius: 15px;
                 overflow: hidden;
+            }
+
+            .table {
+                margin-bottom: 0;
             }
 
             .table th {
@@ -89,12 +135,73 @@
 
             .table td {
                 vertical-align: middle;
+                border-top: 1px solid rgba(0, 0, 0, 0.03);
             }
 
             .badge {
                 padding: 6px 10px;
                 font-weight: 500;
                 border-radius: 8px;
+            }
+
+            .btn-primary {
+                background-color: var(--primary-color);
+                border-color: var(--primary-color);
+            }
+
+            .btn-primary:hover {
+                background-color: var(--secondary-color);
+                border-color: var(--secondary-color);
+            }
+
+            .filter-section {
+                background-color: white;
+                border-radius: 15px;
+                padding: 15px;
+                margin-bottom: 20px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            }
+
+            .filter-title {
+                font-weight: 600;
+                margin-bottom: 15px;
+                color: var(--dark-color);
+            }
+
+            .select2-container--default .select2-selection--multiple {
+                border: 1px solid #ced4da;
+                border-radius: 8px;
+                min-height: 38px;
+            }
+
+            .select2-container--default .select2-selection--multiple .select2-selection__choice {
+                background-color: var(--primary-color);
+                border: none;
+                border-radius: 6px;
+                color: white;
+            }
+
+            .user-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                object-fit: cover;
+                margin-right: 10px;
+            }
+
+            .action-btn {
+                width: 30px;
+                height: 30px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 8px;
+                margin: 0 3px;
+                transition: all 0.2s;
+            }
+
+            .action-btn:hover {
+                transform: scale(1.1);
             }
 
             .status-badge {
@@ -119,33 +226,135 @@
                 color: #ffc107;
             }
 
-            .status-processing {
-                background-color: rgba(13, 110, 253, 0.1);
-                color: #0d6efd;
+            .tab-content {
+                padding: 0 5px;
             }
 
-            .action-btn {
-                width: 30px;
-                height: 30px;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 8px;
-                margin: 0 3px;
+            .chart-container {
+                position: relative;
+                height: 250px;
             }
 
-            .filter-title {
-                font-weight: 500;
-                margin-bottom: 5px;
-                font-size: 0.9rem;
+            .progress-thin {
+                height: 6px;
+                border-radius: 3px;
             }
 
-            .filter-section {
-                background-color: white;
+            /* Animation */
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .animate-fade {
+                animation: fadeIn 0.5s ease-out forwards;
+            }
+
+            /* Admin Profile */
+            .admin-profile {
+                margin-top: auto;
                 padding: 15px;
-                border-radius: 10px;
-                margin-bottom: 20px;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .admin-profile .dropdown-toggle {
+                display: flex;
+                align-items: center;
+                width: 100%;
+                color: white;
+                text-decoration: none;
+                padding: 10px;
+                border-radius: 8px;
+                transition: all 0.3s;
+            }
+
+            .admin-profile .dropdown-toggle:hover {
+                background-color: rgba(255, 255, 255, 0.15);
+            }
+
+            .admin-profile .dropdown-toggle::after {
+                margin-left: auto;
+            }
+
+            .admin-profile .dropdown-menu {
+                width: 100%;
+                border: none;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            .admin-profile .dropdown-item {
+                padding: 10px 15px;
+                color: var(--dark-color);
+            }
+
+            .admin-profile .dropdown-item:hover {
+                background-color: rgba(67, 97, 238, 0.1);
+                color: var(--primary-color);
+            }
+
+            .admin-profile .dropdown-item.logout {
+                color: var(--danger-color);
+            }
+
+            .admin-profile .dropdown-item.logout:hover {
+                background-color: rgba(249, 65, 68, 0.1);
+            }
+
+            .admin-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                object-fit: cover;
+                margin-right: 10px;
+                border: 2px solid rgba(255, 255, 255, 0.3);
+            }
+
+            .admin-info {
+                line-height: 1.2;
+            }
+
+            .admin-name {
+                font-weight: 600;
+                font-size: 0.95rem;
+            }
+
+            .admin-role {
+                font-size: 0.8rem;
+                opacity: 0.8;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .sidebar {
+                    position: fixed;
+                    z-index: 1000;
+                    width: 250px;
+                    transform: translateX(-100%);
+                }
+
+                .sidebar.show {
+                    transform: translateX(0);
+                }
+
+                .main-content {
+                    margin-left: 0;
+                }
+
+                .navbar-toggler {
+                    display: block;
+                }
+                
+                .admin-profile {
+                    margin-top: 20px;
+                }
             }
         </style>
     </head>
@@ -155,12 +364,12 @@
                 <!-- Sidebar -->
                 <div class="col-md-2 sidebar p-0">
                     <div class="sidebar-brand">
-                        <img src="images/logo_petshop.jpg" alt="Logo">
-                        <h4 class="mb-0">PetShop</h4>
+                        <img src="images/logo_pettech.jpg" alt="Logo">
+                        <h4 class="mb-0">PetTech</h4>
                     </div>
                     <ul class="nav flex-column mt-3">
                         <li class="nav-item">
-                            <a class="nav-link" href="Admin.jsp">
+                            <a class="nav-link active" href="Admin.jsp">
                                 <i class="bi bi-speedometer2"></i>Dashboard
                             </a>
                         </li>
@@ -185,7 +394,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" href="paymentsAdmin.jsp">
+                            <a class="nav-link" href="paymentsAdmin.jsp">
                                 <i class="bi bi-credit-card"></i>Thanh toán
                             </a>
                         </li>
@@ -210,7 +419,30 @@
                             </a>
                         </li>
                     </ul>
+                    
+                    <!-- Admin Profile Section -->
+                    <div class="admin-profile">
+                        <div class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="https://via.placeholder.com/40" alt="Admin Avatar" class="admin-avatar">
+                                <div class="admin-info">
+                                    <div class="admin-name">Admin Name</div>
+                                    <div class="admin-role">Quản trị viên</div>
+                                </div>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="editProfile.jsp">
+                                    <i class="bi bi-person me-2"></i>Thông tin cá nhân
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item logout" href="home">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
+
 
                 <!-- Main Content -->
                 <div class="col-md-10 p-4">
