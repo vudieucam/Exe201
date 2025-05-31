@@ -518,7 +518,7 @@
                     <!-- Team Member -->
                     <div class="col-md-4 mb-4">
                         <div class="team-card">
-                            <img src="images/staff-7.jpg" alt="CEO" class="team-img">
+                            <img src="images/dinh.jpg" alt="CEO" class="team-img">
                             <h4>Lê Đỗ Đình</h4>
                             <p class="position">CEO & Nhà sáng lập</p>
                             <p>Chuyên gia huấn luyện thú cưng với 10 năm kinh nghiệm</p>
@@ -527,8 +527,8 @@
                     <!-- Member 2 -->
                     <div class="col-md-4 mb-4">
                         <div class="team-card">
-                            <img src="images/staff-8.jpg" alt="Nguyễn Văn Hải Nam" class="team-img">
-                            <h4>Nguyễn Văn Hải Nam</h4>
+                            <img src="images/nam.jpg" alt="Nguyễn Viết Hải Nam" class="team-img">
+                            <h4>Nguyễn Viết Hải Nam</h4>
                             <p class="position">Giám đốc đào tạo</p>
                             <p>Chuyên gia dinh dưỡng và sức khỏe thú cưng</p>
                         </div>
@@ -537,7 +537,7 @@
                     <!-- Member 3 -->
                     <div class="col-md-4 mb-4">
                         <div class="team-card">
-                            <img src="images/about.jpg" alt="Nguyễn Quỳnh Chi" class="team-img">
+                            <img src="images/chi.jpg" alt="Nguyễn Quỳnh Chi" class="team-img">
                             <h4>Nguyễn Quỳnh Chi</h4>
                             <p class="position">Giám đốc sản phẩm</p>
                             <p>Chuyên gia về các sản phẩm chăm sóc thú cưng</p>
@@ -547,7 +547,7 @@
                     <!-- Member 4 -->
                     <div class="col-md-4 mb-4">
                         <div class="team-card">
-                            <img src="images/about.jpg" alt="Vũ Diệu Cẩm" class="team-img">
+                            <img src="images/cam.jpg" alt="Vũ Diệu Cẩm" class="team-img">
                             <h4>Vũ Diệu Cẩm</h4>
                             <p class="position">Trưởng phòng công nghệ</p>
                             <p>Phát triển hệ thống và ứng dụng cho PetTech</p>
@@ -557,7 +557,7 @@
                     <!-- Member 5 -->
                     <div class="col-md-4 mb-4">
                         <div class="team-card">
-                            <img src="images/about.jpg" alt="Nguyễn Thúy Hiền" class="team-img">
+                            <img src="images/hien.jpg" alt="Nguyễn Thúy Hiền" class="team-img">
                             <h4>Nguyễn Thúy Hiền</h4>
                             <p class="position">Trưởng phòng chăm sóc khách hàng</p>
                             <p>Hỗ trợ và tư vấn cho khách hàng 24/7</p>

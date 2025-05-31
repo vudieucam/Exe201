@@ -1175,7 +1175,7 @@
                             </div>
                             <h3>Sản phẩm chính hãng</h3>
                             <p>Cung cấp các sản phẩm chăm sóc thú cưng chất lượng từ các thương hiệu uy tín.</p>
-                            <a href="products" class="feature-link">
+                            <a href="product" class="feature-link">
                                 Xem thêm <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>
@@ -1248,9 +1248,18 @@
                                             </c:otherwise>
                                         </c:choose>
                                     </p>
-                                    <a href="${pageContext.request.contextPath}/coursedetail?id=${course.id}" class="course-btn">
-                                        Xem chi tiết <i class="fa fa-arrow-right"></i>
-                                    </a>
+                                    <c:choose>
+                                        <c:when test="${not empty sessionScope.user}">
+                                            <a href="${pageContext.request.contextPath}/coursedetail?id=${course.id}" class="course-btn">
+                                                Xem chi tiết <i class="fa fa-arrow-right"></i>
+                                            </a>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <a href="authen?action=login" class="course-btn" >
+                                                Xem chi tiết <i class="fa fa-arrow-right"></i>
+                                            </a>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </div>
                             </div>
                         </div>
@@ -1263,6 +1272,7 @@
                 </div>
             </div>
         </section>
+
 
 
         <!-- Testimonials -->

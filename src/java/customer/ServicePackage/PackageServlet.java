@@ -2,6 +2,7 @@ package customer.ServicePackage;
 
 import dal.PackageDAO;
 import dal.UserDAO;
+import dal.UserServiceDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,11 +15,15 @@ import java.util.UUID;
 import model.SendMailOK;
 import model.ServicePackage;
 import model.User;
+import java.util.Date;
+import java.util.Calendar;
+import model.UserService;
 
 public class PackageServlet extends HttpServlet {
 
     private PackageDAO PackageDAO = new PackageDAO();
     private UserDAO userDAO = new UserDAO();
+    private static final int FREE_PACKAGE_ID = 1;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -75,11 +80,25 @@ public class PackageServlet extends HttpServlet {
                 upgradePackage(request, response);
                 break;
             case "payAndRegister":
+            try {
                 payAndRegister(request, response);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                request.getSession().setAttribute("error", "Lỗi khi xử lý đăng ký: " + e.getMessage());
+                response.sendRedirect("signup.jsp");
+            }
+            break;
+
+            case "confirmPayment":
+                processPayment(request, response);
                 break;
             default:
                 response.sendRedirect("pricing.jsp");
         }
+    }
+
+    private boolean isFreePackage(int packageId) {
+        return packageId == FREE_PACKAGE_ID;
     }
 
     private void registerPackage(HttpServletRequest request, HttpServletResponse response)
@@ -152,21 +171,24 @@ public class PackageServlet extends HttpServlet {
                 return;
             }
 
-            boolean success = PackageDAO.registerPackage(user.getId(), packageId);
-
-            if (success) {
-                user.setServicePackageId(packageId);
-                session.setAttribute("user", user);
-                session.setAttribute("successMessage", "Nâng cấp gói dịch vụ thành công!");
-                session.setAttribute("pkg", PackageDAO.getPackageById(packageId));
-                session.setAttribute("paymentMethod", paymentMethod);
-                response.sendRedirect("payment_success.jsp");
-                return;
-            } else {
-                session.setAttribute("notification", "Nâng cấp gói dịch vụ thất bại. Vui lòng thử lại!");
+            if (isFreePackage(packageId)) {
+                boolean success = PackageDAO.registerPackage(user.getId(), packageId);
+                if (success) {
+                    user.setServicePackageId(packageId);
+                    session.setAttribute("user", user);
+                    session.setAttribute("notification", "Đăng ký gói miễn phí thành công!");
+                    reloadPackages(request, response);
+                    return;
+                }
             }
 
-            reloadPackages(request, response);
+            // Chỉ xử lý thanh toán cho gói trả phí
+            ServicePackage pkg = PackageDAO.getPackageById(packageId);
+            if (pkg != null) {
+                request.setAttribute("pkg", pkg);
+                request.setAttribute("fromRegistration", false);
+                request.getRequestDispatcher("payment.jsp").forward(request, response);
+            }
 
         } catch (NumberFormatException | SQLException e) {
             session.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
@@ -185,10 +207,8 @@ public class PackageServlet extends HttpServlet {
         request.getRequestDispatcher("pricing.jsp").forward(request, response);
     }
 
-
-
     private void payAndRegister(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException, SQLException {
         HttpSession session = request.getSession();
         User pendingUser = (User) session.getAttribute("pendingUser");
 
@@ -199,7 +219,7 @@ public class PackageServlet extends HttpServlet {
             String confirmPassword = request.getParameter("confirm_password");
             String fullname = request.getParameter("fullname");
             String phone = request.getParameter("phone");
-            String address = request.getParameter("address"); // Thêm dòng này
+            String address = request.getParameter("address");
             int packageId = Integer.parseInt(request.getParameter("packageId"));
             String paymentMethod = request.getParameter("paymentMethod");
 
@@ -257,12 +277,135 @@ public class PackageServlet extends HttpServlet {
             pendingUser.setPassword(password);
             pendingUser.setFullname(fullname);
             pendingUser.setPhone(phone);
-            pendingUser.setAddress(address); // Thêm dòng này
+            pendingUser.setAddress(address);
             pendingUser.setServicePackageId(packageId);
             session.setAttribute("pendingUser", pendingUser);
         }
-        // Xử lý thanh toán hoặc đăng ký trực tiếp
-        if (pendingUser.getServicePackageId() > 1) { // Giả sử gói free có ID = 1
+
+        // Xử lý theo loại gói
+        if (isFreePackage(pendingUser.getServicePackageId())) {
+            // Xử lý đăng ký gói free
+
+            try {
+                // Trước khi gọi register()
+                pendingUser.setRoleId(1);
+                // 1. Đăng ký user trước
+                if (userDAO.register(pendingUser)) {
+                    // 2. Lấy user vừa tạo
+                    User createdUser = userDAO.getUserByEmail(pendingUser.getEmail());
+
+                    if (createdUser == null) {
+                        session.setAttribute("error", "Lỗi: Không tìm thấy người dùng sau khi đăng ký.");
+                        response.sendRedirect("signup.jsp?packageId=" + pendingUser.getServicePackageId());
+                        return;
+                    }
+
+                    // 3. Kích hoạt tài khoản
+                    userDAO.setActive(createdUser.getId(), true);
+
+                    // 4. Tạo bản ghi User_Service
+                    UserService service = new UserService();
+                    service.setUserId(createdUser.getId());
+                    service.setPackageId(createdUser.getServicePackageId());
+                    service.setStartDate(new Date());
+
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(new Date());
+                    cal.add(Calendar.DAY_OF_MONTH, 7);
+                    service.setEndDate(cal.getTime());
+
+                    service.setStatus("Đang sử dụng");
+
+                    UserServiceDAO userServiceDAO = new UserServiceDAO();
+                    userServiceDAO.save(service);
+
+                    // 5. Gửi email xác minh
+                    String token = UUID.randomUUID().toString();
+                    pendingUser.setVerificationToken(token);
+                    pendingUser.setStatus(false);
+                    // Cập nhật token và status vào DB
+                    boolean updated = userDAO.updateVerificationTokenAndStatus(createdUser.getId(), token, false);
+                    if (!updated) {
+                        session.setAttribute("error", "Lỗi lưu token xác minh.");
+                        response.sendRedirect("signup.jsp?packageId=" + pendingUser.getServicePackageId());
+                        return;
+                    }
+
+                    String verificationLink = request.getScheme() + "://"
+                            + request.getServerName() + ":"
+                            + request.getServerPort()
+                            + request.getContextPath()
+                            + "/authen?action=verify&token=" + token;
+
+                    PackageDAO spDAO = new PackageDAO();
+                    String packageName = spDAO.getServicePackageNameById(pendingUser.getServicePackageId());
+
+                    String emailBody = "<!DOCTYPE html>"
+                            + "<html lang='vi'>"
+                            + "<head>"
+                            + "<meta charset='UTF-8'>"
+                            + "<style>"
+                            + "body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fffaf4; color: #333; padding: 20px; }"
+                            + ".container { max-width: 600px; margin: auto; background-color: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; }"
+                            + "h2 { color: #ff6600; }"
+                            + ".button { display: inline-block; background-color: #ff9966; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; }"
+                            + ".footer { font-size: 13px; color: #888; margin-top: 30px; line-height: 1.6; }"
+                            + ".footer strong { color: #555; }"
+                            + "</style>"
+                            + "</head>"
+                            + "<body>"
+                            + "<div class='container'>"
+                            + "<h2>🎉 Chào mừng bạn đến với PetTech! 🐾</h2>"
+                            + "<p>Xin chào <strong>" + pendingUser.getFullname() + "</strong>,</p>"
+                            + "<p>Cảm ơn bạn đã đăng ký <strong>gói dịch vụ PetTech</strong>! 💖</p>"
+                            + "<p>Vui lòng nhấp vào nút dưới đây để xác minh tài khoản của bạn:</p>"
+                            + "<p><a class='button' href='" + verificationLink + "'>🔐 Xác minh tài khoản</a></p>"
+                            + "<p><strong>Thông tin gói dịch vụ của bạn:</strong><br>"
+                            + "- Tên gói: <strong>" + packageName + "</strong></p>"
+                            + "<p>Chúng tôi rất vui khi được đồng hành cùng bạn và thú cưng trên hành trình sắp tới! 🐶🐱<br>"
+                            + "Hy vọng bạn sẽ có những trải nghiệm thật tuyệt vời cùng PetTech. 🌟</p>"
+                            + "<div class='footer'>"
+                            + "<strong>📞 Liên hệ hỗ trợ:</strong><br>"
+                            + "SĐT: <a href='tel:0352138596'>0352 138 596</a><br>"
+                            + "Địa chỉ: Khu Công nghệ cao Hòa Lạc, Thạch Thất, Hà Nội<br><br>"
+                            + "Nếu bạn có bất kỳ câu hỏi nào, đừng ngần ngại liên hệ với chúng tôi nhé! 🧡<br>"
+                            + "<strong>❤️ PetTech Team</strong>"
+                            + "</div>"
+                            + "</div>"
+                            + "</body>"
+                            + "</html>";
+
+                    SendMailOK.send(
+                            "smtp.gmail.com",
+                            pendingUser.getEmail(),
+                            "vdc120403@gmail.com",
+                            "ednn nwbo zbyq gahs",
+                            "Xác minh tài khoản PetTech",
+                            emailBody
+                    );
+
+                    // Xóa session tạm
+                    session.removeAttribute("pendingUser");
+                    session.removeAttribute("oldEmail");
+                    session.removeAttribute("oldFullname");
+                    session.removeAttribute("oldPhone");
+
+                    session.setAttribute("notification", "Đăng ký thành công! Vui lòng kiểm tra email để xác minh tài khoản.");
+                    response.sendRedirect("login.jsp");
+                    return;
+                } else {
+                    session.setAttribute("error", "Đăng ký thất bại. Vui lòng thử lại.");
+                    response.sendRedirect("signup.jsp?packageId=" + pendingUser.getServicePackageId());
+                    return;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                session.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
+                response.sendRedirect("signup.jsp?packageId=" + pendingUser.getServicePackageId());
+                return;
+            }
+        } else {
+            // Chuyển đến trang thanh toán cho gói trả phí
             try {
                 ServicePackage pkg = PackageDAO.getPackageById(pendingUser.getServicePackageId());
                 request.setAttribute("pkg", pkg);
@@ -275,87 +418,140 @@ public class PackageServlet extends HttpServlet {
                 return;
             }
         }
+    }
 
-        // Xử lý đăng ký gói free
+    private void processPayment(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+        User pendingUser = (User) session.getAttribute("pendingUser");
+
+        int packageId = Integer.parseInt(request.getParameter("packageId"));
+        String paymentMethod = request.getParameter("paymentMethod");
+
         try {
-            String token = UUID.randomUUID().toString();
-            pendingUser.setVerificationToken(token);
-            pendingUser.setStatus(false);
-            pendingUser.setRoleId(1);
+            ServicePackage pkg = PackageDAO.getPackageById(packageId);
 
-            if (userDAO.register(pendingUser)) {
-                // Gửi email xác minh
-                String verificationLink = request.getScheme() + "://"
-                        + request.getServerName() + ":"
-                        + request.getServerPort()
-                        + request.getContextPath()
-                        + "/authen?action=verify&token=" + token;
+            // Tạo payment record
+            String confirmationCode = UUID.randomUUID().toString().substring(0, 8);
+            boolean paymentRecorded = PackageDAO.recordPayment(
+                    user != null ? user.getId() : null,
+                    pendingUser != null ? pendingUser.getId() : null,
+                    packageId,
+                    paymentMethod,
+                    pkg.getPrice(),
+                    confirmationCode
+            );
 
-                PackageDAO spDAO = new PackageDAO();
-                String packageName = spDAO.getServicePackageNameById(pendingUser.getServicePackageId());
+            if (paymentRecorded) {
+                if (pendingUser != null) {
+                    // Trường hợp đăng ký mới
+                    String activationToken = UUID.randomUUID().toString();
 
-                String emailBody = "<!DOCTYPE html>"
-                        + "<html lang='vi'>"
-                        + "<head>"
-                        + "<meta charset='UTF-8'>"
-                        + "<style>"
-                        + "body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fffaf4; color: #333; padding: 20px; }"
-                        + ".container { max-width: 600px; margin: auto; background-color: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; }"
-                        + "h2 { color: #ff6600; }"
-                        + ".button { display: inline-block; background-color: #ff9966; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; }"
-                        + ".footer { font-size: 13px; color: #888; margin-top: 30px; line-height: 1.6; }"
-                        + ".footer strong { color: #555; }"
-                        + "</style>"
-                        + "</head>"
-                        + "<body>"
-                        + "<div class='container'>"
-                        + "<h2>🎉 Chào mừng bạn đến với PetTech! 🐾</h2>"
-                        + "<p>Xin chào <strong>" + pendingUser.getFullname() + "</strong>,</p>"
-                        + "<p>Cảm ơn bạn đã đăng ký <strong>gói dịch vụ PetTech</strong>! 💖</p>"
-                        + "<p>Vui lòng nhấp vào nút dưới đây để xác minh tài khoản của bạn:</p>"
-                        + "<p><a class='button' href='" + verificationLink + "'>🔐 Xác minh tài khoản</a></p>"
-                        + "<p><strong>Thông tin gói dịch vụ của bạn:</strong><br>"
-                        + "- Tên gói: <strong>" + packageName + "</strong></p>"
-                        + "<p>Chúng tôi rất vui khi được đồng hành cùng bạn và thú cưng trên hành trình sắp tới! 🐶🐱<br>"
-                        + "Hy vọng bạn sẽ có những trải nghiệm thật tuyệt vời cùng PetTech. 🌟</p>"
-                        + "<div class='footer'>"
-                        + "<strong>📞 Liên hệ hỗ trợ:</strong><br>"
-                        + "SĐT: <a href='tel:0352138596'>0352 138 596</a><br>"
-                        + "Địa chỉ: Khu Công nghệ cao Hòa Lạc, Thạch Thất, Hà Nội<br><br>"
-                        + "Nếu bạn có bất kỳ câu hỏi nào, đừng ngần ngại liên hệ với chúng tôi nhé! 🧡<br>"
-                        + "<strong>❤️ PetTech Team</strong>"
-                        + "</div>"
-                        + "</div>"
-                        + "</body>"
-                        + "</html>";
+                    // Lưu token kích hoạt vào session
+                    pendingUser.setActivationToken(activationToken);
+                    pendingUser.setTokenExpiry(calculateExpiryDate(24)); // 24 giờ hết hạn
+                    session.setAttribute("pendingUser", pendingUser);
 
-                SendMailOK.send(
-                        "smtp.gmail.com",
-                        pendingUser.getEmail(),
-                        "vdc120403@gmail.com",
-                        "ednn nwbo zbyq gahs",
-                        "Xác minh tài khoản PetTech",
-                        emailBody
-                );
+                    // Gửi email chờ xác nhận thanh toán
+                    sendPaymentConfirmationEmail(pendingUser, pkg, confirmationCode, request);
 
-                // Xóa session tạm
-                session.removeAttribute("pendingUser");
-                session.removeAttribute("oldEmail");
-                session.removeAttribute("oldFullname");
-                session.removeAttribute("oldPhone");
+                    // Xóa thông tin đăng ký tạm
+                    session.removeAttribute("oldEmail");
+                    session.removeAttribute("oldFullname");
+                    session.removeAttribute("oldPhone");
+                    session.removeAttribute("oldAddress");
 
-                session.setAttribute("notification", "Đăng ký thành công! Vui lòng kiểm tra email để xác minh tài khoản.");
-                response.sendRedirect("login.jsp");
-                return;
+                    // Chuyển đến trang thông báo chờ xác nhận
+                    session.setAttribute("message", "Vui lòng kiểm tra email để xác nhận thanh toán. Bạn có 10 phút để hoàn tất quy trình.");
+                    request.getRequestDispatcher("payment_success.jsp").forward(request, response);
+                } else {
+                    // Trường hợp nâng cấp gói
+                    sendPaymentConfirmationEmail(user, pkg, confirmationCode, request);
+
+                    // Chuyển đến trang thông báo chờ xác nhận
+                    session.setAttribute("notification", "Yêu cầu nâng cấp gói của bạn đã được ghi nhận. Vui lòng kiểm tra email để xác nhận thanh toán.");
+                    response.sendRedirect("login.jsp");
+                }
             } else {
-                session.setAttribute("error", "Đăng ký thất bại. Vui lòng thử lại.");
-                response.sendRedirect("signup.jsp?packageId=" + pendingUser.getServicePackageId());
+                session.setAttribute("error", "Ghi nhận thanh toán thất bại. Vui lòng thử lại.");
+                response.sendRedirect("payment.jsp?packageId=" + packageId);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
             session.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
-            response.sendRedirect("signup.jsp?packageId=" + pendingUser.getServicePackageId());
+            response.sendRedirect("payment.jsp?packageId=" + packageId);
         }
     }
+
+    private void sendPaymentConfirmationEmail(User user, ServicePackage pkg, String confirmationCode, HttpServletRequest request) {
+        String activationLink = "";
+        if (user.getActivationToken() != null) {
+            activationLink = request.getScheme() + "://"
+                    + request.getServerName() + ":"
+                    + request.getServerPort()
+                    + request.getContextPath()
+                    + "/authen?action=activate&token=" + user.getActivationToken();
+        }
+
+        String emailBody = "<!DOCTYPE html>"
+                + "<html lang='vi'>"
+                + "<head>"
+                + "<meta charset='UTF-8'>"
+                + "<style>"
+                + "body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fffaf4; color: #333; padding: 20px; }"
+                + ".container { max-width: 600px; margin: auto; background-color: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; }"
+                + "h2 { color: #ff6600; }"
+                + ".button { display: inline-block; background-color: #ff9966; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; }"
+                + ".highlight { background-color: #fff2cc; padding: 6px 12px; border-radius: 8px; font-weight: bold; display: inline-block; margin: 10px 0; }"
+                + ".footer { font-size: 13px; color: #888; margin-top: 30px; line-height: 1.6; }"
+                + ".footer strong { color: #555; }"
+                + "</style>"
+                + "</head>"
+                + "<body>"
+                + "<div class='container'>"
+                + "<h2>🔔 Xác nhận thanh toán PetTech</h2>"
+                + "<p>Xin chào <strong>" + user.getFullname() + "</strong>,</p>"
+                + "<p>Bạn đã yêu cầu đăng ký/nâng cấp gói dịch vụ <strong>" + pkg.getName() + "</strong>.</p>"
+                + "<p>Mã xác nhận thanh toán của bạn là: <span class='highlight'>" + confirmationCode + "</span></p>"
+                + "<p>Vui lòng chờ quản trị viên kiểm tra và xác nhận thanh toán trong vòng 10 phút.</p>";
+
+        if (!activationLink.isEmpty()) {
+            emailBody += "<p>Sau khi thanh toán được xác nhận, vui lòng nhấp vào nút bên dưới để kích hoạt tài khoản:</p>"
+                    + "<p><a class='button' href='" + activationLink + "'>✅ Kích hoạt tài khoản</a></p>";
+        }
+
+        emailBody += "<p>Cảm ơn bạn đã tin tưởng PetTech! 🐾</p>"
+                + "<div class='footer'>"
+                + "<strong>📞 Hỗ trợ:</strong><br>"
+                + "SĐT: <a href='tel:0352138596'>0352 138 596</a><br>"
+                + "Email: <a href='mailto:vdc120403@gmail.com'>vdc120403@gmail.com</a><br>"
+                + "Địa chỉ: Khu Công nghệ cao Hòa Lạc, Thạch Thất, Hà Nội<br><br>"
+                + "<strong>❤️ PetTech Team</strong>"
+                + "</div>"
+                + "</div>"
+                + "</body>"
+                + "</html>";
+
+        try {
+            SendMailOK.send(
+                    "smtp.gmail.com",
+                    user.getEmail(),
+                    "vdc120403@gmail.com",
+                    "ednn nwbo zbyq gahs",
+                    "🔔 Xác nhận thanh toán PetTech",
+                    emailBody
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Date calculateExpiryDate(int expiryTimeInHours) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.add(Calendar.HOUR, expiryTimeInHours);
+        return cal.getTime();
+    }
+
 }

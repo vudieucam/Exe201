@@ -106,7 +106,11 @@ public class AuthenServlet extends HttpServlet {
             if (!user.isStatus()) {
                 request.setAttribute("notification", "⚠️ Tài khoản chưa được kích hoạt. Vui lòng kiểm tra email.");
                 return "login.jsp";
+            }if (!user.isIsActive()) {
+                request.setAttribute("notification", "⚠️ Gói dịch vụ của bạn chưa được kích hoạt. Vui lòng chọn gói hoặc chờ xác nhận.");
+                return "login.jsp";
             }
+
 
             // Lưu user vào session
             HttpSession session = request.getSession();
@@ -118,7 +122,7 @@ public class AuthenServlet extends HttpServlet {
                 Cookie cEmail = new Cookie("cEmail", email);
                 Cookie cPassword = new Cookie("cPassword", password);
 
-                // Đặt thời gian sống cho cookie là 6 tháng (giống bài mẫu)
+                // Đặt thời gian sống cho cookie là 6 tháng 
                 cEmail.setMaxAge(60 * 60 * 24 * 30 * 6);
                 cPassword.setMaxAge(60 * 60 * 24 * 30 * 6);
 
@@ -126,7 +130,7 @@ public class AuthenServlet extends HttpServlet {
                 response.addCookie(cEmail);
                 response.addCookie(cPassword);
             }
-
+            
             // In debug ra console (tuỳ môi trường)
             System.out.println("Đăng nhập thành công: " + user.getFullname() + " | Vai trò: " + user.getRoleId());
 

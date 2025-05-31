@@ -4,6 +4,7 @@
  */
 package dal;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -115,4 +116,31 @@ public class PackageDAO extends DBConnect {
             }
         }
     }
+
+    public boolean recordPayment(Integer par, Integer packageId, int userId, String paymentMethod, BigDecimal amount, String confirmationCode) throws SQLException {
+
+        String sql = "INSERT INTO payments (user_id, service_package_id, payment_method, "
+                + "amount, payment_date, status, confirmation_code, confirmation_expiry) "
+                + "VALUES (?, ?, ?, ?, GETDATE(), 'pending', ?, DATEADD(MINUTE, 10, GETDATE()))";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, packageId);
+            ps.setString(3, paymentMethod);
+            ps.setBigDecimal(4, amount);
+            ps.setString(5, confirmationCode);
+
+            return ps.executeUpdate() > 0;
+        }
+    }
+    
+    public boolean updateUserPackage(int userId, int packageId) throws SQLException {
+    String sql = "UPDATE users SET service_package_id = ?, status = 1 WHERE id = ?";
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, packageId);
+        ps.setInt(2, userId);
+        return ps.executeUpdate() > 0;
+    }
+}
+
 }

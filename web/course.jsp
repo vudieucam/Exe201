@@ -1057,8 +1057,7 @@
                                             </c:when>
                                             <c:otherwise>
                                                 <a href="authen?action=login&redirect=${pageContext.request.contextPath}/coursedetail?id=${course.id}"
-                                                   class="course-btn"
-                                                   onclick="return confirm('Bạn cần đăng nhập để xem chi tiết khóa học!');">
+                                                   class="course-btn">
                                                     Xem chi tiết <i class="fa fa-arrow-right"></i>
                                                 </a>
                                             </c:otherwise>

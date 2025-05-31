@@ -43,6 +43,7 @@ DROP TABLE IF EXISTS user_progress, lesson_attachments, course_lessons, course_m
                      products, course_access, course_category_course, course_category_items,
                      course_categories, course_images, user_packages, users, courses, service_packages;
 
+DROP TABLE IF EXISTS users;
 -- ===========================================
 --          TẠO CÁC BẢNG
 -- ===========================================
@@ -69,9 +70,25 @@ CREATE TABLE users (
     created_at DATETIME DEFAULT GETDATE(),
     verification_token NVARCHAR(255),
     service_package_id INT, -- Bổ sung cột này để làm khóa ngoại
+	is_active BIT DEFAULT 0,
+    activation_token VARCHAR(100),
+    token_expiry DATETIME,
     CONSTRAINT chk_email CHECK (email LIKE '%@%.%'),
     FOREIGN KEY (service_package_id) REFERENCES service_packages(id)
 );
+
+CREATE TABLE User_Service (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    user_id INT NOT NULL,
+    package_id INT NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    status NVARCHAR(50) NOT NULL, -- Ví dụ: 'Đang sử dụng', 'Đã hết hạn', 'Đã nâng cấp'
+
+    FOREIGN KEY (user_id) REFERENCES Users(id),
+    FOREIGN KEY (package_id) REFERENCES service_packages(id)
+);
+
 
 -- 3. Lịch sử đăng ký gói dịch vụ
 CREATE TABLE user_packages (
@@ -136,7 +153,20 @@ CREATE TABLE course_access (
     FOREIGN KEY (service_package_id) REFERENCES service_packages(id)
 );
 
--- 8. Sản phẩm
+-- 8. Bảng đối tác (partners)
+CREATE TABLE partners (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(100) NOT NULL,
+    email NVARCHAR(100) NOT NULL UNIQUE,
+    phone NVARCHAR(20) NOT NULL,
+    address NVARCHAR(255) NOT NULL,
+    description NVARCHAR(MAX),
+    status BIT DEFAULT 1,
+    created_at DATETIME DEFAULT GETDATE()
+);
+
+
+-- 9. Sản phẩm
 CREATE TABLE products (
     id INT IDENTITY(1,1) PRIMARY KEY,
     name NVARCHAR(255),
@@ -147,37 +177,6 @@ CREATE TABLE products (
     image_url NVARCHAR(MAX),
     FOREIGN KEY (partner_id) REFERENCES users(id)
 );
-
--- 9. Đơn hàng & thanh toán
-CREATE TABLE orders (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    user_id INT,
-    order_date DATETIME DEFAULT GETDATE(),
-    total_amount DECIMAL(12, 0),
-    commission DECIMAL(12, 0),
-    status NVARCHAR(20) CHECK (status IN (N'pending', N'processing', N'completed', N'cancelled')),
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
-CREATE TABLE order_items (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    order_id INT,
-    product_id INT,
-    quantity INT,
-    price DECIMAL(12, 0),
-    FOREIGN KEY (order_id) REFERENCES orders(id),
-    FOREIGN KEY (product_id) REFERENCES products(id)
-);
-
-CREATE TABLE payments (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    order_id INT,
-    payment_date DATETIME DEFAULT GETDATE(),
-    method NVARCHAR(50),
-    amount DECIMAL(12, 0),
-    FOREIGN KEY (order_id) REFERENCES orders(id)
-);
-
 -- 10. Danh mục sản phẩm
 CREATE TABLE product_categories (
     id INT IDENTITY(1,1) PRIMARY KEY,
@@ -192,7 +191,58 @@ CREATE TABLE product_category_items (
     FOREIGN KEY (category_id) REFERENCES product_categories(id)
 );
 
--- 11. Chương học & bài học
+
+-- 11. Đầu tiên tạo bảng orders (di chuyển lên trước payments)
+CREATE TABLE orders (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    user_id INT,
+    order_date DATETIME DEFAULT GETDATE(),
+    total_amount DECIMAL(12, 0),
+    commission DECIMAL(12, 0),
+    status NVARCHAR(20) CHECK (status IN (N'pending', N'processing', N'completed', N'cancelled')),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- 12. Xóa bảng payments thứ hai (nếu đã tạo nhầm)
+-- (Không cần thực thi nếu bạn đang tạo mới toàn bộ database)
+
+CREATE TABLE order_items (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    order_id INT,
+    product_id INT,
+    quantity INT,
+    price DECIMAL(12, 0),
+    FOREIGN KEY (order_id) REFERENCES orders(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
+
+-- 13. Sau đó mới tạo bảng payments (chỉ định nghĩa 1 lần)
+-- Sửa lại bảng payments để hỗ trợ các phương thức thanh toán
+CREATE TABLE payments (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    user_id INT NOT NULL,
+    service_package_id INT NULL, -- Có thể NULL nếu là thanh toán sản phẩm
+    order_id INT NULL,           -- Có thể NULL nếu là thanh toán gói dịch vụ
+    payment_method VARCHAR(50) NOT NULL CHECK (payment_method IN ('MOMO_QR', 'BANK_QR', 'VNPAY', 'CASH')),
+    amount DECIMAL(10,2) NOT NULL,
+    payment_date DATETIME DEFAULT GETDATE(),
+    status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'failed', 'refunded')),
+    transaction_id VARCHAR(100),
+    qr_code_url NVARCHAR(500) NULL, -- URL hình ảnh QR code
+    bank_account_number VARCHAR(20) NULL, -- Số tài khoản ngân hàng (nếu có)
+    bank_name NVARCHAR(100) NULL,    -- Tên ngân hàng
+    notes NVARCHAR(500) NULL,
+	is_confirmed BIT DEFAULT 0,
+    confirmation_code VARCHAR(50),
+    confirmation_expiry DATETIME,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (service_package_id) REFERENCES service_packages(id),
+    FOREIGN KEY (order_id) REFERENCES orders(id)
+);
+
+
+-- 14. Chương học & bài học
 CREATE TABLE course_modules (
     id INT IDENTITY(1,1) PRIMARY KEY,
     course_id INT NOT NULL,
@@ -222,7 +272,7 @@ CREATE TABLE lesson_attachments (
     FOREIGN KEY (lesson_id) REFERENCES course_lessons(id)
 );
 
--- 12. Tiến độ học tập
+-- 15. Tiến độ học tập
 CREATE TABLE user_progress (
     id INT IDENTITY(1,1) PRIMARY KEY,
     user_id INT NOT NULL,
@@ -231,6 +281,52 @@ CREATE TABLE user_progress (
     completed_at DATETIME,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (lesson_id) REFERENCES course_lessons(id)
+);
+
+
+-- 16. Bảng loại tin tức
+CREATE TABLE BlogCategories (
+    category_id INT PRIMARY KEY IDENTITY(1,1),
+    category_name NVARCHAR(100) NOT NULL,
+    description NVARCHAR(255),
+    created_at DATETIME DEFAULT GETDATE()
+);
+
+-- 17. Bảng tin tức
+CREATE TABLE Blogs (
+    blog_id INT PRIMARY KEY IDENTITY(1,1),
+    title NVARCHAR(255) NOT NULL,
+    content NVARCHAR(MAX) NOT NULL,
+    short_description NVARCHAR(500),
+    image_url NVARCHAR(255),
+    category_id INT FOREIGN KEY REFERENCES BlogCategories(category_id),
+    author_id INT, -- Có thể tham chiếu đến bảng Users nếu cần
+    author_name NVARCHAR(100) DEFAULT 'Admin',
+    view_count INT DEFAULT 0,
+    is_featured BIT DEFAULT 0,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+
+-- 18. Bảng bình luận (nếu cần)
+CREATE TABLE BlogComments (
+    comment_id INT PRIMARY KEY IDENTITY(1,1),
+    blog_id INT FOREIGN KEY REFERENCES Blogs(blog_id),
+    user_id INT, -- Tham chiếu đến bảng Users
+    content NVARCHAR(1000) NOT NULL,
+    created_at DATETIME DEFAULT GETDATE()
+);
+
+-- Bảng đánh giá khóa học
+CREATE TABLE course_reviews (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    course_id INT NOT NULL,
+    user_id INT NOT NULL,
+    rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    comment NVARCHAR(MAX),
+    created_at DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (course_id) REFERENCES courses(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 -- ===========================================
 --          HOÀN TẤT TẠO CẤU TRÚC
@@ -276,12 +372,24 @@ Lợi ích:
 199000, N'pro');
 
 -- 2. Người dùng
-INSERT INTO users (email, password, fullname, phone, address, role_id, status, verification_token, service_package_id)
-VALUES
-(N'user1@example.com', N'123456', N'Nguyễn Văn A', N'0901234567', N'Hà Nội', 1, 1, NULL, 1),
-(N'user2@example.com', N'123456', N'Trần Thị B', N'0937654321', N'Hồ Chí Minh', 1, 1, NULL, 2),
-(N'staff1@example.com', N'123456', N'Lê Văn C', N'0912345678', N'Đà Nẵng', 2, 1, NULL, 2),
-(N'admin@example.com', N'123456', N'Phạm Thị D', N'0987654321', N'Cần Thơ', 3, 1, NULL, 3);
+
+-- Chèn người dùng thường dùng gói Free (service_package_id = 1)
+INSERT INTO users (
+    email, password, fullname, phone, address, role_id, status, service_package_id, is_active, verification_token
+) VALUES
+('user1@example.com', '123456Aa', N'Nguyễn Văn A', '0912345678', N'123 Đường ABC, Quận 1', 1, 1, 1, 1, NEWID()),
+
+-- Chèn người dùng dùng gói trả phí chưa được kích hoạt
+
+('user2@example.com', '123456Aa', N'Trần Thị B', '0987654321', N'456 Đường XYZ, Quận 2', 1, 1, 2, 0, NEWID()),
+
+-- Chèn nhân viên
+
+('staff1@pettech.com', '123456Aa', N'Nhân viên C', '0909999999', N'789 Đường DEF, Quận 3', 2, 1, 2, 1, NEWID()),
+
+-- Chèn admin
+
+('admin@pettech.com', '123456Aa', N'Quản trị viên D', '0938888888', N'321 Đường GHI, Quận 4', 3, 1, 3, 1, NEWID());
 
 
 -- 6. Sản phẩm và danh mục
@@ -304,15 +412,63 @@ VALUES
 (3, 2);
 
 -- 7. Đơn hàng & thanh toán
+
+-- Đầu tiên, tạo đơn hàng
 INSERT INTO orders (user_id, total_amount, commission, status)
-VALUES (1, 350000, 10500, 'pending');
+VALUES 
+(1, 350000, 10500, N'completed'),
+(1, 120000, 3600, N'completed');
 
+-- Thêm sản phẩm vào đơn hàng
 INSERT INTO order_items (order_id, product_id, quantity, price)
-VALUES (1, 1, 1, 350000);
+VALUES 
+(1, 1, 1, 350000),
+(2, 2, 1, 120000);
 
-INSERT INTO payments (order_id, payment_date, method, amount)
-VALUES (1, GETDATE(), 'VNPay', 350000);
+-- Sau đó mới thêm thanh toán
+-- Thanh toán bằng QR Momo (cho đơn hàng 1)
+INSERT INTO payments (
+    user_id,
+    order_id,
+    payment_method,
+    amount,
+    status,
+    transaction_id,
+    qr_code_url
+)
+VALUES (
+    1,
+    1,
+    'MOMO_QR',
+    350000,
+    'completed',
+    'MOMO' + CAST(FLOOR(RAND() * 1000000) AS VARCHAR),
+    'https://example.com/qr/momo/123456'
+);
 
+-- Thanh toán bằng QR Ngân hàng (cho đơn hàng 2)
+INSERT INTO payments (
+    user_id,
+    order_id,
+    payment_method,
+    amount,
+    status,
+    transaction_id,
+    qr_code_url,
+    bank_account_number,
+    bank_name
+)
+VALUES (
+    1,
+    2,
+    'BANK_QR',
+    120000,
+    'completed',
+    'BANK' + CAST(FLOOR(RAND() * 1000000) AS VARCHAR),
+    'https://example.com/qr/bank/789012',
+    '1234567890',
+    N'Ngân hàng TMCP Ngoại thương Việt Nam (Vietcombank)'
+);
 
 
 -- ===========================================
@@ -1099,38 +1255,6 @@ DBCC CHECKIDENT ('course_modules', RESEED, 0);
 
 
 
--- Bảng loại tin tức
-CREATE TABLE BlogCategories (
-    category_id INT PRIMARY KEY IDENTITY(1,1),
-    category_name NVARCHAR(100) NOT NULL,
-    description NVARCHAR(255),
-    created_at DATETIME DEFAULT GETDATE()
-);
-
--- Bảng tin tức
-CREATE TABLE Blogs (
-    blog_id INT PRIMARY KEY IDENTITY(1,1),
-    title NVARCHAR(255) NOT NULL,
-    content NVARCHAR(MAX) NOT NULL,
-    short_description NVARCHAR(500),
-    image_url NVARCHAR(255),
-    category_id INT FOREIGN KEY REFERENCES BlogCategories(category_id),
-    author_id INT, -- Có thể tham chiếu đến bảng Users nếu cần
-    author_name NVARCHAR(100) DEFAULT 'Admin',
-    view_count INT DEFAULT 0,
-    is_featured BIT DEFAULT 0,
-    created_at DATETIME DEFAULT GETDATE(),
-    updated_at DATETIME DEFAULT GETDATE()
-);
-
--- Bảng bình luận (nếu cần)
-CREATE TABLE BlogComments (
-    comment_id INT PRIMARY KEY IDENTITY(1,1),
-    blog_id INT FOREIGN KEY REFERENCES Blogs(blog_id),
-    user_id INT, -- Tham chiếu đến bảng Users
-    content NVARCHAR(1000) NOT NULL,
-    created_at DATETIME DEFAULT GETDATE()
-);
 
 -- Thêm dữ liệu loại tin tức
 INSERT INTO BlogCategories (category_name, description) VALUES
@@ -1173,3 +1297,4 @@ Biểu hiện thường thấy là chó gãi nhiều, liếm liên tục ở m�
 Việc phát hiện sớm và điều trị kịp thời là yếu tố then chốt. Chủ nuôi nên đưa thú cưng đến bác sĩ thú y khi thấy dấu hiệu bất thường, đồng thời giữ gìn vệ sinh chỗ ở, thường xuyên tắm rửa bằng sữa tắm chuyên dụng và sử dụng thuốc chống ký sinh trùng định kỳ.
 
 Ngoài ra, chế độ ăn uống đủ dinh dưỡng, giàu Omega-3 và kẽm sẽ hỗ trợ sức khỏe làn da và bộ lông của chó. Nếu được chăm sóc đúng cách, chó sẽ ít bị bệnh da và luôn có một bộ lông mượt mà, khỏe mạnh.', N'Nhận biết và điều trị bệnh da ở chó', 'images/Blog/blog10.jpg', 3, 0);
+

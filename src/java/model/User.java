@@ -4,7 +4,8 @@
  */
 package model;
 
-import java.security.Timestamp;
+import java.sql.Timestamp; 
+import java.util.Date;
 
 /**
  *
@@ -22,12 +23,15 @@ public class User {
     private boolean status;
     private String verificationToken;
     private Timestamp createdAt; // thêm nếu muốn theo dõi ngày tạo
+    private boolean isActive;
     private Integer servicePackageId;
+    private String activationToken;
+    private java.util.Date tokenExpiry;
 
     public User() {
     }
 
-    public User(int id, String email, String password, String fullname, String phone, String address, int roleId, boolean status, String verificationToken, Timestamp createdAt, Integer servicePackageId) {
+    public User(int id, String email, String password, String fullname, String phone, String address, int roleId, boolean status, String verificationToken, Timestamp createdAt, boolean isActive, Integer servicePackageId, String activationToken, Date tokenExpiry) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -38,7 +42,10 @@ public class User {
         this.status = status;
         this.verificationToken = verificationToken;
         this.createdAt = createdAt;
+        this.isActive = isActive;
         this.servicePackageId = servicePackageId;
+        this.activationToken = activationToken;
+        this.tokenExpiry = tokenExpiry;
     }
 
     public int getId() {
@@ -121,6 +128,14 @@ public class User {
         this.createdAt = createdAt;
     }
 
+    public boolean isIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
+    }
+
     public Integer getServicePackageId() {
         return servicePackageId;
     }
@@ -129,4 +144,22 @@ public class User {
         this.servicePackageId = servicePackageId;
     }
 
+    public String getActivationToken() {
+        return activationToken;
+    }
+
+    public void setActivationToken(String activationToken) {
+        this.activationToken = activationToken;
+    }
+
+    public Date getTokenExpiry() {
+        return tokenExpiry;
+    }
+
+    public void setTokenExpiry(Date tokenExpiry) {
+        this.tokenExpiry = tokenExpiry;
+    }
+
+   
+   
 }

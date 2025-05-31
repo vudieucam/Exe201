@@ -1,6 +1,10 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:setLocale value="vi_VN" />
+<fmt:setBundle basename="messages" />
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -57,7 +61,7 @@
             .navbar-nav .nav-link:hover::after {
                 width: 100%;
             }
-/* Responsive */
+            /* Responsive */
             @media (max-width: 768px) {
                 .course-header h2 {
                     font-size: 2rem;
@@ -796,6 +800,52 @@
             .navbar-nav .dropdown-menu.blog-dropdown .view-all:hover {
                 text-decoration: underline;
             }
+
+            /*description goi dich vu */
+            /* Loại bỏ hoàn toàn background và các hiệu ứng không cần thiết */
+            .package-features {
+                list-style: none;
+                padding-left: 0;
+                margin-left: 0;
+            }
+
+            .package-features li {
+                background: none !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 8px 0 8px 25px !important;
+                margin-bottom: 8px;
+                position: relative;
+                color: #6b4b2f;
+                text-align: left;
+            }
+
+            /* Giữ lại icon chân chó */
+            .package-features li:before {
+                content: "🐾";
+                position: absolute;
+                left: 0;
+                top: 8px;
+            }
+
+            /* Điều chỉnh icon check/x */
+            .package-features li i {
+                margin-right: 8px;
+                font-size: 16px;
+            }
+
+            /* Loại bỏ hiệu ứng hover */
+            .package-features li:hover {
+                background: none !important;
+                transform: none !important;
+                padding-left: 25px !important;
+            }
+
+            /* Đảm bảo không có khoảng cách thừa */
+            .package-features-container {
+                padding: 0;
+                margin: 0;
+            }
         </style>
     </head>
     <body>
@@ -896,8 +946,8 @@
             </div>
         </nav>
         <!-- END nav -->
-        
-        
+
+
         <section class="ftco-section bg-light">
             <div class="container">
                 <div class="row justify-content-center pb-5 mb-3">
@@ -951,8 +1001,8 @@
                             <c:forEach var="pkg" items="${packages}">
                                 <div class="col-md-4 mb-4 ftco-animate">
                                     <div class="package-card
-                                         <c:if test="${pkg.id == currentPackageId}">current</c:if>
-                                         <c:if test="${currentPackageId != null && pkg.id < currentPackageId}">registered</c:if>">
+                                         <c:if test="${pkg.id == currentPackageId}"> current</c:if>
+                                         <c:if test="${currentPackageId != null && pkg.id < currentPackageId}"> registered</c:if>">
 
                                              <div class="package-header">
                                                  <h3>${pkg.name}</h3>
@@ -962,17 +1012,49 @@
                                              <div class="package-price mb-3">
                                                  <c:choose>
                                                      <c:when test="${pkg.price == 0}">
-                                                         <span class="display-4">0₫</span>
+                                                         <span class="display-4"><fmt:formatNumber value="${pkg.price}" type="number" groupingUsed="true" />₫</span>
+
                                                      </c:when>
                                                      <c:otherwise>
-                                                         <span class="display-4">${pkg.price}₫</span>
-                                                         <small class="text-muted">Trọn đời</small>
+                                                         <span class="display-4">
+                                                             <fmt:formatNumber value="${pkg.price}" type="number" groupingUsed="true" />
+                                                             ₫
+                                                         </span>
+                                                         <small class="text-muted">/Tháng</small>
                                                      </c:otherwise>
+
                                                  </c:choose>
                                              </div>
 
                                              <ul class="package-features list-unstyled mb-4">
-                                                 <li class="mb-2"><i class="fas fa-paw mr-2"></i>${pkg.description}</li>
+                                                 <c:choose>
+                                                     <c:when test="${pkg.id == 1}">
+                                                         <li><i></i>Truy cập bài viết cơ bản (giới hạn)</li>
+                                                         <li><i></i>Tham gia thảo luận các bài viết</li>
+                                                         <li><i></i>Bài viết nâng cao theo loại thú cưng</li>
+                                                         <li><i></i>Khóa học cơ bản</li>
+                                                         </c:when>
+
+                                                     <c:when test="${pkg.id == 2}">
+                                                         <li><i></i>Truy cập bài viết cơ bản</li>
+                                                         <li><i></i>Tham gia thảo luận các bài viết</li>
+                                                         <li><i></i>Video hướng dẫn không giới hạn</li>
+                                                         <li><i></i>Bài viết nâng cao theo loại thú cưng</li>
+                                                         <li><i></i>Khóa học cơ bản</li>
+                                                         <li><i></i>Tư vấn chuyên gia 1 lần/Tuần</li>
+                                                         </c:when>
+
+                                                     <c:when test="${pkg.id == 3}">
+                                                         <li><i></i>Truy cập bài viết cơ bản</li>
+                                                         <li><i></i>Tham gia thảo luận các bài viết</li>
+                                                         <li><i></i>Video hướng dẫn không giới hạn</li>
+                                                         <li><i></i>Bài viết nâng cao theo loại thú cưng</li>
+                                                         <li><i></i>Tất cả khóa học cơ bản & nâng cao</li>
+                                                         <li><i></i>Tư vấn 1-1 không giới hạn</li>
+                                                         <li><i></i>Tài liệu độc quyền</li>
+                                                         <li><i></i>Ưu đãi 10% sản phẩm từ hệ thống</li>
+                                                         </c:when>
+                                                     </c:choose>
                                              </ul>
 
                                              <div class="package-actions">
@@ -983,36 +1065,17 @@
                                                          </a>
                                                      </c:when>
                                                      <c:otherwise>
-                                                         <c:choose>
-                                                             <c:when test="${pkg.id == currentPackageId}">
-                                                                 <a href="package?action=upgrade&packageId=${pkg.id}" class="btn btn-package btn-block py-3">
-                                                                     <i class="fas fa-arrow-up mr-2"></i>Đăng ký ngay
-                                                                 </a>
-                                                             </c:when>
-                                                             <c:when test="${currentPackageId != null && pkg.id < currentPackageId}">
-                                                                 <a href="package?action=upgrade&packageId=${pkg.id}" class="btn btn-package btn-block py-3">
-                                                                     <i class="fas fa-arrow-up mr-2"></i>Đăng ký ngay
-                                                                 </a>
-                                                             </c:when>
-
-                                                             <c:when test="${currentPackageId != null && pkg.id > currentPackageId}">
-                                                                 <a href="package?action=upgrade&packageId=${pkg.id}" class="btn btn-package btn-block py-3">
-                                                                     <i class="fas fa-arrow-up mr-2"></i>Đăng ký ngay
-                                                                 </a>
-                                                             </c:when>
-                                                             <c:otherwise>
-                                                                 <form action="package" method="post" class="mb-0">
-                                                                     <input type="hidden" name="action" value="register">
-                                                                     <input type="hidden" name="packageId" value="${pkg.id}">
-                                                                     <a href="package?action=upgrade&packageId=${pkg.id}" class="btn btn-package btn-block py-3">
-                                                                         <i class="fas fa-arrow-up mr-2"></i> Đăng ký ngay
-                                                                     </a>
-                                                                 </form>
-                                                             </c:otherwise>
-                                                         </c:choose>
+                                                         <a href="package?action=upgrade&packageId=${pkg.id}" class="btn btn-package btn-block py-3">
+                                                             <i class="fas fa-arrow-up mr-2"></i>
+                                                             <c:choose>
+                                                                 <c:when test="${pkg.id == currentPackageId}">Đang sử dụng</c:when>
+                                                                 <c:otherwise>Đăng ký ngay</c:otherwise>
+                                                             </c:choose>
+                                                         </a>
                                                      </c:otherwise>
                                                  </c:choose>
                                              </div>
+
                                          </div>
                                     </div>
                                 </div>
@@ -1020,6 +1083,7 @@
                         </c:otherwise>
                     </c:choose>
                 </div>
+
         </section>
 
         <!-- Footer -->
