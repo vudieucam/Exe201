@@ -4,7 +4,7 @@
  */
 package customer.Course;
 
-import dal.CourseDAO;
+import dal.CustomerCourseDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -42,7 +42,7 @@ public class CourseDetailServlet extends HttpServlet {
         }
     }
 
-    private CourseDAO courseDAO = new CourseDAO();
+    private CustomerCourseDAO courseDAO = new CustomerCourseDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)

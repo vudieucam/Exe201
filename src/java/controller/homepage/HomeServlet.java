@@ -4,7 +4,7 @@
  */
 package controller.homepage;
 
-import dal.CourseDAO;
+import dal.CustomerCourseDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import model.Course;
+import model.User;
 
 /**
  *
@@ -21,12 +22,12 @@ import model.Course;
  */
 public class HomeServlet extends HttpServlet {
 
-    private CourseDAO courseDAO;
+    private CustomerCourseDAO courseDAO;
 
     @Override
     public void init() throws ServletException {
         super.init();
-        courseDAO = new CourseDAO();
+        courseDAO = new CustomerCourseDAO();
     }
 
     /**
@@ -42,22 +43,31 @@ public class HomeServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         HttpSession session = request.getSession();
-
+        User currentUser = (User) session.getAttribute("user");
+        // Kiểm tra đăng nhập và role
+        if (currentUser == null) {
+            response.sendRedirect("authen?action=login");
+            return;
+        } else if (currentUser.getRoleId() == 1) {
+            request.getRequestDispatcher("/Home.jsp").forward(request, response);
+            return;
+        } else if (currentUser.getRoleId() == 2 || currentUser.getRoleId() == 3) {
+            request.getRequestDispatcher("/Admin.jsp").forward(request, response);
+            return;
+        }
         try {
             // Lấy danh sách khóa học nổi bật (giới hạn 3 khóa)
             List<Course> featuredCourses = courseDAO.getFeaturedCourses(3);
-            session.setAttribute("featuredCourses", featuredCourses);
-
-            // Đặt các thuộc tính vào request
+            //session.setAttribute("featuredCourses", featuredCourses);
             request.setAttribute("featuredCourses", featuredCourses);
 
             // Forward đến trang JSP
-            request.getRequestDispatcher("Home.jsp").forward(request, response);
+            request.getRequestDispatcher("/Home.jsp").forward(request, response);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            
             request.setAttribute("errorMessage", "Đã xảy ra lỗi khi tải dữ liệu trang chủ");
-            request.getRequestDispatcher("Home.jsp").forward(request, response);
+            request.getRequestDispatcher("/Home.jsp").forward(request, response);
         }
     }
 

@@ -4,7 +4,7 @@
  */
 package customer.Course;
 
-import dal.CourseDAO;
+import dal.CustomerCourseDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -37,14 +37,14 @@ public class CourseServlet extends HttpServlet {
         }
     }
 
-    private CourseDAO courseDAO = new CourseDAO();
+    private CustomerCourseDAO courseCDAO = new CustomerCourseDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
             // Lấy danh sách khóa học nổi bật cho menu dropdown
-            List<Course> featuredCourses = courseDAO.getFeaturedCourses(9);
+            List<Course> featuredCourses = courseCDAO.getFeaturedCourses(9);
             request.setAttribute("featuredCourses", featuredCourses);
             String searchQuery = request.getParameter("search");
             String pageParam = request.getParameter("page");
@@ -55,11 +55,11 @@ public class CourseServlet extends HttpServlet {
             int totalCourses;
 
             if (searchQuery != null && !searchQuery.isEmpty()) {
-                courses = courseDAO.searchCourses(searchQuery, currentPage, recordsPerPage);
-                totalCourses = courseDAO.getTotalSearchCourses(searchQuery);
+                courses = courseCDAO.searchCourses(searchQuery, currentPage, recordsPerPage);
+                totalCourses = courseCDAO.getTotalSearchCourses(searchQuery);
             } else {
-                courses = courseDAO.getCoursesByPage(currentPage, recordsPerPage);
-                totalCourses = courseDAO.getTotalCourses();
+                courses = courseCDAO.getCoursesByPage(currentPage, recordsPerPage);
+                totalCourses = courseCDAO.getTotalCourses();
             }
 
             int totalPages = (int) Math.ceil((double) totalCourses / recordsPerPage);

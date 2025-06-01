@@ -19,6 +19,7 @@ public class Blog {
     private String imageUrl;
     private int categoryId;
     private String categoryName;
+    private Integer authorId;
     private String authorName;
     private int viewCount;
     private boolean isFeatured;
@@ -28,7 +29,7 @@ public class Blog {
     public Blog() {
     }
 
-    public Blog(int blogId, String title, String content, String shortDescription, String imageUrl, int categoryId, String categoryName, String authorName, int viewCount, boolean isFeatured, Date createdAt, Date updatedAt) {
+    public Blog(int blogId, String title, String content, String shortDescription, String imageUrl, int categoryId, String categoryName, Integer authorId, String authorName, int viewCount, boolean isFeatured, Date createdAt, Date updatedAt) {
         this.blogId = blogId;
         this.title = title;
         this.content = content;
@@ -36,6 +37,7 @@ public class Blog {
         this.imageUrl = imageUrl;
         this.categoryId = categoryId;
         this.categoryName = categoryName;
+        this.authorId = authorId;
         this.authorName = authorName;
         this.viewCount = viewCount;
         this.isFeatured = isFeatured;
@@ -99,6 +101,14 @@ public class Blog {
         this.categoryName = categoryName;
     }
 
+    public Integer getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(Integer authorId) {
+        this.authorId = authorId;
+    }
+
     public String getAuthorName() {
         return authorName;
     }
@@ -139,4 +149,7 @@ public class Blog {
         this.updatedAt = updatedAt;
     }
 
+    
+    
+    
 }

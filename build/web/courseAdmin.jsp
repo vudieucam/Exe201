@@ -6,9 +6,64 @@
 
 
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@page import="model.Course" %>
+<%@page import="model.CourseModule" %>
+<%@page import="model.CourseLesson" %>
+<%@page import="dal.CourseDAO" %>
+<%@page import="java.util.List" %>
+<%@page import="java.text.SimpleDateFormat" %>
+<%@page import="java.util.Date" %>
+
+<c:if test="${not empty error}">
+    <div class="alert alert-danger alert-dismissible fade show">
+        ${error}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <c:remove var="error" scope="session"/>
+</c:if>
+
+<%
+    // Khởi tạo DAO
+    CourseDAO courseDAO = new CourseDAO();
+
+    // Xử lý courseId
+    int courseId = 0;
+    try {
+        String courseIdParam = request.getParameter("id");
+        if (courseIdParam != null && !courseIdParam.isEmpty()) {
+            courseId = Integer.parseInt(courseIdParam);
+        }
+    } catch (NumberFormatException e) {
+        // Xử lý khi ID không hợp lệ
+        request.setAttribute("error", "ID khóa học không hợp lệ");
+    }
+
+    // Lấy danh sách courses từ request attribute hoặc từ DAO
+    List<Course> courses = (List<Course>) request.getAttribute("courses");
+    if (courses == null) {
+        courses = courseDAO.getAllCourses();
+    }
+
+    // Lấy danh sách modules nếu đang edit course
+    List<CourseModule> modules = null;
+    Course currentCourse = null;
+    if (courseId > 0) {
+        try {
+            currentCourse = courseDAO.getCourseDetails(courseId);
+            modules = courseDAO.getCourseModules(courseId);
+
+            // Kiểm tra course có tồn tại không
+            if (currentCourse == null) {
+                request.setAttribute("error", "Không tìm thấy khóa học với ID: " + courseId);
+            }
+        } catch (Exception e) {
+            request.setAttribute("error", "Lỗi khi tải thông tin khóa học: " + e.getMessage());
+        }
+    }
+%>
 
 
 <!DOCTYPE html>
@@ -20,6 +75,10 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"/>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <style>
             :root {
@@ -359,12 +418,170 @@
                 .navbar-toggler {
                     display: block;
                 }
-                
+
                 .admin-profile {
                     margin-top: 20px;
                 }
             }
+            /* Thêm vào phần style */
+            .table th {
+                position: relative;
+                cursor: pointer;
+                padding-right: 30px !important;
+            }
+
+            .sort-icon {
+                position: absolute;
+                right: 8px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #6c757d;
+                font-size: 0.8rem;
+            }
+
+            .sort-icon:hover {
+                color: var(--primary-color);
+            }
+
+            .column-search {
+                margin-top: 5px;
+                width: 100% !important;
+            }
+
+            .dataTables_wrapper .dataTables_filter input {
+                margin-left: 0.5em;
+                border: 1px solid #dee2e6;
+                border-radius: 4px;
+                padding: 5px 10px;
+            }
+
+            .dataTables_wrapper .dataTables_length select {
+                border: 1px solid #dee2e6;
+                border-radius: 4px;
+                padding: 5px;
+            }
+            /* Thêm vào phần CSS */
+            .form-control[readonly] {
+                background-color: #f8f9fa;
+                border-color: #e9ecef;
+                cursor: not-allowed;
+            }
         </style>
+        <!-- Thêm phần script để xử lý AJAX -->
+        <script>
+            $(document).ready(function () {
+                $('#courseTable').DataTable({
+                    dom: 'Bfrtip',
+                    buttons: [
+                        'copy', 'csv', 'excel', 'pdf', 'print'
+                    ],
+                    columnDefs: [
+                        {targets: 0, type: 'num'}, // Cột ID sắp xếp số
+                        {targets: 1, type: 'string'}, // Cột Tên khóa học sắp xếp chuỗi
+                        {targets: 2, type: 'string'}, // Cột Giảng viên sắp xếp chuỗi
+                        {targets: 3, type: 'string'}, // Cột Danh mục sắp xếp chuỗi
+                        {targets: 4, type: 'string'}, // Cột Thời lượng sắp xếp chuỗi
+                        {targets: [6], orderable: false} // Tắt sắp xếp cho cột hành động
+                    ],
+                    language: {
+                        url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/vi.json'
+                    },
+                    initComplete: function () {
+                        // Thêm ô tìm kiếm cho từng cột
+                        this.api().columns().every(function () {
+                            var column = this;
+                            var header = $(column.header());
+
+                            // Chỉ thêm search cho các cột không phải hành động
+                            if (header.index() !== 6) {
+                                var input = $('<input type="text" class="column-search form-control form-control-sm" placeholder="Tìm..."/>')
+                                        .appendTo(header)
+                                        .on('keyup change', function () {
+                                            if (column.search() !== this.value) {
+                                                column.search(this.value).draw();
+                                            }
+                                        });
+
+                                // Thêm icon sort cho header
+                                header.css('position', 'relative');
+                                $('<span class="sort-icon"><i class="bi bi-arrow-down-up"></i></span>')
+                                        .appendTo(header)
+                                        .on('click', function () {
+                                            column.order(column.order() === 'asc' ? 'desc' : 'asc').draw();
+                                        });
+                            }
+                        });
+                    }
+                });
+
+                // Style cho phần search
+                $('.dataTables_filter input').addClass('form-control form-control-sm');
+            });
+            // Function to edit module
+            function editModule(moduleId, title, description) {
+                document.getElementById('editModuleId').value = moduleId;
+                document.getElementById('editModuleTitle').value = title;
+                document.getElementById('editModuleDescription').value = description;
+                var editModal = new bootstrap.Modal(document.getElementById('editModuleModal'));
+                editModal.show();
+            }
+
+            // Function to delete module
+            function deleteModule(moduleId) {
+                if (confirm('Bạn có chắc chắn muốn xóa module này? Tất cả bài học trong module cũng sẽ bị xóa.')) {
+                    window.location.href = 'courseadmin?action=deleteModule&id=' + moduleId;
+                }
+            }
+
+            // Function to edit lesson
+            function editLesson(lessonId, title, content, videoUrl) {
+                document.getElementById('editLessonId').value = lessonId;
+                document.getElementById('editLessonTitle').value = title;
+                document.getElementById('editLessonContent').value = content;
+                document.getElementById('editLessonVideoUrl').value = videoUrl || '';
+                var editModal = new bootstrap.Modal(document.getElementById('editLessonModal'));
+                editModal.show();
+            }
+
+            // Function to delete lesson
+            function deleteLesson(lessonId) {
+                if (confirm('Bạn có chắc chắn muốn xóa bài học này?')) {
+                    window.location.href = 'courseadmin?action=deleteLesson&id=' + lessonId;
+                }
+            }
+            function deleteCourse(id) {
+                if (confirm("Bạn có chắc muốn xóa khóa học này không?")) {
+                    window.location.href = 'courseadmin?action=delete&id=' + id;
+                }
+            }
+
+            function toggleCourseStatus(id) {
+                window.location.href = 'courseadmin?action=toggleStatus&id=' + id;
+            }
+            // Initialize Select2
+            $(document).ready(function () {
+                $('.form-select').select2({
+                    minimumResultsForSearch: Infinity
+                });
+            });
+            // Xử lý khi click nút chỉnh sửa danh mục
+            function openEditCategoryModal(id, name) {
+                document.getElementById('editCategoryId').value = id;
+                document.getElementById('editCategoryName').value = name;
+
+                // Cập nhật action cho form
+                document.getElementById('editCategoryForm').action =
+                        '${pageContext.request.contextPath}/courseadmin?action=updateCategory';
+
+                // Mở modal
+                var modal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
+                modal.show();
+            }
+
+
+
+
+        </script>
     </head>
     <body>
         <div class="container-fluid">
@@ -387,7 +604,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="courseAdmin.jsp">
+                            <a class="nav-link" href="courseadmin">
                                 <i class="bi bi-book"></i>Khóa học
                             </a>
                         </li>
@@ -427,7 +644,7 @@
                             </a>
                         </li>
                     </ul>
-                    
+
                     <!-- Admin Profile Section -->
                     <div class="admin-profile">
                         <div class="dropdown">
@@ -440,12 +657,12 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="editProfile.jsp">
-                                    <i class="bi bi-person me-2"></i>Thông tin cá nhân
-                                </a></li>
+                                        <i class="bi bi-person me-2"></i>Thông tin cá nhân
+                                    </a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item logout" href="home">
-                                    <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
-                                </a></li>
+                                        <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                                    </a></li>
                             </ul>
                         </div>
                     </div>
@@ -454,511 +671,574 @@
                 <!-- Main Content -->
                 <div class="col-md-10 p-4">
                     <div class="tab-content">
-
-                        <!-- Courses Tab -->
-                        <div class="tab-pane show active" id="courses">
-
-                            <h2 class="mb-4">Quản lý Khóa học</h2>
-
-                            <!-- Filter Section -->
-                            <div class="filter-section">
-                                <div class="row">
-
-                                    <div class="col-md-3">
-                                        <label class="form-label filter-title">Tìm kiếm</label>
-                                        <div class="input-group">
-                                            <input type="text" class="form-control" id="course-search" placeholder="Tìm kiếm..." oninput="filterCourseTable(this, 1)">
-                                            <button class="btn btn-primary" type="button">
-                                                <i class="bi bi-search"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                        <c:if test="${not empty success}">
+                            <div class="alert alert-success alert-dismissible fade show">
+                                ${success}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
+                            <c:remove var="success" scope="session"/>
+                        </c:if>
 
-                            <div class="card">
-                                <div class="card-header d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+                        <c:if test="${not empty error}">
+                            <div class="alert alert-danger alert-dismissible fade show">
+                                ${error}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                            <c:remove var="error" scope="session"/>
+                        </c:if>
+                        <!-- Courses Tab -->
+
+                        <h2 class="mb-4">Quản lý Khóa học</h2>
+
+                        <!-- Filter Section -->
+                        <div class="filter-section mb-4">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCourseModal">
                                             <i class="bi bi-plus-circle me-1"></i> Thêm khóa học
                                         </button>
 
+                                        <!-- Nút thêm danh mục -->
+                                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                                            <i class="bi bi-tags me-1"></i> Quản lý Danh mục
+                                        </button>
                                     </div>
-                                    <div>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-secondary active">Tất cả (86)</button>
-                                            <button class="btn btn-sm btn-outline-secondary">Đang hoạt động (72)</button>
-                                            <button class="btn btn-sm btn-outline-secondary">Bản nháp (8)</button>
-                                            <button class="btn btn-sm btn-outline-secondary">Lưu trữ (6)</button>
+                                </div>
+
+
+                            </div>
+                        </div>
+
+                        <!-- Course List -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h4>Danh sách Khóa học</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table id="courseTable" class="table table-hover table-striped">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th width="5%">ID</th>
+                                                <th width="27%">Tên khóa học</th>
+                                                <th width="15%">Giảng viên</th>
+                                                <th width="18%">Danh mục</th>
+                                                <th width="12%">Thời lượng</th>
+                                                <th width="10%">Trạng thái</th>
+                                                <th width="20%">Hành động</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <c:forEach items="${courses}" var="course">
+                                                <tr>
+                                                    <td>${course.id}</td>
+                                                    <td>
+                                                        <a href="courseadmin?action=edit&id=${course.id}" class="text-primary fw-bold">
+                                                            ${course.title}
+                                                        </a>
+                                                    </td>
+                                                    <td>${course.researcher}</td>
+                                                    <td>${not empty course.categories ? course.categories : 'Chưa phân loại'}</td>
+                                                    <td>${course.time}</td>
+                                                    <td>
+                                                        <span class="badge ${course.status == 1 ? 'bg-success' : 'bg-secondary'}">
+                                                            ${course.status == 1 ? 'Active' : 'Inactive'}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex">
+                                                            <a href="courseadmin?action=edit&id=${course.id}" 
+                                                               class="btn btn-sm btn-outline-primary me-1" title="Sửa">
+                                                                <i class="bi bi-pencil"></i>
+                                                            </a>
+                                                            <button onclick="deleteCourse(${course.id})" 
+                                                                    class="btn btn-sm btn-outline-danger me-1" title="Xóa">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                            <button onclick="toggleCourseStatus(${course.id})" 
+                                                                    class="btn btn-sm ${course.status == 1 ? 'btn-outline-warning' : 'btn-outline-success'}"
+                                                                    title="${course.status == 1 ? 'Ẩn khóa học' : 'Hiện khóa học'}">
+                                                                <i class="bi ${course.status == 1 ? 'bi-eye-slash' : 'bi-eye'}"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </c:forEach>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal Thêm Danh mục -->
+                        <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form action="${pageContext.request.contextPath}/courseadmin?action=addCategory" method="POST">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Quản lý Danh mục Khóa học</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- Form thêm danh mục mới -->
+                                            <div class="mb-3">
+                                                <label class="form-label">Thêm danh mục mới</label>
+                                                <div class="input-group">
+                                                    <input type="text" name="categoryName" class="form-control" 
+                                                           placeholder="Nhập tên danh mục" required>
+                                                    <button type="submit" class="btn btn-primary">Thêm</button>
+                                                </div>
+                                            </div>
+
+                                            <!-- Danh sách danh mục hiện có -->
+                                            <div class="mb-3">
+                                                <label class="form-label">Danh sách danh mục</label>
+                                                <div class="list-group">
+                                                    <c:forEach items="${categories}" var="category">
+                                                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                            ${category.name}
+                                                            <div>
+                                                                <a href="${pageContext.request.contextPath}/courseadmin?action=editCategory&id=${category.id}" 
+                                                                   class="btn btn-sm btn-outline-primary me-1">
+                                                                    <i class="bi bi-pencil"></i>
+                                                                </a>
+                                                                <a href="${pageContext.request.pathInfo}?action=deleteCategory&id=${category.id}" 
+                                                                   class="btn btn-sm btn-outline-danger"
+                                                                   onclick="return confirm('Bạn có chắc muốn xóa danh mục này?')">
+                                                                    <i class="bi bi-trash"></i>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </c:forEach>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal Chỉnh sửa Danh mục (dynamic sẽ được thêm bằng JS) -->
+                        <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form id="editCategoryForm" method="POST">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Chỉnh sửa Danh mục</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="hidden" name="categoryId" id="editCategoryId">
+                                            <div class="mb-3">
+                                                <label class="form-label">Tên danh mục</label>
+                                                <input type="text" name="categoryName" id="editCategoryName" 
+                                                       class="form-control" required>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                            <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <c:if test="${not empty currentCourse}">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h4>Chi tiết Khóa học</h4>
+                                </div>
+                                <div class="card-body">
+                                    <form action="${pageContext.request.contextPath}/courseadmin?action=update" method="POST" enctype="multipart/form-data">
+                                        <input type=text" name="id" value="${currentCourse.id}" readonly="">
+
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">ID Khóa học</label>
+                                                <input type="text" class="form-control" value="${currentCourse.id}" readonly>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Tên khóa học</label>
+                                                <input type="text" name="title" class="form-control" value="${currentCourse.title}" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Giảng viên</label>
+                                                <input type="text" name="researcher" class="form-control" value="${currentCourse.researcher}" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Danh mục*</label>
+                                                <select name="categoryId" class="form-select" required>
+                                                    <option value="">-- Chọn danh mục --</option>
+                                                    <c:forEach items="${categories}" var="category">
+                                                        <option value="${category.id}" 
+                                                                ${currentCourse.categoryId == category.id ? 'selected' : ''}>
+                                                            ${category.name}
+                                                        </option>
+                                                    </c:forEach>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Ảnh hiện tại</label>
+                                                <c:choose>
+                                                    <c:when test="${not empty currentCourse.imageUrl}">
+                                                        <div>
+                                                            <img src="${pageContext.request.contextPath}/${currentCourse.imageUrl}" 
+                                                                 alt="Ảnh khóa học" style="max-height: 100px;">
+                                                        </div>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <div class="text-muted">Chưa có ảnh</div>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Cập nhật ảnh đại diện</label>
+                                                <input type="file" name="thumbnail" class="form-control" accept="image/*">
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Nội dung chi tiết</label>
+                                            <textarea name="content" class="form-control" rows="5" required>${not empty currentCourse.content ? fn:escapeXml(currentCourse.content) : ''}</textarea>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <div class="col-md-3">
+                                                <label class="form-label">Thời lượng</label>
+                                                <input type="text" name="time" class="form-control" 
+                                                       value="${not empty currentCourse.time ? currentCourse.time : ''}" required>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label">Trạng thái</label>
+                                                <select name="status" class="form-select">
+                                                    <option value="1" ${currentCourse.status == 1 ? 'selected' : ''}>Active</option>
+                                                    <option value="0" ${currentCourse.status == 0 ? 'selected' : ''}>Inactive</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="text-end">
+                                            <button type="submit" class="btn btn-primary">Cập nhật khóa học</button>
+                                            <a href="${pageContext.request.contextPath}/courseadmin" class="btn btn-secondary">Quay lại</a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </c:if>
+
+                        <!-- THÊM PHẦN NÀY ĐỂ HIỂN THỊ VÀ QUẢN LÝ MODULE/LESSON -->
+                        <!-- Modules Section -->
+                        <div class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h4>Modules</h4>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModuleModal">
+                                    <i class="bi bi-plus"></i> Thêm Module
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <c:choose>
+                                    <c:when test="${not empty modules}">
+                                        <div class="accordion" id="modulesAccordion">
+                                            <c:forEach items="${modules}" var="module">
+                                                <c:set var="lessons" value="${module.lessons}" />
+                                                <div class="accordion-item mb-2">
+                                                    <h2 class="accordion-header" id="heading${module.id}">
+                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                                                data-bs-target="#collapse${module.id}" aria-expanded="false">
+                                                            ${module.title}
+                                                            <span class="badge bg-primary ms-2">${not empty lessons ? fn:length(lessons) : 0} bài học</span>
+                                                        </button>
+                                                    </h2>
+                                                    <div id="collapse${module.id}" class="accordion-collapse collapse" 
+                                                         aria-labelledby="heading${module.id}" data-bs-parent="#modulesAccordion">
+                                                        <div class="accordion-body">
+                                                            <div class="d-flex justify-content-between mb-3">
+                                                                <p class="mb-0">${module.description}</p>
+                                                                <div>
+                                                                    <button class="btn btn-sm btn-outline-primary" 
+                                                                            onclick="editModule(${module.id}, '${fn:escapeXml(module.title)}', '${fn:escapeXml(module.description)}')">
+                                                                        <i class="bi bi-pencil"></i> Sửa
+                                                                    </button>
+                                                                    <button class="btn btn-sm btn-outline-danger" 
+                                                                            onclick="deleteModule(${module.id})">
+                                                                        <i class="bi bi-trash"></i> Xóa
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Lessons List -->
+                                                            <div class="module-lesson mt-3">
+                                                                <h5 class="d-flex justify-content-between align-items-center">
+                                                                    <span>Bài học</span>
+                                                                    <button class="btn btn-sm btn-primary" 
+                                                                            data-bs-toggle="modal" data-bs-target="#addLessonModal${module.id}">
+                                                                        <i class="bi bi-plus"></i> Thêm bài học
+                                                                    </button>
+                                                                </h5>
+
+                                                                <c:choose>
+                                                                    <c:when test="${not empty lessons}">
+                                                                        <div class="list-group">
+                                                                            <c:forEach items="${lessons}" var="lesson">
+                                                                                <div class="list-group-item lesson-item">
+                                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                                        <div>
+                                                                                            <h6 class="mb-1">${lesson.title}</h6>
+                                                                                            <c:if test="${not empty lesson.videoUrl}">
+                                                                                                <small><a href="${lesson.videoUrl}" target="_blank">Xem video</a></small>
+                                                                                            </c:if>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <button class="btn btn-sm btn-outline-primary"
+                                                                                                    onclick="editLesson(${lesson.id}, '${fn:escapeXml(lesson.title)}', '${fn:escapeXml(lesson.content)}', '${not empty lesson.videoUrl ? fn:escapeXml(lesson.videoUrl) : ''}')">
+                                                                                                <i class="bi bi-pencil"></i>
+                                                                                            </button>
+                                                                                            <button class="btn btn-sm btn-outline-danger"
+                                                                                                    onclick="deleteLesson(${lesson.id})">
+                                                                                                <i class="bi bi-trash"></i>
+                                                                                            </button>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </c:forEach>
+                                                                        </div>
+                                                                    </c:when>
+                                                                    <c:otherwise>
+                                                                        <p class="text-muted">Chưa có bài học nào trong module này</p>
+                                                                    </c:otherwise>
+                                                                </c:choose>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </c:forEach>
+                                        </div>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <p class="text-muted">Khóa học này chưa có module nào</p>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+                        </div>
+
+
+                        <!-- KẾT THÚC PHẦN MODULE/LESSON -->
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Course Modal -->
+            <div class="modal fade" id="addCourseModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <form action="${pageContext.request.contextPath}/courseadmin?action=add" method="POST" enctype="multipart/form-data">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Thêm khóa học mới</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Tên khóa học*</label>
+                                        <input type="text" name="title" class="form-control" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Giảng viên*</label>
+                                        <input type="text" name="researcher" class="form-control" required>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Danh mục*</label>
+                                            <select name="categoryId" class="form-select" required>
+                                                <option value="">-- Chọn danh mục --</option>
+                                                <c:forEach items="${categories}" var="category">
+                                                    <option value="${category.id}">${category.name}</option>
+                                                </c:forEach>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Trạng thái*</label>
+                                            <select name="status" class="form-select" required>
+                                                <option value="1">Active</option>
+                                                <option value="0">Inactive</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Nội dung chi tiết*</label>
+                                        <textarea name="content" class="form-control" rows="5" required></textarea>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Thời lượng*</label>
+                                            <input type="text" name="time" class="form-control" required>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label">Ảnh đại diện*</label>
+                                            <input type="file" name="thumbnail" class="form-control" accept="image/*" required>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover" id="courses-table">
-                                            <thead>
-                                                <tr>
-                                                    <th style="width: 50px">#</th>
-                                                    <th>Khóa học</th>
-                                                    <th>Giảng viên</th>
-                                                    <th>Danh mục</th>
-                                                    <th>Học viên</th>
-                                                    <th>Đánh giá</th>
-                                                    <th>Trạng thái</th>
-                                                    <th style="width: 100px">Hành động</th>
-                                                </tr>
-                                                <tr>
-                                                    <th style="width: 50px">
-                                                        <input type="text" class="form-control form-control-sm" placeholder="#" 
-                                                               oninput="filterCourseTable(this, 0)" />
-                                                    </th>
-                                                    <th>
-                                                        <input type="text" class="form-control form-control-sm" placeholder="Tên khóa học" 
-                                                               oninput="filterCourseTable(this, 1)" />
-                                                    </th>
-                                                    <th>
-                                                        <input type="text" class="form-control form-control-sm" placeholder="Giảng viên" 
-                                                               oninput="filterCourseTable(this, 2)" />
-                                                    </th>
-                                                    <th>
-                                                        <select class="form-select form-select-sm" onchange="filterCourseTable(this, 3)">
-                                                            <option value="">Tất cả</option>
-                                                            <option value="Lập trình">Lập trình</option>
-                                                            <option value="Thiết kế">Thiết kế</option>
-                                                            <option value="Kinh doanh">Kinh doanh</option>
-                                                            <option value="Ngôn ngữ">Ngôn ngữ</option>
-                                                        </select>
-                                                    </th>
-                                                    <th>
-                                                        <input type="text" class="form-control form-control-sm" placeholder="Số lượng" 
-                                                               oninput="filterCourseTable(this, 4)" />
-                                                    </th>
-                                                    <th>
-                                                        <input type="text" class="form-control form-control-sm" placeholder="Điểm" 
-                                                               oninput="filterCourseTable(this, 5)" />
-                                                    </th>
-                                                    <th>
-                                                        <select class="form-select form-select-sm" onchange="filterCourseTable(this, 6)">
-                                                            <option value="">Tất cả</option>
-                                                            <option value="Đang hoạt động">Đang hoạt động</option>
-                                                            <option value="Bản nháp">Bản nháp</option>
-                                                            <option value="Lưu trữ">Lưu trữ</option>
-                                                        </select>
-                                                    </th>
-                                                    <th style="width: 100px"></th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td>1</td>
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <img src="https://via.placeholder.com/40" class="rounded me-2" width="40" height="40">
-                                                            <div>
-                                                                <h6 class="mb-0">Lập trình Python cơ bản</h6>
-                                                                <small class="text-muted">12 bài học</small>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>Nguyễn Văn A</td>
-                                                    <td><span class="badge bg-primary">Lập trình</span></td>
-                                                    <td>1,245</td>
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <i class="bi bi-star-fill text-warning me-1"></i>
-                                                            <span>4.8</span>
-                                                        </div>
-                                                    </td>
-                                                    <td><span class="status-badge status-active">Đang hoạt động</span></td>
-                                                    <td>
-                                                        <button class="btn btn-sm btn-outline-primary action-btn">
-                                                            <i class="bi bi-eye"></i>
-                                                        </button>
-                                                        <button class="btn btn-sm btn-outline-secondary action-btn">
-                                                            <i class="bi bi-pencil"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>2</td>
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <img src="https://via.placeholder.com/40" class="rounded me-2" width="40" height="40">
-                                                            <div>
-                                                                <h6 class="mb-0">Thiết kế UI/UX</h6>
-                                                                <small class="text-muted">15 bài học</small>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>Trần Thị B</td>
-                                                    <td><span class="badge bg-success">Thiết kế</span></td>
-                                                    <td>876</td>
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <i class="bi bi-star-fill text-warning me-1"></i>
-                                                            <span>4.7</span>
-                                                        </div>
-                                                    </td>
-                                                    <td><span class="status-badge status-active">Đang hoạt động</span></td>
-                                                    <td>
-                                                        <button class="btn btn-sm btn-outline-primary action-btn">
-                                                            <i class="bi bi-eye"></i>
-                                                        </button>
-                                                        <button class="btn btn-sm btn-outline-secondary action-btn">
-                                                            <i class="bi bi-pencil"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>3</td>
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <img src="https://via.placeholder.com/40" class="rounded me-2" width="40" height="40">
-                                                            <div>
-                                                                <h6 class="mb-0">Marketing Online</h6>
-                                                                <small class="text-muted">10 bài học</small>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>Lê Văn C</td>
-                                                    <td><span class="badge bg-info">Kinh doanh</span></td>
-                                                    <td>654</td>
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <i class="bi bi-star-fill text-warning me-1"></i>
-                                                            <span>4.5</span>
-                                                        </div>
-                                                    </td>
-                                                    <td><span class="status-badge status-active">Đang hoạt động</span></td>
-                                                    <td>
-                                                        <button class="btn btn-sm btn-outline-primary action-btn">
-                                                            <i class="bi bi-eye"></i>
-                                                        </button>
-                                                        <button class="btn btn-sm btn-outline-secondary action-btn">
-                                                            <i class="bi bi-pencil"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>4</td>
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <img src="https://via.placeholder.com/40" class="rounded me-2" width="40" height="40">
-                                                            <div>
-                                                                <h6 class="mb-0">Tiếng Anh giao tiếp</h6>
-                                                                <small class="text-muted">20 bài học</small>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>Phạm Thị D</td>
-                                                    <td><span class="badge bg-warning">Ngôn ngữ</span></td>
-                                                    <td>1,532</td>
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <i class="bi bi-star-fill text-warning me-1"></i>
-                                                            <span>4.9</span>
-                                                        </div>
-                                                    </td>
-                                                    <td><span class="status-badge status-active">Đang hoạt động</span></td>
-                                                    <td>
-                                                        <button class="btn btn-sm btn-outline-primary action-btn">
-                                                            <i class="bi bi-eye"></i>
-                                                        </button>
-                                                        <button class="btn btn-sm btn-outline-secondary action-btn">
-                                                            <i class="bi bi-pencil"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>5</td>
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <img src="https://via.placeholder.com/40" class="rounded me-2" width="40" height="40">
-                                                            <div>
-                                                                <h6 class="mb-0">Machine Learning</h6>
-                                                                <small class="text-muted">18 bài học</small>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>Hoàng Văn E</td>
-                                                    <td><span class="badge bg-primary">Lập trình</span></td>
-                                                    <td>723</td>
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <i class="bi bi-star-fill text-warning me-1"></i>
-                                                            <span>4.6</span>
-                                                        </div>
-                                                    </td>
-                                                    <td><span class="status-badge status-draft">Bản nháp</span></td>
-                                                    <td>
-                                                        <button class="btn btn-sm btn-outline-primary action-btn">
-                                                            <i class="bi bi-eye"></i>
-                                                        </button>
-                                                        <button class="btn btn-sm btn-outline-secondary action-btn">
-                                                            <i class="bi bi-pencil"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                    <button type="submit" class="btn btn-primary">Thêm khóa học</button>
+                                </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
 
-                                    <!-- Pagination -->
-                                    <nav aria-label="Page navigation" class="mt-3">
-                                        <ul class="pagination justify-content-center">
-                                            <li class="page-item disabled">
-                                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
-                                                    <i class="bi bi-chevron-left"></i>
-                                                </a>
-                                            </li>
-                                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                            <li class="page-item">
-                                                <a class="page-link" href="#">
-                                                    <i class="bi bi-chevron-right"></i>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </nav>
+            <!-- Add Module Modal -->
+            <div class="modal fade" id="addModuleModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form action="${pageContext.request.contextPath}/courseadmin?action=addModule" method="POST">
+                            <input type="hidden" name="courseId" value="${not empty course ? course.id : ''}">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Thêm Module mới</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Tên Module*</label>
+                                    <input type="text" name="title" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Mô tả</label>
+                                    <textarea name="description" class="form-control" rows="3"></textarea>
                                 </div>
                             </div>
-                        </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                <button type="submit" class="btn btn-primary">Thêm Module</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
 
+            <!-- Edit Module Modal -->
+            <div class="modal fade" id="editModuleModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form action="${pageContext.request.contextPath}/courseadmin?action=updateModule" method="POST">
+                            <input type="hidden" name="courseId" value="${not empty course ? course.id : ''}">
+                            <input type="hidden" name="moduleId" id="editModuleId">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Chỉnh sửa Module</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Tên Module*</label>
+                                    <input type="text" name="title" id="editModuleTitle" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Mô tả</label>
+                                    <textarea name="description" id="editModuleDescription" class="form-control" rows="3"></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
 
-
-                        <!-- Add Course Modal -->
-                        <div class="modal fade" id="addCourseModal" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content">
+            <!-- Add Lesson Modal (dynamic - one for each module) -->
+            <c:if test="${not empty modules}">
+                <c:forEach items="${modules}" var="module">
+                    <div class="modal fade" id="addLessonModal${module.id}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <form action="${pageContext.request.contextPath}/courseadmin?action=addLesson" method="POST">
+                                    <input type="hidden" name="moduleId" value="${module.id}">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="addCourseModalLabel">Thêm khóa học mới</h5>
+                                        <h5 class="modal-title">Thêm bài học mới</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <form>
-                                            <div class="row mb-3">
-                                                <div class="col-md-6">
-                                                    <label for="courseName" class="form-label">Tên khóa học</label>
-                                                    <input type="text" class="form-control" id="courseName" required>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="courseCategory" class="form-label">Danh mục</label>
-                                                    <select class="form-select" id="courseCategory" required>
-                                                        <option value="">Chọn danh mục</option>
-                                                        <option value="programming">Lập trình</option>
-                                                        <option value="design">Thiết kế</option>
-                                                        <option value="business">Kinh doanh</option>
-                                                        <option value="language">Ngôn ngữ</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="row mb-3">
-                                                <div class="col-md-6">
-                                                    <label for="courseInstructor" class="form-label">Giảng viên</label>
-                                                    <select class="form-select" id="courseInstructor" required>
-                                                        <option value="">Chọn giảng viên</option>
-                                                        <option value="1">Nguyễn Văn A</option>
-                                                        <option value="2">Trần Thị B</option>
-                                                        <option value="3">Lê Văn C</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="courseLevel" class="form-label">Cấp độ</label>
-                                                    <select class="form-select" id="courseLevel" required>
-                                                        <option value="">Chọn cấp độ</option>
-                                                        <option value="beginner">Cơ bản</option>
-                                                        <option value="intermediate">Trung cấp</option>
-                                                        <option value="advanced">Nâng cao</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="courseDescription" class="form-label">Mô tả khóa học</label>
-                                                <textarea class="form-control" id="courseDescription" rows="3" required></textarea>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="courseThumbnail" class="form-label">Ảnh đại diện</label>
-                                                <input class="form-control" type="file" id="courseThumbnail" accept="image/*">
-                                            </div>
-                                            <div class="row mb-3">
-                                                <div class="col-md-4">
-                                                    <label for="coursePrice" class="form-label">Giá (VND)</label>
-                                                    <input type="number" class="form-control" id="coursePrice" min="0">
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label for="courseDiscount" class="form-label">Giảm giá (%)</label>
-                                                    <input type="number" class="form-control" id="courseDiscount" min="0" max="100">
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label for="courseStatus" class="form-label">Trạng thái</label>
-                                                    <select class="form-select" id="courseStatus" required>
-                                                        <option value="draft">Bản nháp</option>
-                                                        <option value="active">Đang hoạt động</option>
-                                                        <option value="archived">Lưu trữ</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </form>
+                                        <div class="mb-3">
+                                            <label class="form-label">Tên bài học*</label>
+                                            <input type="text" name="title" class="form-control" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Nội dung*</label>
+                                            <textarea name="content" class="form-control" rows="5" required></textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Video URL (nếu có)</label>
+                                            <input type="url" name="videoUrl" class="form-control" placeholder="https://youtube.com/watch?v=...">
+                                        </div>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                                        <button type="button" class="btn btn-primary">Lưu khóa học</button>
+                                        <button type="submit" class="btn btn-primary">Thêm bài học</button>
                                     </div>
-                                </div>
+                                </form>
                             </div>
                         </div>
                     </div>
+                </c:forEach>
+            </c:if>
 
+            <!-- Edit Lesson Modal (dynamic) -->
+            <div class="modal fade" id="editLessonModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <form action="${pageContext.request.contextPath}/courseadmin?action=updateLesson" method="POST">
+                            <input type="hidden" name="lessonId" id="editLessonId">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Chỉnh sửa bài học</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Tên bài học*</label>
+                                    <input type="text" name="title" id="editLessonTitle" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Nội dung*</label>
+                                    <textarea name="content" id="editLessonContent" class="form-control" rows="5" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Video URL (nếu có)</label>
+                                    <input type="url" name="videoUrl" id="editLessonVideoUrl" class="form-control">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
         <!-- Scripts -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
         <script>
-                                                            // Initialize Select2
-                                                            $(document).ready(function () {
-                                                                $('.form-select').select2({
-                                                                    minimumResultsForSearch: Infinity
-                                                                });
-                                                                // Initialize charts
-                                                                const visitsCtx = document.getElementById('visitsChart').getContext('2d');
-                                                                const visitsChart = new Chart(visitsCtx, {
-                                                                    type: 'line',
-                                                                    data: {
-                                                                        labels: ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'],
-                                                                        datasets: [
-                                                                            {
-                                                                                label: 'Lượt truy cập',
-                                                                                data: [1200, 1900, 1700, 2100, 2300, 2000, 1800],
-                                                                                borderColor: '#4361ee',
-                                                                                backgroundColor: 'rgba(67, 97, 238, 0.1)',
-                                                                                tension: 0.3,
-                                                                                fill: true
-                                                                            },
-                                                                            {
-                                                                                label: 'Đăng ký mới',
-                                                                                data: [40, 60, 55, 75, 80, 70, 65],
-                                                                                borderColor: '#4cc9f0',
-                                                                                backgroundColor: 'rgba(76, 201, 240, 0.1)',
-                                                                                tension: 0.3,
-                                                                                fill: true
-                                                                            }
-                                                                        ]
-                                                                    },
-                                                                    options: {
-                                                                        responsive: true,
-                                                                        maintainAspectRatio: false,
-                                                                        plugins: {
-                                                                            legend: {
-                                                                                position: 'top',
-                                                                            }
-                                                                        },
-                                                                        scales: {
-                                                                            y: {
-                                                                                beginAtZero: true
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                });
-                                                                const packagesCtx = document.getElementById('packagesChart').getContext('2d');
-                                                                const packagesChart = new Chart(packagesCtx, {
-                                                                    type: 'doughnut',
-                                                                    data: {
-                                                                        labels: ['Free', 'Standard', 'Pro'],
-                                                                        datasets: [{
-                                                                                data: [35, 40, 25],
-                                                                                backgroundColor: [
-                                                                                    '#6c757d',
-                                                                                    '#38b000',
-                                                                                    '#4361ee'
-                                                                                ],
-                                                                                borderWidth: 0
-                                                                            }]
-                                                                    },
-                                                                    options: {
-                                                                        responsive: true,
-                                                                        maintainAspectRatio: false,
-                                                                        plugins: {
-                                                                            legend: {
-                                                                                position: 'right',
-                                                                            }
-                                                                        },
-                                                                        cutout: '70%'
-                                                                    }
-                                                                });
-                                                            });
-
-                                                            document.addEventListener('DOMContentLoaded', function () {
-                                                                const tables = document.querySelectorAll('table');
-
-                                                                tables.forEach(table => {
-                                                                    const filters = table.querySelectorAll('thead input, thead select');
-                                                                    const rows = table.querySelectorAll('tbody tr');
-
-                                                                    if (!filters.length || !rows.length)
-                                                                        return;
-
-                                                                    filters.forEach((filter, i) => {
-                                                                        filter.addEventListener('input', () => {
-                                                                            const filterValues = Array.from(filters).map(f => f.value.toLowerCase().trim());
-                                                                            rows.forEach(row => {
-                                                                                const cells = row.querySelectorAll('td');
-                                                                                let visible = true;
-                                                                                filterValues.forEach((val, j) => {
-                                                                                    if (!val)
-                                                                                        return;
-                                                                                    const text = cells[j]?.textContent?.toLowerCase() || '';
-                                                                                    if (!text.includes(val))
-                                                                                        visible = false;
-                                                                                });
-                                                                                row.style.display = visible ? '' : 'none';
-                                                                            });
-                                                                        });
-                                                                    });
-                                                                });
-                                                            });
-
-
-
-                                                            function filterCourseTable(input, columnIndex) {
-                                                                const filter = input.value.toUpperCase();
-                                                                const table = document.getElementById("courses-table");
-                                                                const rows = table.getElementsByTagName("tr");
-
-                                                                // Bắt đầu từ 2 để bỏ qua 2 hàng header
-                                                                for (let i = 2; i < rows.length; i++) {
-                                                                    const cell = rows[i].getElementsByTagName("td")[columnIndex];
-                                                                    if (cell) {
-                                                                        let txtValue = cell.textContent || cell.innerText;
-
-                                                                        // Xử lý đặc biệt cho cột đánh giá
-                                                                        if (columnIndex === 5) {
-                                                                            const ratingSpan = cell.querySelector('span');
-                                                                            if (ratingSpan) {
-                                                                                txtValue = ratingSpan.textContent || ratingSpan.innerText;
-                                                                            }
-                                                                        }
-
-                                                                        // Xử lý đặc biệt cho cột trạng thái
-                                                                        if (columnIndex === 6) {
-                                                                            const statusSpan = cell.querySelector('.status-badge');
-                                                                            if (statusSpan) {
-                                                                                txtValue = statusSpan.textContent || statusSpan.innerText;
-                                                                            }
-                                                                        }
-
-                                                                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                                                                            rows[i].style.display = "";
-                                                                        } else {
-                                                                            rows[i].style.display = "none";
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-
 
         </script>
     </body>

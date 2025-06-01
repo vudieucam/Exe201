@@ -1,8 +1,7 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -352,7 +351,7 @@
                 .navbar-toggler {
                     display: block;
                 }
-                
+
                 .admin-profile {
                     margin-top: 20px;
                 }
@@ -370,7 +369,7 @@
                     </div>
                     <ul class="nav flex-column mt-3">
                         <li class="nav-item">
-                            <a class="nav-link active" href="Admin.jsp">
+                            <a class="nav-link active" href="admin">
                                 <i class="bi bi-speedometer2"></i>Dashboard
                             </a>
                         </li>
@@ -380,7 +379,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="courseAdmin.jsp">
+                            <a class="nav-link" href="courseadmin">
                                 <i class="bi bi-book"></i>Khóa học
                             </a>
                         </li>
@@ -420,7 +419,7 @@
                             </a>
                         </li>
                     </ul>
-                    
+
                     <!-- Admin Profile Section -->
                     <div class="admin-profile">
                         <div class="dropdown">
@@ -433,12 +432,12 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="editProfile.jsp">
-                                    <i class="bi bi-person me-2"></i>Thông tin cá nhân
-                                </a></li>
+                                        <i class="bi bi-person me-2"></i>Thông tin cá nhân
+                                    </a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item logout" href="home">
-                                    <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
-                                </a></li>
+                                <li><a class="dropdown-item logout" href="authen?action=login">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                                    </a></li>
                             </ul>
                         </div>
                     </div>
@@ -454,12 +453,56 @@
                             <!-- Stat Cards -->
                             <div class="row mb-4">
                                 <div class="col-md-3 mb-3">
+                                    <div class="card stat-card bg-dark text-white animate-fade" style="animation-delay: 0.5s">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h5 class="card-title">Thống kê truy cập</h5>
+
+                                                    <!-- Dòng hiển thị số người đang online -->
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        <span class="badge bg-success me-2" style="width: 10px; height: 10px; border-radius: 50%;"></span>
+                                                        <div>
+                                                            <span class="small">Đang online:</span>
+                                                            <h4 class="mb-0 d-inline-block ms-2">${onlineUsers}</h4>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Dòng hiển thị tổng lượt truy cập -->
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="badge bg-primary me-2" style="width: 10px; height: 10px; border-radius: 50%;"></span>
+                                                        <div>
+                                                            <span class="small">Tổng lượt:</span>
+                                                            <h4 class="mb-0 d-inline-block ms-2">${totalVisitors}</h4>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Badge hiển thị trạng thái -->
+                                                    <c:choose>
+                                                        <c:when test="${onlineUsers > 50}">
+                                                            <span class="badge bg-success mt-2">Cao điểm</span>
+                                                        </c:when>
+                                                        <c:when test="${onlineUsers > 20}">
+                                                            <span class="badge bg-warning text-dark mt-2">Bình thường</span>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span class="badge bg-secondary mt-2">Thấp điểm</span>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </div>
+                                                <i class="bi bi-people fs-1 opacity-50"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3 mb-3">
                                     <div class="card stat-card bg-primary text-white animate-fade" style="animation-delay: 0.1s">
                                         <div class="card-body">
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div>
                                                     <h5 class="card-title">Người dùng</h5>
-                                                    <h2 class="card-text">1,245</h2>
+                                                    <h2 class="card-text">${totalUsers}</h2>
                                                     <span class="badge bg-white text-primary">+12%</span>
                                                 </div>
                                                 <i class="bi bi-people fs-1 opacity-50"></i>
@@ -473,7 +516,7 @@
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div>
                                                     <h5 class="card-title">Khóa học</h5>
-                                                    <h2 class="card-text">86</h2>
+                                                    <h2 class="card-text">${totalCourses}</h2>
                                                     <span class="badge bg-white text-success">+5%</span>
                                                 </div>
                                                 <i class="bi bi-book fs-1 opacity-50"></i>
@@ -487,7 +530,7 @@
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div>
                                                     <h5 class="card-title">Đơn hàng</h5>
-                                                    <h2 class="card-text">324</h2>
+                                                    <h2 class="card-text">${totalOrders}</h2>
                                                     <span class="badge bg-white text-info">-3%</span>
                                                 </div>
                                                 <i class="bi bi-cart fs-1 opacity-50"></i>
@@ -501,7 +544,7 @@
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div>
                                                     <h5 class="card-title">Doanh thu</h5>
-                                                    <h2 class="card-text">₫48.5M</h2>
+                                                    <h2 class="card-text">₫<fmt:formatNumber value="${totalRevenue}" pattern="#,##0.00"/></h2>
                                                     <span class="badge bg-white text-warning">+8%</span>
                                                 </div>
                                                 <i class="bi bi-currency-dollar fs-1 opacity-50"></i>
@@ -511,315 +554,218 @@
                                 </div>
                             </div>
 
-                            <!-- Charts Row -->
-                            <div class="row mb-4">
-                                <div class="col-md-8 mb-3">
-                                    <div class="card h-100">
-                                        <div class="card-header d-flex justify-content-between align-items-center">
-                                            <h5 class="mb-0">Lượt truy cập & Đăng ký</h5>
-                                            <div class="btn-group">
-                                                <button class="btn btn-sm btn-outline-secondary active">7 ngày</button>
-                                                <button class="btn btn-sm btn-outline-secondary">30 ngày</button>
-                                                <button class="btn btn-sm btn-outline-secondary">90 ngày</button>
-                                            </div>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="chart-container">
-                                                <canvas id="visitsChart"></canvas>
-                                            </div>
-                                        </div>
-                                    </div>
+
+                            <!-- Recent Activities -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Hoạt động gần đây</h5>
                                 </div>
-                                <div class="col-md-4 mb-3">
-                                    <div class="card h-100">
-                                        <div class="card-header">
-                                            <h5 class="mb-0">Phân phối gói dịch vụ</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="chart-container">
-                                                <canvas id="packagesChart"></canvas>
+                                <div class="card-body p-0">
+                                    <div class="list-group list-group-flush">
+                                        <c:forEach var="user" items="${recentUsers}">
+                                            <div class="list-group-item border-0 py-3">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="bg-primary bg-opacity-10 p-2 rounded-circle">
+                                                        <i class="bi bi-person-plus text-primary"></i>
+                                                    </div>
+                                                    <div class="ms-3">
+                                                        <h6 class="mb-0">Người dùng mới đăng ký</h6>
+                                                        <small class="text-muted">${user.fullname} - <fmt:formatDate value="${user.created_at}" pattern="dd/MM/yyyy HH:mm"/></small>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
+                                        </c:forEach>
+
+                                        <c:forEach var="order" items="${recentOrders}">
+                                            <div class="list-group-item border-0 py-3">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="bg-success bg-opacity-10 p-2 rounded-circle">
+                                                        <i class="bi bi-cart-check text-success"></i>
+                                                    </div>
+                                                    <div class="ms-3">
+                                                        <h6 class="mb-0">Đơn hàng mới</h6>
+                                                        <small class="text-muted">Đơn #${order.id} - <fmt:formatNumber value="${order.total_amount}" type="currency" currencySymbol="₫"/></small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </c:forEach>
+
+                                        <c:forEach var="payment" items="${recentPayments}">
+                                            <div class="list-group-item border-0 py-3">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="bg-info bg-opacity-10 p-2 rounded-circle">
+                                                        <i class="bi bi-credit-card text-info"></i>
+                                                    </div>
+                                                    <div class="ms-3">
+                                                        <h6 class="mb-0">Thanh toán mới</h6>
+                                                        <small class="text-muted">Số tiền: <fmt:formatNumber value="${payment.amount}" type="currency" currencySymbol="₫"/> - <fmt:formatDate value="${payment.payment_date}" pattern="dd/MM/yyyy HH:mm"/></small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </c:forEach>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Recent Activities & Top Courses -->
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <div class="card h-100">
-                                        <div class="card-header d-flex justify-content-between align-items-center">
-                                            <h5 class="mb-0">Hoạt động gần đây</h5>
-                                            <a href="#" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
-                                        </div>
-                                        <div class="card-body p-0">
-                                            <div class="list-group list-group-flush">
-                                                <div class="list-group-item border-0 py-3">
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle">
-                                                            <i class="bi bi-person-plus text-primary"></i>
-                                                        </div>
-                                                        <div class="ms-3">
-                                                            <h6 class="mb-0">Người dùng mới đăng ký</h6>
-                                                            <small class="text-muted">Nguyễn Văn A - 10 phút trước</small>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="list-group-item border-0 py-3">
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="bg-success bg-opacity-10 p-2 rounded-circle">
-                                                            <i class="bi bi-cart-check text-success"></i>
-                                                        </div>
-                                                        <div class="ms-3">
-                                                            <h6 class="mb-0">Đơn hàng mới</h6>
-                                                            <small class="text-muted">Đơn #ORD-1234 - 25 phút trước</small>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="list-group-item border-0 py-3">
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="bg-info bg-opacity-10 p-2 rounded-circle">
-                                                            <i class="bi bi-book text-info"></i>
-                                                        </div>
-                                                        <div class="ms-3">
-                                                            <h6 class="mb-0">Khóa học mới được thêm</h6>
-                                                            <small class="text-muted">Lập trình Python - 1 giờ trước</small>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="list-group-item border-0 py-3">
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="bg-warning bg-opacity-10 p-2 rounded-circle">
-                                                            <i class="bi bi-credit-card text-warning"></i>
-                                                        </div>
-                                                        <div class="ms-3">
-                                                            <h6 class="mb-0">Thanh toán thành công</h6>
-                                                            <small class="text-muted">Gói Pro - 2 giờ trước</small>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="list-group-item border-0 py-3">
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="bg-danger bg-opacity-10 p-2 rounded-circle">
-                                                            <i class="bi bi-chat-left-text text-danger"></i>
-                                                        </div>
-                                                        <div class="ms-3">
-                                                            <h6 class="mb-0">Bình luận mới</h6>
-                                                            <small class="text-muted">Bài viết "Học AI" - 3 giờ trước</small>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                            <!-- Top Courses -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Khóa học phổ biến</h5>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <div class="card h-100">
-                                        <div class="card-header">
-                                            <h5 class="mb-0">Khóa học phổ biến</h5>
-                                        </div>
-                                        <div class="card-body p-0">
-                                            <div class="table-responsive">
-                                                <table class="table table-hover mb-0">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Khóa học</th>
-                                                            <th>Lượt xem</th>
-                                                            <th>Tỉ lệ hoàn thành</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td>
-                                                                <div class="d-flex align-items-center">
-                                                                    <img src="https://via.placeholder.com/40" class="rounded me-2" width="40" height="40">
-                                                                    <span>Lập trình Python</span>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Khóa học</th>
+                                                    <th>Lượt truy cập</th>
+                                                    <th>Tỉ lệ hoàn thành</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <c:forEach var="course" items="${popularCourses}">
+                                                    <tr>
+                                                        <td>
+                                                            <div class="d-flex align-items-center">
+                                                                <img src="/images/course/course_${course.id}.jpg" class="rounded me-2" width="40" height="40" alt="${course.title}">
+                                                                <span>${course.title}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <c:set var="accessCount" value="${courseDAO.getAccessCount(course.id)}"/>
+                                                            ${accessCount}
+                                                        </td>
+                                                        <td>
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="progress progress-thin w-100 me-2">
+                                                                    <c:set var="completionRate" value="${courseDAO.getCompletionRate(course.id)}"/>
+                                                                    <div class="progress-bar bg-success" style="width: ${completionRate}%"></div>
                                                                 </div>
-                                                            </td>
-                                                            <td>1,245</td>
-                                                            <td>
-                                                                <div class="d-flex align-items-center">
-                                                                    <div class="progress progress-thin w-100 me-2">
-                                                                        <div class="progress-bar bg-success" style="width: 78%"></div>
-                                                                    </div>
-                                                                    <span>78%</span>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>
-                                                                <div class="d-flex align-items-center">
-                                                                    <img src="https://via.placeholder.com/40" class="rounded me-2" width="40" height="40">
-                                                                    <span>Machine Learning</span>
-                                                                </div>
-                                                            </td>
-                                                            <td>982</td>
-                                                            <td>
-                                                                <div class="d-flex align-items-center">
-                                                                    <div class="progress progress-thin w-100 me-2">
-                                                                        <div class="progress-bar bg-info" style="width: 65%"></div>
-                                                                    </div>
-                                                                    <span>65%</span>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>
-                                                                <div class="d-flex align-items-center">
-                                                                    <img src="https://via.placeholder.com/40" class="rounded me-2" width="40" height="40">
-                                                                    <span>Web Development</span>
-                                                                </div>
-                                                            </td>
-                                                            <td>876</td>
-                                                            <td>
-                                                                <div class="d-flex align-items-center">
-                                                                    <div class="progress progress-thin w-100 me-2">
-                                                                        <div class="progress-bar bg-warning" style="width: 52%"></div>
-                                                                    </div>
-                                                                    <span>52%</span>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>
-                                                                <div class="d-flex align-items-center">
-                                                                    <img src="https://via.placeholder.com/40" class="rounded me-2" width="40" height="40">
-                                                                    <span>Data Science</span>
-                                                                </div>
-                                                            </td>
-                                                            <td>754</td>
-                                                            <td>
-                                                                <div class="d-flex align-items-center">
-                                                                    <div class="progress progress-thin w-100 me-2">
-                                                                        <div class="progress-bar bg-primary" style="width: 45%"></div>
-                                                                    </div>
-                                                                    <span>45%</span>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
+                                                                <span>${completionRate}%</span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </c:forEach>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-
                     </div>
-
                 </div>
             </div>
-        </div>
 
-        <!-- Scripts -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+            <!-- Scripts -->
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+            <script>
+                const dailyVisits = ${dailyVisitsJson}; // [{"date":"2025-05-30", "count":120}, ...]
+            </script>
 
-        <script>
-            // Initialize Select2
-            $(document).ready(function () {
-                $('.form-select').select2({
-                    minimumResultsForSearch: Infinity
-                });
-                // Initialize charts
-                const visitsCtx = document.getElementById('visitsChart').getContext('2d');
-                const visitsChart = new Chart(visitsCtx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'],
-                        datasets: [
-                            {
-                                label: 'Lượt truy cập',
-                                data: [1200, 1900, 1700, 2100, 2300, 2000, 1800],
-                                borderColor: '#4361ee',
-                                backgroundColor: 'rgba(67, 97, 238, 0.1)',
-                                tension: 0.3,
-                                fill: true
-                            },
-                            {
-                                label: 'Đăng ký mới',
-                                data: [40, 60, 55, 75, 80, 70, 65],
-                                borderColor: '#4cc9f0',
-                                backgroundColor: 'rgba(76, 201, 240, 0.1)',
-                                tension: 0.3,
-                                fill: true
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                            }
+            <script>
+                // Initialize Select2
+                $(document).ready(function () {
+                    $('.form-select').select2({
+                        minimumResultsForSearch: Infinity
+                    });
+                    // Initialize charts
+                    const visitsCtx = document.getElementById('visitsChart').getContext('2d');
+                    const visitsChart = new Chart(visitsCtx, {
+                        type: 'line',
+                        data: {
+                            labels: ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'],
+                            datasets: [
+                                {
+                                    label: 'Lượt truy cập',
+                                    data: [1200, 1900, 1700, 2100, 2300, 2000, 1800],
+                                    borderColor: '#4361ee',
+                                    backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                                    tension: 0.3,
+                                    fill: true
+                                },
+                                {
+                                    label: 'Đăng ký mới',
+                                    data: [40, 60, 55, 75, 80, 70, 65],
+                                    borderColor: '#4cc9f0',
+                                    backgroundColor: 'rgba(76, 201, 240, 0.1)',
+                                    tension: 0.3,
+                                    fill: true
+                                }
+                            ]
                         },
-                        scales: {
-                            y: {
-                                beginAtZero: true
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
                             }
                         }
-                    }
-                });
-                const packagesCtx = document.getElementById('packagesChart').getContext('2d');
-                const packagesChart = new Chart(packagesCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Free', 'Standard', 'Pro'],
-                        datasets: [{
-                                data: [35, 40, 25],
-                                backgroundColor: [
-                                    '#6c757d',
-                                    '#38b000',
-                                    '#4361ee'
-                                ],
-                                borderWidth: 0
-                            }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                            }
+                    });
+                    const packagesCtx = document.getElementById('packagesChart').getContext('2d');
+                    const packagesChart = new Chart(packagesCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Free', 'Standard', 'Pro'],
+                            datasets: [{
+                                    data: [35, 40, 25],
+                                    backgroundColor: [
+                                        '#6c757d',
+                                        '#38b000',
+                                        '#4361ee'
+                                    ],
+                                    borderWidth: 0
+                                }]
                         },
-                        cutout: '70%'
-                    }
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'right',
+                                }
+                            },
+                            cutout: '70%'
+                        }
+                    });
                 });
-            });
 
-            document.addEventListener('DOMContentLoaded', function () {
-                const tables = document.querySelectorAll('table');
+                document.addEventListener('DOMContentLoaded', function () {
+                    const tables = document.querySelectorAll('table');
 
-                tables.forEach(table => {
-                    const filters = table.querySelectorAll('thead input, thead select');
-                    const rows = table.querySelectorAll('tbody tr');
+                    tables.forEach(table => {
+                        const filters = table.querySelectorAll('thead input, thead select');
+                        const rows = table.querySelectorAll('tbody tr');
 
-                    if (!filters.length || !rows.length)
-                        return;
+                        if (!filters.length || !rows.length)
+                            return;
 
-                    filters.forEach((filter, i) => {
-                        filter.addEventListener('input', () => {
-                            const filterValues = Array.from(filters).map(f => f.value.toLowerCase().trim());
-                            rows.forEach(row => {
-                                const cells = row.querySelectorAll('td');
-                                let visible = true;
-                                filterValues.forEach((val, j) => {
-                                    if (!val)
-                                        return;
-                                    const text = cells[j]?.textContent?.toLowerCase() || '';
-                                    if (!text.includes(val))
-                                        visible = false;
+                        filters.forEach((filter, i) => {
+                            filter.addEventListener('input', () => {
+                                const filterValues = Array.from(filters).map(f => f.value.toLowerCase().trim());
+                                rows.forEach(row => {
+                                    const cells = row.querySelectorAll('td');
+                                    let visible = true;
+                                    filterValues.forEach((val, j) => {
+                                        if (!val)
+                                            return;
+                                        const text = cells[j]?.textContent?.toLowerCase() || '';
+                                        if (!text.includes(val))
+                                            visible = false;
+                                    });
+                                    row.style.display = visible ? '' : 'none';
                                 });
-                                row.style.display = visible ? '' : 'none';
                             });
                         });
                     });
                 });
-            });
-        </script>
+            </script>
     </body>
 </html>

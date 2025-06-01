@@ -5,7 +5,7 @@
 
 package customer.Course;
 
-import dal.CourseDAO;
+import dal.CustomerCourseDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -38,12 +38,12 @@ public class CourseCategoryServlet extends HttpServlet {
         }
     } 
 
-    private CourseDAO courseDAO = new CourseDAO();
+    private CustomerCourseDAO courseCDAO = new CustomerCourseDAO();
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
         String category = request.getParameter("category");
-        List<Course> courses = courseDAO.getCoursesByCategory(category);
+        List<Course> courses = courseCDAO.getCoursesByCategory(category);
         request.setAttribute("category", category);
         request.setAttribute("courses", courses);
         request.getRequestDispatcher("category.jsp").forward(request, response);

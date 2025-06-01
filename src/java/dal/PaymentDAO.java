@@ -7,9 +7,9 @@ package dal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import model.Payments;
-
-
 
 /**
  *
@@ -62,5 +62,47 @@ public class PaymentDAO extends DBConnect {
         payment.setConfirmationCode(rs.getString("confirmation_code"));
         payment.setConfirmationExpiry(rs.getTimestamp("confirmation_expiry"));
         return payment;
+    }
+
+    // Tính tổng doanh thu
+    public double getTotalRevenue() {
+        String sql = "SELECT SUM(amount) FROM payments WHERE status = 'completed'";
+        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    // Lấy danh sách thanh toán gần đây
+    public List<Payments> getRecentPayments(int limit) {
+        List<Payments> payments = new ArrayList<>();
+        String sql = "SELECT TOP (?) p.*, u.fullname as customer_name FROM payments p "
+                + "JOIN users u ON p.user_id = u.id "
+                + "ORDER BY p.payment_date DESC";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, limit);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Payments payment = new Payments();
+                    payment.setId(rs.getInt("id"));
+                    // Use getBigDecimal instead of getDouble
+                    payment.setAmount(rs.getBigDecimal("amount"));
+                    payment.setPaymentDate(rs.getTimestamp("payment_date"));
+                    payment.setStatus(rs.getString("status"));
+                    payment.setPaymentMethod(rs.getString("payment_method"));
+                    // If your Payments class doesn't have customerName field,
+                    // you'll need to add it or remove this line
+                    payment.setBankName(rs.getString("customer_name"));
+                    payments.add(payment);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return payments;
     }
 }

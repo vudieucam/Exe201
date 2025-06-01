@@ -106,11 +106,11 @@ public class AuthenServlet extends HttpServlet {
             if (!user.isStatus()) {
                 request.setAttribute("notification", "⚠️ Tài khoản chưa được kích hoạt. Vui lòng kiểm tra email.");
                 return "login.jsp";
-            }if (!user.isIsActive()) {
+            }
+            if (!user.isIsActive()) {
                 request.setAttribute("notification", "⚠️ Gói dịch vụ của bạn chưa được kích hoạt. Vui lòng chọn gói hoặc chờ xác nhận.");
                 return "login.jsp";
             }
-
 
             // Lưu user vào session
             HttpSession session = request.getSession();
@@ -130,16 +130,16 @@ public class AuthenServlet extends HttpServlet {
                 response.addCookie(cEmail);
                 response.addCookie(cPassword);
             }
-            
+
             // In debug ra console (tuỳ môi trường)
             System.out.println("Đăng nhập thành công: " + user.getFullname() + " | Vai trò: " + user.getRoleId());
 
             // Chuyển hướng theo vai trò
             switch (user.getRoleId()) {
                 case 3:
-                    return "admin-dashboard.jsp"; // Trang admin
+                    return "admin"; // Trang admin
                 case 2:
-                    return "staff-dashboard.jsp"; // Trang nhân viên
+                    return "admin"; // Trang nhân viên
                 default:
                     String redirect = request.getParameter("redirect");
                     if (redirect != null && !redirect.isEmpty()) {

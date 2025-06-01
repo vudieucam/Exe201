@@ -18,14 +18,26 @@ public class Course {
     private String researcher;
     private String imageUrl;
     private String time;
+    private int status;
+    private String categories; // Thêm trường categories
+    private int categoryId;
 
-    // Constructor mặc định
+    public int getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public Course(int categoryId) {
+        this.categoryId = categoryId;
+    }
+
     public Course() {
     }
 
-    // Constructor đầy đủ tham số
-    public Course(int id, String title, String content, String postDate,
-                String researcher, String imageUrl, String time) {
+    public Course(int id, String title, String content, String postDate, String researcher, String imageUrl, String time, int status, String categories) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -33,9 +45,10 @@ public class Course {
         this.researcher = researcher;
         this.imageUrl = imageUrl;
         this.time = time;
+        this.status = status;
+        this.categories = categories;
     }
 
-    // Getter và Setter
     public int getId() {
         return id;
     }
@@ -49,7 +62,7 @@ public class Course {
     }
 
     public void setTitle(String title) {
-        this.title = title != null ? title : "";
+        this.title = title;
     }
 
     public String getContent() {
@@ -57,7 +70,7 @@ public class Course {
     }
 
     public void setContent(String content) {
-        this.content = content != null ? content : "";
+        this.content = content;
     }
 
     public String getPostDate() {
@@ -65,7 +78,7 @@ public class Course {
     }
 
     public void setPostDate(String postDate) {
-        this.postDate = postDate != null ? postDate : "";
+        this.postDate = postDate;
     }
 
     public String getResearcher() {
@@ -73,7 +86,7 @@ public class Course {
     }
 
     public void setResearcher(String researcher) {
-        this.researcher = researcher != null ? researcher : "";
+        this.researcher = researcher;
     }
 
     public String getImageUrl() {
@@ -81,7 +94,7 @@ public class Course {
     }
 
     public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl != null ? imageUrl : "";
+        this.imageUrl = imageUrl;
     }
 
     public String getTime() {
@@ -89,19 +102,29 @@ public class Course {
     }
 
     public void setTime(String time) {
-        this.time = time != null ? time : "";
+        this.time = time;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public String getCategories() {
+        return categories;
+    }
+
+    public void setCategories(String categories) {
+        this.categories = categories;
     }
 
     @Override
     public String toString() {
-        return "Course{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", content.length=" + (content != null ? content.length() : 0) +
-                ", postDate='" + postDate + '\'' +
-                ", researcher='" + researcher + '\'' +
-                ", imageUrl='" + imageUrl + '\'' +
-                ", time='" + time + '\'' +
-                '}';
+        return "Course{" + "id=" + id + ", title=" + title + ", content=" + content + ", postDate=" + postDate + ", researcher=" + researcher + ", imageUrl=" + imageUrl + ", time=" + time + ", status=" + status + ", categories=" + categories + '}';
     }
+
+
 }

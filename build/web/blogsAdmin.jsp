@@ -379,7 +379,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="courseAdmin.jsp">
+                            <a class="nav-link" href="courseadmin">
                                 <i class="bi bi-book"></i>Khóa học
                             </a>
                         </li>

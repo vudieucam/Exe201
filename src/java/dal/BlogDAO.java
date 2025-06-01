@@ -248,5 +248,30 @@ public class BlogDAO extends DBConnect {
         }
         return 0;
     }
+// Lấy danh sách blog gần đây
 
+    public List<Blog> getRecentBlogs(int limit) {
+        List<Blog> blogs = new ArrayList<>();
+        String sql = "SELECT TOP (?) b.*, bc.category_name FROM Blogs b "
+                + "JOIN BlogCategories bc ON b.category_id = bc.category_id "
+                + "ORDER BY b.created_at DESC";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, limit);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Blog blog = new Blog();
+                    blog.setBlogId(rs.getInt("blog_id"));
+                    blog.setTitle(rs.getString("title"));
+                    blog.setShortDescription(rs.getString("short_description"));
+                    blog.setImageUrl(rs.getString("image_url"));
+                    blog.setCategoryName(rs.getString("category_name"));
+                    blog.setCreatedAt(rs.getTimestamp("created_at"));
+                    blogs.add(blog);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return blogs;
+    }
 }

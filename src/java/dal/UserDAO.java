@@ -11,6 +11,8 @@ import java.sql.SQLException;
 import model.GoogleAccount;
 import model.User;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -331,4 +333,67 @@ public class UserDAO extends DBConnect {
         }
     }
 
+    // Đếm tổng số người dùng
+    public long countAllUsers() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM users";
+        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
+            return 0;
+        }
+    }
+
+    // Lấy danh sách người dùng gần đây
+    // Trong UserDAO
+    public List<User> getRecentUsers(int limit) {
+        String sql = "SELECT TOP (?) * FROM users ORDER BY created_at DESC";
+        List<User> list = new ArrayList<>();
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setInt(1, limit);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                User user = new User();
+                user.setId(rs.getInt("id"));
+                user.setFullname(rs.getString("fullname"));
+                user.setCreatedAt(rs.getTimestamp("created_at"));
+                // Thêm các trường khác nếu cần
+                list.add(user);
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return list;
+    }
+
+    // Đếm số user đăng ký trong ngày cụ thể
+    public int countUsersRegisteredOnDate(String date) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM users WHERE CAST(created_at AS DATE) = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, date);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        UserDAO dao = new UserDAO();
+        String email = "user5@example.com"; // Thay bằng email user role=1
+        String password = "123456Aa"; // Thay bằng password đúng
+
+        try {
+            User user = dao.login(email, password);
+            System.out.println("Test login:");
+            System.out.println("User: " + (user != null ? user.toString() : "null"));
+            if (user != null) {
+                System.out.println("Role: " + user.getRoleId());
+                System.out.println("Status: " + user.isStatus());
+                System.out.println("Active: " + user.isIsActive());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
