@@ -1,13 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
 
-/**
- *
- * @author FPT
- */
+import java.util.Date;
+import java.util.List;
+
 public class CourseLesson {
     private int id;
     private int moduleId;
@@ -16,11 +11,17 @@ public class CourseLesson {
     private String videoUrl;
     private int duration;
     private int orderIndex;
-
+    private Date createdAt;
+    private Date updatedAt;
+    private List<LessonAttachment> attachments;
+    
+    // Constructors
     public CourseLesson() {
     }
 
-    public CourseLesson(int id, int moduleId, String title, String content, String videoUrl, int duration, int orderIndex) {
+    public CourseLesson(int id, int moduleId, String title, String content, 
+                       String videoUrl, int duration, int orderIndex, 
+                       Date createdAt, Date updatedAt) {
         this.id = id;
         this.moduleId = moduleId;
         this.title = title;
@@ -28,8 +29,11 @@ public class CourseLesson {
         this.videoUrl = videoUrl;
         this.duration = duration;
         this.orderIndex = orderIndex;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
+    // Getters and Setters
     public int getId() {
         return id;
     }
@@ -85,8 +89,28 @@ public class CourseLesson {
     public void setOrderIndex(int orderIndex) {
         this.orderIndex = orderIndex;
     }
-    
-    
-    
-    
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public List<LessonAttachment> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<LessonAttachment> attachments) {
+        this.attachments = attachments;
+    }
 }

@@ -2,7 +2,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
-
 package customer.Course;
 
 import dal.CustomerCourseDAO;
@@ -22,37 +21,42 @@ import model.Course;
 public class CourseCategoryServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet CourseCategoryServlet</title>");  
+            out.println("<title>Servlet CourseCategoryServlet</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet CourseCategoryServlet at " + request.getContextPath () + "</h1>");
+            out.println("<h1>Servlet CourseCategoryServlet at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
-    } 
+    }
 
-    private CustomerCourseDAO courseCDAO = new CustomerCourseDAO();
+    private CustomerCourseDAO CustomercourseDAO = new CustomerCourseDAO();
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         String category = request.getParameter("category");
-        List<Course> courses = courseCDAO.getCoursesByCategory(category);
+        if (category == null || category.isEmpty()) {
+            response.sendRedirect("course");
+            return;
+        }
+
+        List<Course> courses = CustomercourseDAO.getCoursesByCategory(category);
         request.setAttribute("category", category);
         request.setAttribute("courses", courses);
         request.getRequestDispatcher("category.jsp").forward(request, response);
-    } 
-
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         processRequest(request, response);
     }
 
@@ -62,4 +66,3 @@ public class CourseCategoryServlet extends HttpServlet {
     }// </editor-fold>
 
 }
-

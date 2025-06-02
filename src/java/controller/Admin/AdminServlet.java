@@ -106,7 +106,7 @@ public class AdminServlet extends HttpServlet {
             request.setAttribute("recentBlogs", recentBlogs);
 
             // Forward tới trang admin dashboard
-            request.getRequestDispatcher("/Admin.jsp").forward(request, response);
+            request.getRequestDispatcher("Admin.jsp").forward(request, response);
 
         } catch (Exception e) {
             e.printStackTrace();

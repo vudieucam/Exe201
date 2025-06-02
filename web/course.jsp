@@ -987,13 +987,13 @@
                     <h2>Danh Sách Khóa Học</h2>
                 </div>
 
-                <div class = row> 
+                <div class = row>
                     <c:if test="${not empty courses}">
                         <c:forEach var="course" items="${courses}">
                             <div class="col-lg-4 col-md-6 mb-4">
                                 <div class="course-card">
                                     <div class="course-img-container">
-                                        <c:set var="imageUrl" value="${course.imageUrl}" />
+                                        <c:set var="imageUrl" value="${course.thumbnailUrl}" />
                                         <c:set var="defaultImage" value="${pageContext.request.contextPath}/images/corgin-1.jpg" />
                                         <c:choose>
                                             <c:when test="${not empty imageUrl}">
@@ -1023,7 +1023,7 @@
 
                                         <div class="course-meta">
                                             <i class="fa fa-clock-o"></i> 
-                                            <c:out value="${course.time != null ? course.time : 'Đang cập nhật'}" />
+                                            <c:out value="${not empty course.duration ? course.duration : 'Đang cập nhật'}" />
                                         </div>
 
                                         <c:if test="${not empty course.researcher}">
@@ -1044,10 +1044,6 @@
                                                 </c:otherwise>
                                             </c:choose>
                                         </p>
-
-                                        <div class="course-meta">
-                                            <i class="fa fa-calendar"></i> ${course.time}
-                                        </div>
 
                                         <c:choose>
                                             <c:when test="${not empty sessionScope.user}">
@@ -1071,7 +1067,7 @@
                     <c:if test="${empty courses}">
                         <div class="col-12 text-center">
                             <div class="alert alert-info" style="background-color: #e2d9ff; border-color: #6d4aff; color: #3a3a3a;">
-                                <i class="fa fa-paw"></i> Hiện chưa có khóa học nào. Vui lòng quay lại sau!
+                                <i class="fa fa-paw"></i> Không tìm thấy khóa học nào phù hợp!
                             </div>
                         </div>
                     </c:if>

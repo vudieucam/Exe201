@@ -10,8 +10,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import model.Course;
+import model.CourseCategory;
 import model.CourseLesson;
 import model.CourseModule;
+import model.UserProgress;
 
 /**
  *
@@ -19,34 +21,51 @@ import model.CourseModule;
  */
 public class CustomerCourseDAO extends DBConnect {
 
-    // Lấy toàn bộ khóa học
-    public List<Course> getAllCourses() {
-        List<Course> list = new ArrayList<>();
-        String sql = "SELECT c.id, c.title, c.content, c.post_date, c.researcher, c.duration, c.status, "
-                + "COALESCE(c.thumbnail_url, '/images/corgin-1.jpg') AS image_url, "
-                + "STUFF((SELECT ', ' + cc.name "
-                + "       FROM course_category_mapping ccm "
-                + "       JOIN course_categories cc ON ccm.category_id = cc.id "
-                + "       WHERE ccm.course_id = c.id "
-                + "       FOR XML PATH('')), 1, 2, '') AS categories "
-                + "FROM courses c "
-                + "WHERE c.status = 1"; // Chỉ lấy khóa học active
-
-        try {
-            PreparedStatement st = connection.prepareStatement(sql);
+    private List<CourseCategory> getCategoriesByCourseId(int courseId) throws SQLException {
+        List<CourseCategory> categories = new ArrayList<>();
+        String sql = "SELECT cc.id, cc.name FROM course_category_mapping ccm "
+                + "JOIN course_categories cc ON ccm.category_id = cc.id "
+                + "WHERE ccm.course_id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, courseId);
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
-                Course c = new Course(
-                        rs.getInt("id"),
-                        rs.getString("title"),
-                        rs.getString("content"),
-                        rs.getString("post_date"),
-                        rs.getString("researcher"),
-                        rs.getString("image_url"),
-                        rs.getString("duration"),
-                        rs.getInt("status"),
-                        rs.getString("categories")
-                );
+                CourseCategory cat = new CourseCategory();
+                cat.setId(rs.getInt("id"));
+                cat.setName(rs.getString("name"));
+                categories.add(cat);
+            }
+        }
+        return categories;
+    }
+
+    public List<Course> getCoursesByPage(int page, int recordsPerPage) {
+        List<Course> list = new ArrayList<>();
+        String sql = "SELECT c.id, c.title, c.content, c.post_date, c.researcher, c.duration, c.status, "
+                + "COALESCE(c.thumbnail_url, '/images/corgin-1.jpg') AS thumbnail_url "
+                + "FROM courses c "
+                + "WHERE c.status = 1 "
+                + "ORDER BY c.id OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, (page - 1) * recordsPerPage);
+            st.setInt(2, recordsPerPage);
+            ResultSet rs = st.executeQuery();
+
+            while (rs.next()) {
+                Course c = new Course();
+                c.setId(rs.getInt("id"));
+                c.setTitle(rs.getString("title"));
+                c.setContent(rs.getString("content"));
+                c.setPostDate(rs.getDate("post_date"));
+                c.setResearcher(rs.getString("researcher"));
+                c.setDuration(rs.getString("duration"));
+                c.setStatus(rs.getInt("status"));
+                c.setThumbnailUrl(rs.getString("thumbnail_url"));
+
+                // Lấy danh mục khóa học
+                c.setCategories(getCategoriesByCourseId(c.getId()));
+
                 list.add(c);
             }
         } catch (SQLException e) {
@@ -56,37 +75,65 @@ public class CustomerCourseDAO extends DBConnect {
         return list;
     }
 
-    public List<Course> getCoursesByPage(int page, int recordsPerPage) {
-        List<Course> list = new ArrayList<>();
+    public Course getCourseById(int courseId) throws SQLException {
         String sql = "SELECT c.id, c.title, c.content, c.post_date, c.researcher, c.duration, c.status, "
-                + "COALESCE(c.thumbnail_url, '/images/corgin-1.jpg') AS image_url, "
-                + "STUFF((SELECT ', ' + cc.name "
-                + "       FROM course_category_mapping ccm "
-                + "       JOIN course_categories cc ON ccm.category_id = cc.id "
-                + "       WHERE ccm.course_id = c.id "
-                + "       FOR XML PATH('')), 1, 2, '') AS categories "
+                + "COALESCE(c.thumbnail_url, '/images/corgin-1.jpg') AS thumbnail_url "
                 + "FROM courses c "
-                + "WHERE c.status = 1 "
-                + "ORDER BY c.id OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+                + "WHERE c.id = ?";
 
-        try {
-            PreparedStatement st = connection.prepareStatement(sql);
-            st.setInt(1, (page - 1) * recordsPerPage);
-            st.setInt(2, recordsPerPage);
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, courseId);
             ResultSet rs = st.executeQuery();
 
+            if (rs.next()) {
+                Course c = new Course();
+                c.setId(rs.getInt("id"));
+                c.setTitle(rs.getString("title"));
+                c.setContent(rs.getString("content"));
+                c.setPostDate(rs.getDate("post_date"));
+                c.setResearcher(rs.getString("researcher"));
+                c.setDuration(rs.getString("duration"));
+                c.setStatus(rs.getInt("status"));
+                c.setThumbnailUrl(rs.getString("thumbnail_url"));
+
+                // Lấy danh mục khóa học
+                c.setCategories(getCategoriesByCourseId(c.getId()));
+
+                return c;
+            }
+        }
+        return null;
+    }
+
+    public List<Course> searchCourses(String query) {
+        List<Course> list = new ArrayList<>();
+        String sql = "SELECT c.id, c.title, c.content, c.post_date, c.researcher, c.duration, c.status, "
+                + "COALESCE(c.thumbnail_url, '/images/corgin-1.jpg') AS thumbnail_url "
+                + "FROM courses c "
+                + "WHERE (c.title LIKE ? OR c.content LIKE ? OR c.researcher LIKE ?) AND c.status = 1 "
+                + "ORDER BY c.id";
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            String searchParam = "%" + query + "%";
+            st.setString(1, searchParam);
+            st.setString(2, searchParam);
+            st.setString(3, searchParam);
+
+            ResultSet rs = st.executeQuery();
             while (rs.next()) {
-                Course c = new Course(
-                        rs.getInt("id"),
-                        rs.getString("title"),
-                        rs.getString("content"),
-                        rs.getString("post_date"),
-                        rs.getString("researcher"),
-                        rs.getString("image_url"),
-                        rs.getString("duration"),
-                        rs.getInt("status"),
-                        rs.getString("categories")
-                );
+                Course c = new Course();
+                c.setId(rs.getInt("id"));
+                c.setTitle(rs.getString("title"));
+                c.setContent(rs.getString("content"));
+                c.setPostDate(rs.getDate("post_date"));
+                c.setResearcher(rs.getString("researcher"));
+                c.setDuration(rs.getString("duration"));
+                c.setStatus(rs.getInt("status"));
+                c.setThumbnailUrl(rs.getString("thumbnail_url"));
+
+                // Lấy danh mục khóa học
+                c.setCategories(getCategoriesByCourseId(c.getId()));
+
                 list.add(c);
             }
         } catch (SQLException e) {
@@ -108,50 +155,6 @@ public class CustomerCourseDAO extends DBConnect {
             e.printStackTrace();
         }
         return 0;
-    }
-
-    public List<Course> searchCourses(String query, int page, int recordsPerPage) {
-        List<Course> list = new ArrayList<>();
-        String sql = "SELECT c.id, c.title, c.content, c.post_date, c.researcher, c.duration, c.status, "
-                + "COALESCE(c.thumbnail_url, '/images/corgin-1.jpg') AS image_url, "
-                + "STUFF((SELECT ', ' + cc.name "
-                + "       FROM course_category_mapping ccm "
-                + "       JOIN course_categories cc ON ccm.category_id = cc.id "
-                + "       WHERE ccm.course_id = c.id "
-                + "       FOR XML PATH('')), 1, 2, '') AS categories "
-                + "FROM courses c "
-                + "WHERE c.status = 1 AND (c.title LIKE ? OR c.content LIKE ? OR c.researcher LIKE ?) "
-                + "ORDER BY c.id OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
-
-        try {
-            PreparedStatement st = connection.prepareStatement(sql);
-            String searchParam = "%" + query + "%";
-            st.setString(1, searchParam);
-            st.setString(2, searchParam);
-            st.setString(3, searchParam);
-            st.setInt(4, (page - 1) * recordsPerPage);
-            st.setInt(5, recordsPerPage);
-            ResultSet rs = st.executeQuery();
-
-            while (rs.next()) {
-                Course c = new Course(
-                        rs.getInt("id"),
-                        rs.getString("title"),
-                        rs.getString("content"),
-                        rs.getString("post_date"),
-                        rs.getString("researcher"),
-                        rs.getString("image_url"),
-                        rs.getString("duration"),
-                        rs.getInt("status"),
-                        rs.getString("categories")
-                );
-                list.add(c);
-            }
-        } catch (SQLException e) {
-            System.out.println("Lỗi SQL: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return list;
     }
 
     public int getTotalSearchCourses(String query) {
@@ -186,23 +189,24 @@ public class CustomerCourseDAO extends DBConnect {
                 + "WHERE c.status = 1 "
                 + "ORDER BY c.post_date DESC";
 
-        try {
-            PreparedStatement st = connection.prepareStatement(sql);
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setInt(1, limit);
             ResultSet rs = st.executeQuery();
 
             while (rs.next()) {
-                Course c = new Course(
-                        rs.getInt("id"),
-                        rs.getString("title"),
-                        rs.getString("content"),
-                        rs.getString("post_date"),
-                        rs.getString("researcher"),
-                        rs.getString("image_url"),
-                        rs.getString("duration"),
-                        rs.getInt("status"),
-                        rs.getString("categories")
-                );
+                Course c = new Course();
+                c.setId(rs.getInt("id"));
+                c.setTitle(rs.getString("title"));
+                c.setContent(rs.getString("content"));
+                c.setPostDate(rs.getDate("post_date")); // ✅ đúng kiểu java.util.Date
+                c.setResearcher(rs.getString("researcher"));
+                c.setDuration(rs.getString("duration"));
+                c.setStatus(rs.getInt("status"));
+                c.setThumbnailUrl(rs.getString("image_url")); // ✅ bạn dùng image_url nhưng trường là thumbnailUrl
+
+                // Nếu cần tên danh mục dạng chuỗi, bạn có thể tạo trường riêng trong class Course
+                // Hoặc nếu có method getCategoriesByCourseId, bạn có thể gán:
+                // c.setCategories(getCategoriesByCourseId(c.getId()));
                 list.add(c);
             }
         } catch (SQLException e) {
@@ -227,62 +231,29 @@ public class CustomerCourseDAO extends DBConnect {
                 + "JOIN course_categories cc ON ccm.category_id = cc.id "
                 + "WHERE cc.name = ? AND c.status = 1";
 
-        try {
-            PreparedStatement st = connection.prepareStatement(sql);
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setString(1, category);
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
-                Course c = new Course(
-                        rs.getInt("id"),
-                        rs.getString("title"),
-                        rs.getString("content"),
-                        rs.getString("post_date"),
-                        rs.getString("researcher"),
-                        rs.getString("image_url"),
-                        rs.getString("duration"),
-                        rs.getInt("status"),
-                        rs.getString("categories")
-                );
+                Course c = new Course();
+                c.setId(rs.getInt("id"));
+                c.setTitle(rs.getString("title"));
+                c.setContent(rs.getString("content"));
+                c.setPostDate(rs.getDate("post_date")); // ✅ trả về java.sql.Date, bạn có thể để kiểu java.util.Date trong class
+                c.setResearcher(rs.getString("researcher"));
+                c.setDuration(rs.getString("duration"));
+                c.setStatus(rs.getInt("status"));
+                c.setThumbnailUrl(rs.getString("image_url")); // ⬅ image_url lấy từ SQL
+                // Nếu bạn muốn lưu chuỗi category thì cần thêm một field riêng (ví dụ: `private String categoryNames`)
+                // c.setCategories(...) chỉ dùng khi là List<CourseCategory>
+
                 list.add(c);
             }
         } catch (SQLException e) {
             System.out.println("Lỗi SQL: " + e.getMessage());
-        }
-        return list;
-    }
-
-    // Lấy chi tiết khóa học
-    public Course getCourseDetails(int courseId) {
-        String sql = "SELECT c.*, "
-                + "STUFF((SELECT ', ' + cc.name "
-                + "       FROM course_category_mapping ccm "
-                + "       JOIN course_categories cc ON ccm.category_id = cc.id "
-                + "       WHERE ccm.course_id = c.id "
-                + "       FOR XML PATH('')), 1, 2, '') AS categories "
-                + "FROM courses c WHERE c.id = ?";
-
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
-            st.setInt(1, courseId);
-            ResultSet rs = st.executeQuery();
-
-            if (rs.next()) {
-                Course course = new Course();
-                course.setId(rs.getInt("id"));
-                course.setTitle(rs.getString("title"));
-                course.setContent(rs.getString("content"));
-                course.setPostDate(rs.getString("post_date"));
-                course.setResearcher(rs.getString("researcher"));
-                course.setTime(rs.getString("duration")); // Sửa thành duration
-                course.setStatus(rs.getInt("status"));
-                course.setImageUrl(rs.getString("thumbnail_url")); // Thêm thumbnail
-                course.setCategories(rs.getString("categories"));
-                return course;
-            }
-        } catch (SQLException e) {
-            System.out.println("ERROR in getCourseDetails: " + e.getMessage());
             e.printStackTrace();
         }
-        return null;
+        return list;
     }
 
     public List<CourseModule> getCourseModules(int courseId) {
@@ -349,8 +320,11 @@ public class CustomerCourseDAO extends DBConnect {
                         rs.getString("content"),
                         rs.getString("video_url"),
                         rs.getInt("duration"),
-                        rs.getInt("order_index")
+                        rs.getInt("order_index"),
+                        rs.getTimestamp("created_at"),
+                        rs.getTimestamp("updated_at")
                 );
+
             }
         } catch (SQLException e) {
             System.out.println("Error getting lesson details: " + e.getMessage());
@@ -368,10 +342,18 @@ public class CustomerCourseDAO extends DBConnect {
             if (rs.next()) {
                 return rs.getString("image_url");
             }
+            // Nếu không có ảnh chính, trả về thumbnail từ bảng courses
+            sql = "SELECT thumbnail_url FROM courses WHERE id = ?";
+
+            st.setInt(1, courseId);
+            rs = st.executeQuery();
+            if (rs.next()) {
+                return rs.getString("thumbnail_url");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
+        return "/images/default-course.jpg"; // Ảnh mặc định
     }
 
     // Thêm ảnh mới
@@ -433,4 +415,74 @@ public class CustomerCourseDAO extends DBConnect {
         l.setOrderIndex(rs.getInt("order_index"));
         return l;
     }
+
+    // Thêm kiểm tra quyền truy cập khóa học
+    public boolean canAccessCourse(int userId, int courseId) {
+        String sql = "SELECT COUNT(*) FROM user_packages up "
+                + "JOIN course_access ca ON up.service_package_id = ca.service_package_id "
+                + "WHERE up.user_id = ? AND ca.course_id = ? AND up.end_date >= GETDATE()";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.setInt(2, courseId);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next() && rs.getInt(1) > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Thêm hàm lấy tiến độ học tập
+    public UserProgress getUserProgress(int userId, int lessonId) {
+        String sql = "SELECT * FROM user_progress WHERE user_id = ? AND lesson_id = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.setInt(2, lessonId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return new UserProgress(
+                        rs.getInt("id"),
+                        rs.getInt("user_id"),
+                        rs.getInt("lesson_id"),
+                        rs.getBoolean("completed"),
+                        rs.getTimestamp("completed_at")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Thêm hàm cập nhật tiến độ học tập
+    public boolean updateUserProgress(UserProgress progress) {
+        String sql = "IF EXISTS (SELECT 1 FROM user_progress WHERE user_id = ? AND lesson_id = ?) "
+                + "UPDATE user_progress SET completed = ?, completed_at = ? "
+                + "WHERE user_id = ? AND lesson_id = ? "
+                + "ELSE "
+                + "INSERT INTO user_progress (user_id, lesson_id, completed, completed_at) "
+                + "VALUES (?, ?, ?, ?)";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, progress.getUserId());
+            stmt.setInt(2, progress.getLessonId());
+            stmt.setBoolean(3, progress.isCompleted());
+            stmt.setTimestamp(4, new java.sql.Timestamp(System.currentTimeMillis()));
+            stmt.setInt(5, progress.getUserId());
+            stmt.setInt(6, progress.getLessonId());
+            stmt.setInt(7, progress.getUserId());
+            stmt.setInt(8, progress.getLessonId());
+            stmt.setBoolean(9, progress.isCompleted());
+            stmt.setTimestamp(10, new java.sql.Timestamp(System.currentTimeMillis()));
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }

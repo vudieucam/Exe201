@@ -1,54 +1,45 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
 
-/**
- *
- * @author FPT
- */
-
+import java.util.Date;
+import java.util.List;
 
 public class Course {
     private int id;
     private String title;
     private String content;
-    private String postDate;
+    private Date postDate;
     private String researcher;
-    private String imageUrl;
-    private String time;
+    private String videoUrl;
     private int status;
-    private String categories; // Thêm trường categories
-    private int categoryId;
-
-    public int getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(int categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    public Course(int categoryId) {
-        this.categoryId = categoryId;
-    }
-
+    private String duration;
+    private String thumbnailUrl;
+    private Date createdAt;
+    private Date updatedAt;
+    private List<CourseCategory> categories;
+    private List<CourseImage> images;
+    private List<CourseModule> modules;
+    private List<CourseReview> reviews;
+    
+    // Constructors
     public Course() {
     }
 
-    public Course(int id, String title, String content, String postDate, String researcher, String imageUrl, String time, int status, String categories) {
+    public Course(int id, String title, String content, Date postDate, String researcher, String videoUrl, 
+                 int status, String duration, String thumbnailUrl, Date createdAt, Date updatedAt) {
         this.id = id;
         this.title = title;
         this.content = content;
         this.postDate = postDate;
         this.researcher = researcher;
-        this.imageUrl = imageUrl;
-        this.time = time;
+        this.videoUrl = videoUrl;
         this.status = status;
-        this.categories = categories;
+        this.duration = duration;
+        this.thumbnailUrl = thumbnailUrl;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
+    // Getters and Setters
     public int getId() {
         return id;
     }
@@ -73,11 +64,11 @@ public class Course {
         this.content = content;
     }
 
-    public String getPostDate() {
+    public Date getPostDate() {
         return postDate;
     }
 
-    public void setPostDate(String postDate) {
+    public void setPostDate(Date postDate) {
         this.postDate = postDate;
     }
 
@@ -89,20 +80,12 @@ public class Course {
         this.researcher = researcher;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public String getVideoUrl() {
+        return videoUrl;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
     }
 
     public int getStatus() {
@@ -113,18 +96,67 @@ public class Course {
         this.status = status;
     }
 
-    public String getCategories() {
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
+    }
+
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public List<CourseCategory> getCategories() {
         return categories;
     }
 
-    public void setCategories(String categories) {
+    public void setCategories(List<CourseCategory> categories) {
         this.categories = categories;
     }
 
-    @Override
-    public String toString() {
-        return "Course{" + "id=" + id + ", title=" + title + ", content=" + content + ", postDate=" + postDate + ", researcher=" + researcher + ", imageUrl=" + imageUrl + ", time=" + time + ", status=" + status + ", categories=" + categories + '}';
+    public List<CourseImage> getImages() {
+        return images;
     }
 
+    public void setImages(List<CourseImage> images) {
+        this.images = images;
+    }
 
+    public List<CourseModule> getModules() {
+        return modules;
+    }
+
+    public void setModules(List<CourseModule> modules) {
+        this.modules = modules;
+    }
+
+    public List<CourseReview> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(List<CourseReview> reviews) {
+        this.reviews = reviews;
+    }
 }

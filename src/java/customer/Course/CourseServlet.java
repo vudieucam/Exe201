@@ -4,6 +4,7 @@
  */
 package customer.Course;
 
+import dal.CourseDAO;
 import dal.CustomerCourseDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -11,6 +12,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.sql.SQLException;
 import java.util.List;
 import model.Course;
 
@@ -37,45 +39,94 @@ public class CourseServlet extends HttpServlet {
         }
     }
 
-    private CustomerCourseDAO courseCDAO = new CustomerCourseDAO();
+    private CustomerCourseDAO CustomercourseDAO = new CustomerCourseDAO();
+    private CourseDAO courseDAO = new CourseDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            // Lấy danh sách khóa học nổi bật cho menu dropdown
-            List<Course> featuredCourses = courseCDAO.getFeaturedCourses(9);
-            request.setAttribute("featuredCourses", featuredCourses);
-            String searchQuery = request.getParameter("search");
-            String pageParam = request.getParameter("page");
-            int currentPage = (pageParam == null || pageParam.isEmpty()) ? 1 : Integer.parseInt(pageParam);
-            int recordsPerPage = 9;
+            String action = request.getParameter("action");
 
-            List<Course> courses;
-            int totalCourses;
-
-            if (searchQuery != null && !searchQuery.isEmpty()) {
-                courses = courseCDAO.searchCourses(searchQuery, currentPage, recordsPerPage);
-                totalCourses = courseCDAO.getTotalSearchCourses(searchQuery);
-            } else {
-                courses = courseCDAO.getCoursesByPage(currentPage, recordsPerPage);
-                totalCourses = courseCDAO.getTotalCourses();
+            // Xử lý yêu cầu xem chi tiết khóa học
+            if ("detail".equals(action)) {
+                handleCourseDetail(request, response);
+                return;
             }
 
-            int totalPages = (int) Math.ceil((double) totalCourses / recordsPerPage);
+            // Xử lý yêu cầu danh sách khóa học
+            handleCourseList(request, response);
 
-            request.setAttribute("courses", courses);
-            request.setAttribute("currentPage", currentPage);
-            request.setAttribute("totalPages", totalPages);
-            request.setAttribute("searchQuery", searchQuery);
-
-            request.getRequestDispatcher("/course.jsp").forward(request, response);
-
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Tham số không hợp lệ");
         } catch (Exception e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "Lỗi khi tải danh sách khóa học");
+                    "Lỗi hệ thống khi xử lý yêu cầu");
         }
+    }
+
+    private void handleCourseDetail(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException, SQLException {
+        String id = request.getParameter("id");
+        if (id == null || id.isEmpty()) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu tham số ID");
+            return;
+        }
+
+        try {
+            Course course = courseDAO.getCourseById(Integer.parseInt(id));
+            if (course == null) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Khóa học không tồn tại");
+                return;
+            }
+
+            request.setAttribute("course", course);
+            request.getRequestDispatcher("/course_detail.jsp").forward(request, response);
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID khóa học không hợp lệ");
+        }
+    }
+
+    private void handleCourseList(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        // Lấy danh sách khóa học nổi bật
+        List<Course> featuredCourses = CustomercourseDAO.getFeaturedCourses(9);
+        request.setAttribute("featuredCourses", featuredCourses);
+
+        // Xử lý phân trang và tìm kiếm
+        String searchQuery = request.getParameter("search");
+        int currentPage = 1;
+        int recordsPerPage = 9;
+
+        try {
+            String pageParam = request.getParameter("page");
+            if (pageParam != null && !pageParam.isEmpty()) {
+                currentPage = Integer.parseInt(pageParam);
+            }
+        } catch (NumberFormatException e) {
+            // Giữ giá trị mặc định nếu page không hợp lệ
+        }
+
+        List<Course> courses;
+        int totalCourses;
+
+        if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+            courses = CustomercourseDAO.searchCourses(searchQuery.trim());
+            totalCourses = CustomercourseDAO.getTotalSearchCourses(searchQuery.trim());
+        } else {
+            courses = CustomercourseDAO.getCoursesByPage(currentPage, recordsPerPage);
+            totalCourses = CustomercourseDAO.getTotalCourses();
+        }
+
+        int totalPages = (int) Math.ceil((double) totalCourses / recordsPerPage);
+
+        request.setAttribute("courses", courses);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("searchQuery", searchQuery);
+
+        request.getRequestDispatcher("/course.jsp").forward(request, response);
     }
 
     @Override

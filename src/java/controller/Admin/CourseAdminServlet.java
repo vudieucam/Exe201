@@ -12,9 +12,6 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Paths;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -280,8 +277,7 @@ public class CourseAdminServlet extends HttpServlet {
             }
 
             // Lấy categoryId của khóa học
-            Integer categoryId = courseDAO.getCourseCategoryId(id);
-            course.setCategoryId(categoryId);
+            course.setCategories(courseDAO.getCourseCategories(id));
 
             List<CourseModule> modules = courseDAO.getCourseModules(id);
             List<CourseCategory> categories = courseDAO.getAllCategories();
@@ -336,7 +332,7 @@ public class CourseAdminServlet extends HttpServlet {
             newCourse.setTitle(title);
             newCourse.setContent(content);
             newCourse.setResearcher(researcher);
-            newCourse.setTime(time);
+            newCourse.setDuration(time); // ✅ đúng theo DAO và Course.java
             newCourse.setStatus(status);
 
             // Xử lý upload file thumbnail
@@ -345,7 +341,7 @@ public class CourseAdminServlet extends HttpServlet {
                 String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
                 InputStream fileContent = filePart.getInputStream();
                 String imagePath = saveUploadedFile(fileName, fileContent);
-                newCourse.setImageUrl(imagePath);
+                newCourse.setThumbnailUrl(imagePath);
             }
 
             // Thêm khóa học vào database
@@ -354,8 +350,8 @@ public class CourseAdminServlet extends HttpServlet {
                     newCourse.getContent(),
                     newCourse.getResearcher(),
                     null, // videoUrl (nếu có)
-                    newCourse.getTime(),
-                    newCourse.getImageUrl(),
+                    newCourse.getDuration(),
+                    newCourse.getThumbnailUrl(),
                     categoryIds
             );
 
@@ -399,7 +395,7 @@ public class CourseAdminServlet extends HttpServlet {
             course.setTitle(title);
             course.setContent(content);
             course.setResearcher(researcher);
-            course.setTime(time);
+            course.setDuration(time);
             course.setStatus(status);
 
             // Handle file upload if new thumbnail is provided
@@ -408,7 +404,7 @@ public class CourseAdminServlet extends HttpServlet {
                 String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
                 InputStream fileContent = filePart.getInputStream();
                 String imagePath = saveUploadedFile(fileName, fileContent);
-                course.setImageUrl(imagePath);
+                course.setThumbnailUrl(imagePath);
             }
 
             boolean updated = courseDAO.updateCourse(course);

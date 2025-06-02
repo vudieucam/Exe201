@@ -4,6 +4,7 @@
  */
 package customer.Course;
 
+import dal.CourseDAO;
 import dal.CustomerCourseDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -42,15 +43,17 @@ public class CourseDetailServlet extends HttpServlet {
         }
     }
 
-    private CustomerCourseDAO courseDAO = new CustomerCourseDAO();
+    private CustomerCourseDAO CustomercourseDAO = new CustomerCourseDAO();
+    private CourseDAO courseDAO = new CourseDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
             // Lấy danh sách khóa học nổi bật cho menu dropdown
-            List<Course> featuredCourses = courseDAO.getFeaturedCourses(9);
+            List<Course> featuredCourses = CustomercourseDAO.getFeaturedCourses(9);
             request.setAttribute("featuredCourses", featuredCourses);
+
             String idRaw = request.getParameter("id");
             String lessonIdRaw = request.getParameter("lesson");
 
@@ -63,7 +66,7 @@ public class CourseDetailServlet extends HttpServlet {
             int courseId = Integer.parseInt(idRaw);
             int lessonId = (lessonIdRaw != null && !lessonIdRaw.isEmpty()) ? Integer.parseInt(lessonIdRaw) : 0;
 
-            Course course = courseDAO.getCourseDetails(courseId);
+            Course course = courseDAO.getCourseById(courseId); // Sửa từ getCourseDetails() sang getCourseById()
             if (course == null) {
                 request.getSession().setAttribute("errorMessage", "Không tìm thấy khóa học");
                 response.sendRedirect("course");
@@ -77,10 +80,11 @@ public class CourseDetailServlet extends HttpServlet {
 
             // Lấy tất cả bài học
             for (CourseModule module : modules) {
-                List<CourseLesson> lessons = courseDAO.getModuleLessons(module.getId());
+                List<CourseLesson> lessons = CustomercourseDAO.getModuleLessons(module.getId());
                 moduleLessonsMap.put(module.getId(), lessons);
                 allLessons.addAll(lessons);
 
+                // Chọn bài học đầu tiên nếu không có lessonId được chỉ định
                 if (lessonId == 0 && currentLesson == null && !lessons.isEmpty()) {
                     currentLesson = lessons.get(0);
                 }
@@ -88,11 +92,20 @@ public class CourseDetailServlet extends HttpServlet {
 
             // Nếu chỉ định lessonId
             if (lessonId > 0) {
-                currentLesson = courseDAO.getLessonDetails(lessonId);
+                currentLesson = CustomercourseDAO.getLessonDetails(lessonId);
 
-                boolean valid = allLessons.stream().anyMatch(l -> l.getId() == lessonId);
-                if (!valid) {
-                    currentLesson = null;
+                // Kiểm tra xem lesson có thuộc khóa học này không
+                if (currentLesson != null) {
+                    boolean valid = false;
+                    for (CourseLesson lesson : allLessons) {
+                        if (lesson.getId() == currentLesson.getId()) {
+                            valid = true;
+                            break;
+                        }
+                    }
+                    if (!valid) {
+                        currentLesson = null;
+                    }
                 }
             }
 
@@ -103,10 +116,12 @@ public class CourseDetailServlet extends HttpServlet {
 
             // Tìm vị trí hiện tại và bài liền trước / sau
             int currentIndex = -1;
-            for (int i = 0; i < allLessons.size(); i++) {
-                if (allLessons.get(i).getId() == currentLesson.getId()) {
-                    currentIndex = i;
-                    break;
+            if (currentLesson != null) {
+                for (int i = 0; i < allLessons.size(); i++) {
+                    if (allLessons.get(i).getId() == currentLesson.getId()) {
+                        currentIndex = i;
+                        break;
+                    }
                 }
             }
 

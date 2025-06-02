@@ -18,14 +18,10 @@ Author     : FPT
 <%@page import="java.util.Date" %>
 
 <%
-    System.out.println("JSP - Course object: " + request.getAttribute("course"));
-%>
-
-<%
 // Phần 1: Kiểm tra course có tồn tại không
-    Course course = (Course) request.getAttribute("course");
-    if (course == null) {
-        String errorMessage = (String) request.getSession().getAttribute("errorMessage");
+Course course = (Course) request.getAttribute("course");
+if (course == null) {
+    String errorMessage = (String) request.getSession().getAttribute("errorMessage");
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -74,39 +70,31 @@ Author     : FPT
     </body>
 </html>
 <%
-        return;
-    }
+    return;
+}
 
-// Phần 2: Xử lý dữ liệu khi course tồn tại
 // Định dạng ngày đăng
-    String formattedDate = "Đang cập nhật";
-    try {
-        if (course.getPostDate() != null && !course.getPostDate().isEmpty()) {
-            SimpleDateFormat dbFormat = new SimpleDateFormat("yyyy-MM-dd");
-            Date date = dbFormat.parse(course.getPostDate());
-            SimpleDateFormat displayFormat = new SimpleDateFormat("dd/MM/yyyy");
-            formattedDate = displayFormat.format(date);
-        }
-    } catch (Exception e) {
-        System.out.println("Lỗi định dạng ngày: " + e.getMessage());
-    }
+String formattedDate = "Đang cập nhật";
+if (course.getPostDate() != null) {
+    SimpleDateFormat displayFormat = new SimpleDateFormat("dd/MM/yyyy");
+    formattedDate = displayFormat.format(course.getPostDate());
+}
 
 // Xử lý đường dẫn ảnh
-    String imageUrl = course.getImageUrl();
-    String defaultImage = request.getContextPath() + "/images/corgi-course.jpg";
-    String finalImagePath;
+String imageUrl = course.getThumbnailUrl(); // Sửa từ getImageUrl() sang getThumbnailUrl()
+String defaultImage = request.getContextPath() + "/images/corgi-course.jpg";
+String finalImagePath;
 
-    if (imageUrl != null && !imageUrl.isEmpty()) {
-        if (imageUrl.startsWith("/") || imageUrl.startsWith("http")) {
-            finalImagePath = imageUrl.startsWith("/") ? request.getContextPath() + imageUrl : imageUrl;
-        } else {
-            finalImagePath = request.getContextPath() + "/" + imageUrl;
-        }
+if (imageUrl != null && !imageUrl.isEmpty()) {
+    if (imageUrl.startsWith("/") || imageUrl.startsWith("http")) {
+        finalImagePath = imageUrl.startsWith("/") ? request.getContextPath() + imageUrl : imageUrl;
     } else {
-        finalImagePath = defaultImage;
+        finalImagePath = request.getContextPath() + "/" + imageUrl;
     }
+} else {
+    finalImagePath = defaultImage;
+}
 %>
-
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -1533,7 +1521,7 @@ Author     : FPT
                                     <span><strong>Ngày đăng:</strong> <span style="color: #FF6B35; font-size: 1rem;"><%= formattedDate%></span></span>
                                 </div>
 
-                                <% if (course.getTime() != null && !course.getTime().isEmpty()) {%>
+                                <% if (course.getDuration() != null && !course.getDuration().isEmpty()) {%>
                                 <div class="meta-item" style="
                                      background-color: #FFE8CC;
                                      border: 2px dashed #FF9F1C;
@@ -1545,7 +1533,7 @@ Author     : FPT
                                      gap: 6px;
                                      ">
                                     <i class="fa fa-clock-o" style="color: #FF6B35; font-size: 1.1rem;"></i>
-                                    <span><strong>Thời lượng:</strong> <span style="color: #FF6B35; font-size: 1rem;"><%= course.getTime()%></span></span>
+                                    <span><strong>Thời lượng:</strong> <span style="color: #FF6B35; font-size: 1rem;"><%= course.getDuration()%></span></span>
                                 </div>
                                 <% }%>
 
@@ -1656,25 +1644,24 @@ Author     : FPT
                                     </div>
 
                                     <!-- Navigation buttons -->
-                                    <%-- Lấy id của bài học hiện tại từ URL --%>
-                                    <c:if test="${previousLesson != null}">
-                                        <a href="coursedetail?id=${course.id}&lesson=${previousLesson.id}" class="btn btn-outline-primary">
-                                            ← Bài trước
-                                        </a>
-                                    </c:if>
+                                    <div class="lesson-navigation mt-4">
+                                        <c:if test="${previousLesson != null}">
+                                            <a href="coursedetail?id=${course.id}&lesson=${previousLesson.id}" class="btn btn-outline-primary">
+                                                ← Bài trước
+                                            </a>
+                                        </c:if>
 
-                                    <c:if test="${nextLesson != null}">
-                                        <a href="coursedetail?id=${course.id}&lesson=${nextLesson.id}" class="btn btn-primary float-end">
-                                            Bài tiếp theo →
-                                        </a>
-                                    </c:if>
-
-
+                                        <c:if test="${nextLesson != null}">
+                                            <a href="coursedetail?id=${course.id}&lesson=${nextLesson.id}" class="btn btn-primary float-end">
+                                                Bài tiếp theo →
+                                            </a>
+                                        </c:if>
+                                    </div>
                                 </div>
                             </c:when>
                             <c:otherwise>
                                 <div class="alert alert-warning">
-                                    Khóa học này chưa có nội dung chi tiết. Vui lòng quay lại sau!
+                                    Vui lòng chọn một bài học từ danh sách bên trái
                                 </div>
                             </c:otherwise>
                         </c:choose>

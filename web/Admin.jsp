@@ -357,415 +357,346 @@
                 }
             }
         </style>
+        <script>
+            $(document).ready(function () {
+                $('#courseTable').DataTable({
+                    language: {
+                        url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/vi.json'
+                    }
+                });
+            });
+
+            function openEditCategoryModal(id, name) {
+                $('#editCategoryId').val(id);
+                $('#editCategoryName').val(name);
+                $('#editCategoryModal').modal('show');
+            }
+
+            function confirmDelete(courseId) {
+                if (confirm('Bạn có chắc chắn muốn xóa khóa học này?')) {
+                    window.location.href = 'courseadmin?action=delete&id=' + courseId;
+                }
+            }
+
+            function toggleCourseStatus(courseId) {
+                if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái khóa học này?')) {
+                    window.location.href = 'courseadmin?action=toggleStatus&id=' + courseId;
+                }
+            }
+        </script>
     </head>
     <body>
-        <div class="container-fluid">
-            <div class="row">
-                <!-- Sidebar -->
-                <div class="col-md-2 sidebar p-0">
-                    <div class="sidebar-brand">
-                        <img src="images/logo_pettech.jpg" alt="Logo">
-                        <h4 class="mb-0">PetTech</h4>
+        <c:choose>
+            <%-- Kiểm tra nếu chưa đăng nhập --%>
+            <c:when test="${empty sessionScope.user}">
+                <div class="container mt-5">
+                    <div class="alert alert-danger text-center">
+                        <h4>Bạn cần đăng nhập để truy cập trang này</h4>
+                        <a href="authen?action=login" class="btn btn-primary mt-3">Đăng nhập</a>
                     </div>
-                    <ul class="nav flex-column mt-3">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="admin">
-                                <i class="bi bi-speedometer2"></i>Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="userAdmin.jsp">
-                                <i class="bi bi-people"></i>Người dùng
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="courseadmin">
-                                <i class="bi bi-book"></i>Khóa học
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="productsAdmin.jsp">
-                                <i class="bi bi-cart"></i>Sản phẩm
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="ordersAdmin.jsp">
-                                <i class="bi bi-receipt"></i>Đơn hàng
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="paymentsAdmin.jsp">
-                                <i class="bi bi-credit-card"></i>Thanh toán
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="blogsAdmin.jsp">
-                                <i class="bi bi-newspaper"></i>Blog
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="partnersAdmin.jsp">
-                                <i class="bi bi-building"></i>Đối tác
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="reports.jsp">
-                                <i class="bi bi-graph-up"></i>Báo cáo
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="settings.jsp">
-                                <i class="bi bi-gear"></i>Cài đặt
-                            </a>
-                        </li>
-                    </ul>
+                </div>
+            </c:when>
 
-                    <!-- Admin Profile Section -->
-                    <div class="admin-profile">
-                        <div class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                <img src="https://via.placeholder.com/40" alt="Admin Avatar" class="admin-avatar">
-                                <div class="admin-info">
-                                    <div class="admin-name">Admin Name</div>
-                                    <div class="admin-role">Quản trị viên</div>
-                                </div>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="editProfile.jsp">
-                                        <i class="bi bi-person me-2"></i>Thông tin cá nhân
-                                    </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item logout" href="authen?action=login">
-                                        <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
-                                    </a></li>
+            <%-- Kiểm tra nếu đã đăng nhập nhưng không có quyền (role = 1) --%>
+            <c:when test="${sessionScope.user.roleId == 1}">
+                <div class="container mt-5">
+                    <div class="alert alert-warning text-center">
+                        <h4>Bạn không có quyền truy cập trang quản trị</h4>
+                        <a href="home" class="btn btn-primary mt-3">Quay về trang chủ</a>
+                    </div>
+                </div>
+            </c:when>
+
+            <%-- Nếu đã đăng nhập và có quyền (role 2 hoặc 3) --%>
+            <c:otherwise>
+                <div class="container-fluid">
+                    <div class="row">
+                        <!-- Sidebar -->
+                        <div class="col-md-2 sidebar p-0">
+                            <div class="sidebar-brand">
+                                <img src="images/logo_pettech.jpg" alt="Logo">
+                                <h4 class="mb-0">PetTech</h4>
+                            </div>
+                            <ul class="nav flex-column mt-3">
+                                <li class="nav-item">
+                                    <a class="nav-link active" href="admin">
+                                        <i class="bi bi-speedometer2"></i>Dashboard
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="userAdmin.jsp">
+                                        <i class="bi bi-people"></i>Người dùng
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="courseadmin">
+                                        <i class="bi bi-book"></i>Khóa học
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="productsAdmin.jsp">
+                                        <i class="bi bi-cart"></i>Sản phẩm
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="ordersAdmin.jsp">
+                                        <i class="bi bi-receipt"></i>Đơn hàng
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="paymentsAdmin.jsp">
+                                        <i class="bi bi-credit-card"></i>Thanh toán
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="blogsAdmin.jsp">
+                                        <i class="bi bi-newspaper"></i>Blog
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="partnersAdmin.jsp">
+                                        <i class="bi bi-building"></i>Đối tác
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="reports.jsp">
+                                        <i class="bi bi-graph-up"></i>Báo cáo
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="settings.jsp">
+                                        <i class="bi bi-gear"></i>Cài đặt
+                                    </a>
+                                </li>
                             </ul>
+
+                            <!-- Admin Profile Section -->
+                            <div class="admin-profile">
+                                <div class="dropdown">
+                                    <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <img src="${not empty sessionScope.user.avatar ? sessionScope.user.avatar : 'https://via.placeholder.com/40'}" 
+                                             alt="Admin Avatar" class="admin-avatar">
+                                        <div class="admin-info">
+                                            <div class="admin-name">${sessionScope.user.fullname}</div>
+                                            <div class="admin-role">
+                                                <c:choose>
+                                                    <c:when test="${sessionScope.user.roleId == 3}">Quản trị viên</c:when>
+                                                    <c:when test="${sessionScope.user.roleId == 2}">Nhân viên</c:when>
+                                                </c:choose>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" href="editProfile.jsp">
+                                                <i class="bi bi-person me-2"></i>Thông tin cá nhân
+                                            </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item logout" href="authen?action=logout">
+                                                <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                                            </a></li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- Main Content -->
-                <div class="col-md-10 p-4">
-                    <div class="tab-content">
-                        <!-- Dashboard Tab -->
-                        <div class="tab-pane active" id="dashboard">
-                            <h2 class="mb-4">Dashboard Tổng quan</h2>
+                        <!-- Main Content -->
+                        <div class="col-md-10 p-4">
+                            <div class="tab-content">
+                                <c:if test="${not empty success}">
+                                    <div class="alert alert-success alert-dismissible fade show">
+                                        ${success}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                    <c:remove var="success" scope="session"/>
+                                </c:if>
 
-                            <!-- Stat Cards -->
-                            <div class="row mb-4">
-                                <div class="col-md-3 mb-3">
-                                    <div class="card stat-card bg-dark text-white animate-fade" style="animation-delay: 0.5s">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <h5 class="card-title">Thống kê truy cập</h5>
+                                <c:if test="${not empty error}">
+                                    <div class="alert alert-danger alert-dismissible fade show">
+                                        ${error}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                    <c:remove var="error" scope="session"/>
+                                </c:if>
 
-                                                    <!-- Dòng hiển thị số người đang online -->
-                                                    <div class="d-flex align-items-center mb-2">
-                                                        <span class="badge bg-success me-2" style="width: 10px; height: 10px; border-radius: 50%;"></span>
-                                                        <div>
-                                                            <span class="small">Đang online:</span>
-                                                            <h4 class="mb-0 d-inline-block ms-2">${onlineUsers}</h4>
-                                                        </div>
-                                                    </div>
+                                <h2 class="mb-4">Quản lý Khóa học</h2>
 
-                                                    <!-- Dòng hiển thị tổng lượt truy cập -->
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="badge bg-primary me-2" style="width: 10px; height: 10px; border-radius: 50%;"></span>
-                                                        <div>
-                                                            <span class="small">Tổng lượt:</span>
-                                                            <h4 class="mb-0 d-inline-block ms-2">${totalVisitors}</h4>
-                                                        </div>
-                                                    </div>
+                                <!-- Filter Section -->
+                                <div class="filter-section mb-4">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <div class="d-flex gap-2">
+                                                <a href="courseAdd.jsp" class="btn btn-primary">
+                                                    <i class="bi bi-plus-circle me-1"></i> Thêm khóa học
+                                                </a>
 
-                                                    <!-- Badge hiển thị trạng thái -->
-                                                    <c:choose>
-                                                        <c:when test="${onlineUsers > 50}">
-                                                            <span class="badge bg-success mt-2">Cao điểm</span>
-                                                        </c:when>
-                                                        <c:when test="${onlineUsers > 20}">
-                                                            <span class="badge bg-warning text-dark mt-2">Bình thường</span>
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <span class="badge bg-secondary mt-2">Thấp điểm</span>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </div>
-                                                <i class="bi bi-people fs-1 opacity-50"></i>
+                                                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#categoryManagementModal">
+                                                    <i class="bi bi-tags me-1"></i> Quản lý Danh mục
+                                                </button>
                                             </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <form action="courseadmin" method="GET" class="d-flex">
+                                                <input type="hidden" name="action" value="search">
+                                                <input type="text" name="keyword" class="form-control" placeholder="Tìm kiếm khóa học..." 
+                                                       value="${not empty searchKeyword ? searchKeyword : ''}">
+                                                <button type="submit" class="btn btn-outline-primary ms-2">
+                                                    <i class="bi bi-search"></i>
+                                                </button>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="col-md-3 mb-3">
-                                    <div class="card stat-card bg-primary text-white animate-fade" style="animation-delay: 0.1s">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <h5 class="card-title">Người dùng</h5>
-                                                    <h2 class="card-text">${totalUsers}</h2>
-                                                    <span class="badge bg-white text-primary">+12%</span>
-                                                </div>
-                                                <i class="bi bi-people fs-1 opacity-50"></i>
-                                            </div>
-                                        </div>
+                                <!-- Course List -->
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h4>Danh sách Khóa học</h4>
                                     </div>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <div class="card stat-card bg-success text-white animate-fade" style="animation-delay: 0.2s">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <h5 class="card-title">Khóa học</h5>
-                                                    <h2 class="card-text">${totalCourses}</h2>
-                                                    <span class="badge bg-white text-success">+5%</span>
-                                                </div>
-                                                <i class="bi bi-book fs-1 opacity-50"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <div class="card stat-card bg-info text-white animate-fade" style="animation-delay: 0.3s">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <h5 class="card-title">Đơn hàng</h5>
-                                                    <h2 class="card-text">${totalOrders}</h2>
-                                                    <span class="badge bg-white text-info">-3%</span>
-                                                </div>
-                                                <i class="bi bi-cart fs-1 opacity-50"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <div class="card stat-card bg-warning text-dark animate-fade" style="animation-delay: 0.4s">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <h5 class="card-title">Doanh thu</h5>
-                                                    <h2 class="card-text">₫<fmt:formatNumber value="${totalRevenue}" pattern="#,##0.00"/></h2>
-                                                    <span class="badge bg-white text-warning">+8%</span>
-                                                </div>
-                                                <i class="bi bi-currency-dollar fs-1 opacity-50"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-
-                            <!-- Recent Activities -->
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <h5 class="mb-0">Hoạt động gần đây</h5>
-                                </div>
-                                <div class="card-body p-0">
-                                    <div class="list-group list-group-flush">
-                                        <c:forEach var="user" items="${recentUsers}">
-                                            <div class="list-group-item border-0 py-3">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="bg-primary bg-opacity-10 p-2 rounded-circle">
-                                                        <i class="bi bi-person-plus text-primary"></i>
-                                                    </div>
-                                                    <div class="ms-3">
-                                                        <h6 class="mb-0">Người dùng mới đăng ký</h6>
-                                                        <small class="text-muted">${user.fullname} - <fmt:formatDate value="${user.created_at}" pattern="dd/MM/yyyy HH:mm"/></small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </c:forEach>
-
-                                        <c:forEach var="order" items="${recentOrders}">
-                                            <div class="list-group-item border-0 py-3">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="bg-success bg-opacity-10 p-2 rounded-circle">
-                                                        <i class="bi bi-cart-check text-success"></i>
-                                                    </div>
-                                                    <div class="ms-3">
-                                                        <h6 class="mb-0">Đơn hàng mới</h6>
-                                                        <small class="text-muted">Đơn #${order.id} - <fmt:formatNumber value="${order.total_amount}" type="currency" currencySymbol="₫"/></small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </c:forEach>
-
-                                        <c:forEach var="payment" items="${recentPayments}">
-                                            <div class="list-group-item border-0 py-3">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="bg-info bg-opacity-10 p-2 rounded-circle">
-                                                        <i class="bi bi-credit-card text-info"></i>
-                                                    </div>
-                                                    <div class="ms-3">
-                                                        <h6 class="mb-0">Thanh toán mới</h6>
-                                                        <small class="text-muted">Số tiền: <fmt:formatNumber value="${payment.amount}" type="currency" currencySymbol="₫"/> - <fmt:formatDate value="${payment.payment_date}" pattern="dd/MM/yyyy HH:mm"/></small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </c:forEach>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Top Courses -->
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0">Khóa học phổ biến</h5>
-                                </div>
-                                <div class="card-body p-0">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover mb-0">
-                                            <thead>
-                                                <tr>
-                                                    <th>Khóa học</th>
-                                                    <th>Lượt truy cập</th>
-                                                    <th>Tỉ lệ hoàn thành</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <c:forEach var="course" items="${popularCourses}">
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table id="courseTable" class="table table-hover table-striped">
+                                                <thead class="table-light">
                                                     <tr>
-                                                        <td>
-                                                            <div class="d-flex align-items-center">
-                                                                <img src="/images/course/course_${course.id}.jpg" class="rounded me-2" width="40" height="40" alt="${course.title}">
-                                                                <span>${course.title}</span>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <c:set var="accessCount" value="${courseDAO.getAccessCount(course.id)}"/>
-                                                            ${accessCount}
-                                                        </td>
-                                                        <td>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="progress progress-thin w-100 me-2">
-                                                                    <c:set var="completionRate" value="${courseDAO.getCompletionRate(course.id)}"/>
-                                                                    <div class="progress-bar bg-success" style="width: ${completionRate}%"></div>
-                                                                </div>
-                                                                <span>${completionRate}%</span>
-                                                            </div>
-                                                        </td>
+                                                        <th width="5%">ID</th>
+                                                        <th width="27%">Tên khóa học</th>
+                                                        <th width="15%">Giảng viên</th>
+                                                        <th width="18%">Danh mục</th>
+                                                        <th width="12%">Thời lượng</th>
+                                                        <th width="10%">Trạng thái</th>
+                                                        <th width="20%">Hành động</th>
                                                     </tr>
-                                                </c:forEach>
-                                            </tbody>
-                                        </table>
+                                                </thead>
+                                                <tbody>
+                                                    <c:forEach items="${courses}" var="course">
+                                                        <tr>
+                                                            <td>${course.id}</td>
+                                                            <td>
+                                                                <a href="courseadmin?action=edit&id=${course.id}" class="text-primary fw-bold">
+                                                                    ${course.title}
+                                                                </a>
+                                                            </td>
+                                                            <td>${course.researcher}</td>
+                                                            <td>${not empty course.categories ? course.categories : 'Chưa phân loại'}</td>
+                                                            <td>${course.time}</td>
+                                                            <td>
+                                                                <span class="badge ${course.status == 1 ? 'bg-success' : 'bg-secondary'}">
+                                                                    ${course.status == 1 ? 'Active' : 'Inactive'}
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <div class="d-flex">
+                                                                    <a href="courseadmin?action=edit&id=${course.id}" 
+                                                                       class="btn btn-sm btn-outline-primary me-1" title="Sửa">
+                                                                        <i class="bi bi-pencil"></i>
+                                                                    </a>
+                                                                    <button onclick="confirmDelete(${course.id})" 
+                                                                            class="btn btn-sm btn-outline-danger me-1" title="Xóa">
+                                                                        <i class="bi bi-trash"></i>
+                                                                    </button>
+                                                                    <button onclick="toggleCourseStatus(${course.id})" 
+                                                                            class="btn btn-sm ${course.status == 1 ? 'btn-outline-warning' : 'btn-outline-success'}"
+                                                                            title="${course.status == 1 ? 'Ẩn khóa học' : 'Hiện khóa học'}">
+                                                                        <i class="bi ${course.status == 1 ? 'bi-eye-slash' : 'bi-eye'}"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </c:forEach>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Scripts -->
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-            <script>
-                const dailyVisits = ${dailyVisitsJson}; // [{"date":"2025-05-30", "count":120}, ...]
-            </script>
+                <!-- Category Management Modal -->
+                <div class="modal fade" id="categoryManagementModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form action="courseadmin" method="POST">
+                                <input type="hidden" name="action" value="addCategory">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Quản lý Danh mục Khóa học</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Thêm danh mục mới</label>
+                                        <div class="input-group">
+                                            <input type="text" name="categoryName" class="form-control" 
+                                                   placeholder="Nhập tên danh mục" required>
+                                            <button type="submit" class="btn btn-primary">Thêm</button>
+                                        </div>
+                                    </div>
 
-            <script>
-                // Initialize Select2
-                $(document).ready(function () {
-                    $('.form-select').select2({
-                        minimumResultsForSearch: Infinity
-                    });
-                    // Initialize charts
-                    const visitsCtx = document.getElementById('visitsChart').getContext('2d');
-                    const visitsChart = new Chart(visitsCtx, {
-                        type: 'line',
-                        data: {
-                            labels: ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'],
-                            datasets: [
-                                {
-                                    label: 'Lượt truy cập',
-                                    data: [1200, 1900, 1700, 2100, 2300, 2000, 1800],
-                                    borderColor: '#4361ee',
-                                    backgroundColor: 'rgba(67, 97, 238, 0.1)',
-                                    tension: 0.3,
-                                    fill: true
-                                },
-                                {
-                                    label: 'Đăng ký mới',
-                                    data: [40, 60, 55, 75, 80, 70, 65],
-                                    borderColor: '#4cc9f0',
-                                    backgroundColor: 'rgba(76, 201, 240, 0.1)',
-                                    tension: 0.3,
-                                    fill: true
-                                }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    position: 'top',
-                                }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true
-                                }
-                            }
-                        }
-                    });
-                    const packagesCtx = document.getElementById('packagesChart').getContext('2d');
-                    const packagesChart = new Chart(packagesCtx, {
-                        type: 'doughnut',
-                        data: {
-                            labels: ['Free', 'Standard', 'Pro'],
-                            datasets: [{
-                                    data: [35, 40, 25],
-                                    backgroundColor: [
-                                        '#6c757d',
-                                        '#38b000',
-                                        '#4361ee'
-                                    ],
-                                    borderWidth: 0
-                                }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    position: 'right',
-                                }
-                            },
-                            cutout: '70%'
-                        }
-                    });
-                });
+                                    <div class="mb-3">
+                                        <label class="form-label">Danh sách danh mục</label>
+                                        <div class="list-group">
+                                            <c:forEach items="${categories}" var="category">
+                                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                    ${category.name}
+                                                    <div>
+                                                        <button type="button" class="btn btn-sm btn-outline-primary me-1" 
+                                                                onclick="openEditCategoryModal(${category.id}, '${fn:escapeXml(category.name)}')">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </button>
+                                                        <a href="courseadmin?action=deleteCategory&id=${category.id}" 
+                                                           class="btn btn-sm btn-outline-danger"
+                                                           onclick="return confirm('Bạn có chắc muốn xóa danh mục này?')">
+                                                            <i class="bi bi-trash"></i>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </c:forEach>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
 
-                document.addEventListener('DOMContentLoaded', function () {
-                    const tables = document.querySelectorAll('table');
+                <!-- Edit Category Modal -->
+                <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form action="courseadmin" method="POST">
+                                <input type="hidden" name="action" value="updateCategory">
+                                <input type="hidden" name="categoryId" id="editCategoryId">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Chỉnh sửa Danh mục</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Tên danh mục</label>
+                                        <input type="text" name="categoryName" id="editCategoryName" 
+                                               class="form-control" required>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </c:otherwise>
+        </c:choose>
 
-                    tables.forEach(table => {
-                        const filters = table.querySelectorAll('thead input, thead select');
-                        const rows = table.querySelectorAll('tbody tr');
 
-                        if (!filters.length || !rows.length)
-                            return;
+        <!-- Scripts -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 
-                        filters.forEach((filter, i) => {
-                            filter.addEventListener('input', () => {
-                                const filterValues = Array.from(filters).map(f => f.value.toLowerCase().trim());
-                                rows.forEach(row => {
-                                    const cells = row.querySelectorAll('td');
-                                    let visible = true;
-                                    filterValues.forEach((val, j) => {
-                                        if (!val)
-                                            return;
-                                        const text = cells[j]?.textContent?.toLowerCase() || '';
-                                        if (!text.includes(val))
-                                            visible = false;
-                                    });
-                                    row.style.display = visible ? '' : 'none';
-                                });
-                            });
-                        });
-                    });
-                });
-            </script>
     </body>
 </html>
