@@ -3,6 +3,7 @@ package controller.Admin;
 import dal.CourseDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,6 +21,12 @@ import model.CourseCategory;
 import model.CourseLesson;
 import model.CourseModule;
 import org.apache.commons.io.IOUtils;
+
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024, // 1MB
+        maxFileSize = 1024 * 1024 * 5, // 5MB
+        maxRequestSize = 1024 * 1024 * 10 // 10MB
+)
 
 public class CourseAdminServlet extends HttpServlet {
 // Thêm các hằng số ở đầu class
@@ -271,7 +278,7 @@ public class CourseAdminServlet extends HttpServlet {
             }
 
             int id = Integer.parseInt(idParam);
-            Course course = courseDAO.getCourseDetails(id);
+            Course course = courseDAO.getCourseDetail(id);
             if (course == null) {
                 throw new ServletException("Khóa học không tồn tại");
             }
@@ -297,14 +304,34 @@ public class CourseAdminServlet extends HttpServlet {
         }
     }
 
+//    private void listCourses(HttpServletRequest request, HttpServletResponse response)
+//            throws ServletException, IOException {
+//        List<Course> courses = courseDAO.getAllCourses();
+//        List<CourseCategory> categories = courseDAO.getAllCategories(); // Thêm dòng này
+//        System.out.println("DEBUG: Total courses: " + (courses != null ? courses.size() : "null"));
+//        System.out.println("DEBUG: Total categories: " + (categories != null ? categories.size() : "null"));
+//
+//        request.setAttribute("courses", courses);
+//        request.setAttribute("categories", categories); // Thêm dòng này
+//        request.getRequestDispatcher("courseAdmin.jsp").forward(request, response);
+//    }
     private void listCourses(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        List<Course> courses = courseDAO.getAllCourses();
-        List<CourseCategory> categories = courseDAO.getAllCategories(); // Thêm dòng này
+        try {
+            List<Course> courses = courseDAO.getAllCourses();
+            List<CourseCategory> categories = courseDAO.getAllCategories();
 
-        request.setAttribute("courses", courses);
-        request.setAttribute("categories", categories); // Thêm dòng này
-        request.getRequestDispatcher("courseAdmin.jsp").forward(request, response);
+            //System.out.println("DEBUG - Tổng số khóa học: " + (courses != null ? courses.size() : "null"));
+
+            request.setAttribute("courses", courses);
+            request.setAttribute("categories", categories);
+            request.getRequestDispatcher("courseAdmin.jsp").forward(request, response);
+        } catch (Exception e) {
+            //System.err.println("LỖI LÚC LẤY DANH SÁCH KHÓA HỌC: " + e.getMessage());
+            e.printStackTrace();
+            request.setAttribute("error", "Lỗi khi tải dữ liệu: " + e.getMessage());
+            request.getRequestDispatcher("courseAdmin.jsp").forward(request, response);
+        }
     }
 
     private void addCourse(HttpServletRequest request, HttpServletResponse response)
@@ -316,15 +343,21 @@ public class CourseAdminServlet extends HttpServlet {
             String researcher = request.getParameter("researcher");
             String time = request.getParameter("time");
             int status = Integer.parseInt(request.getParameter("status"));
+            String[] categoryIds = request.getParameterValues("categoryIds");
 
-            // Lấy danh sách categoryIds từ request (dạng mảng)
-            String[] categoryIdsParam = request.getParameterValues("categoryIds");
-            List<Integer> categoryIds = new ArrayList<>();
+            // Validate dữ liệu
+            if (title == null || title.trim().isEmpty()) {
+                throw new ServletException("Tên khóa học không được để trống");
+            }
 
-            if (categoryIdsParam != null) {
-                for (String id : categoryIdsParam) {
-                    categoryIds.add(Integer.parseInt(id));
-                }
+            // Xử lý upload file
+            Part filePart = request.getPart("thumbnail");
+            String imagePath = null;
+
+            if (filePart != null && filePart.getSize() > 0) {
+                String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+                InputStream fileContent = filePart.getInputStream();
+                imagePath = saveUploadedFile(fileName, fileContent);
             }
 
             // Tạo đối tượng Course
@@ -332,40 +365,31 @@ public class CourseAdminServlet extends HttpServlet {
             newCourse.setTitle(title);
             newCourse.setContent(content);
             newCourse.setResearcher(researcher);
-            newCourse.setDuration(time); // ✅ đúng theo DAO và Course.java
+            newCourse.setDuration(time);
             newCourse.setStatus(status);
+            newCourse.setThumbnailUrl(imagePath);
 
-            // Xử lý upload file thumbnail
-            Part filePart = request.getPart("thumbnail");
-            if (filePart != null && filePart.getSize() > 0) {
-                String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-                InputStream fileContent = filePart.getInputStream();
-                String imagePath = saveUploadedFile(fileName, fileContent);
-                newCourse.setThumbnailUrl(imagePath);
+            // Chuyển categoryIds từ String[] sang List<Integer>
+            List<Integer> categories = new ArrayList<>();
+            if (categoryIds != null) {
+                for (String id : categoryIds) {
+                    categories.add(Integer.parseInt(id));
+                }
             }
 
-            // Thêm khóa học vào database
-            int courseId = courseDAO.addCourse(
-                    newCourse.getTitle(),
-                    newCourse.getContent(),
-                    newCourse.getResearcher(),
-                    null, // videoUrl (nếu có)
-                    newCourse.getDuration(),
-                    newCourse.getThumbnailUrl(),
-                    categoryIds
-            );
+            // Thêm vào database
+            boolean success = courseDAO.addCourseWithCategories(newCourse, categories);
 
-            if (courseId > 0) {
-                request.getSession().setAttribute("SUCCESS_MSG", "Thêm khóa học thành công");
-                response.sendRedirect(request.getContextPath() + "/courseadmin?action=edit&id=" + courseId);
+            if (success) {
+                request.getSession().setAttribute("success", "Thêm khóa học thành công");
+                response.sendRedirect("courseadmin");
             } else {
-                request.setAttribute("ERROR_MSG", "Thêm khóa học thất bại");
-                request.getRequestDispatcher("courseAdmin.jsp").forward(request, response);
+                request.setAttribute("error", "Thêm khóa học thất bại");
+                request.getRequestDispatcher("courseAdd.jsp").forward(request, response);
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("ERROR_MSG", "Lỗi khi thêm khóa học: " + e.getMessage());
-            request.getRequestDispatcher("courseAdmin.jsp").forward(request, response);
+            request.setAttribute("error", "Lỗi khi thêm khóa học: " + e.getMessage());
+            request.getRequestDispatcher("courseAdd.jsp").forward(request, response);
         }
     }
 

@@ -972,4 +972,73 @@ public class CourseDAO extends DBConnect {
             return false;
         }
     }
+
+    // Thêm phương thức mới
+    public boolean addCourseWithCategories(Course course, List<Integer> categoryIds) {
+        String sql = "INSERT INTO courses (title, content, researcher, duration, status, thumbnail_url) VALUES (?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement st = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            st.setString(1, course.getTitle());
+            st.setString(2, course.getContent());
+            st.setString(3, course.getResearcher());
+            st.setString(4, course.getDuration());
+            st.setInt(5, course.getStatus());
+            st.setString(6, course.getThumbnailUrl());
+
+            int affectedRows = st.executeUpdate();
+            if (affectedRows == 0) {
+                return false;
+            }
+
+            try (ResultSet generatedKeys = st.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    int courseId = generatedKeys.getInt(1);
+                    // Thêm liên kết với các danh mục
+                    return addCourseCategories(courseId, categoryIds);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private boolean addCourseCategories(int courseId, List<Integer> categoryIds) {
+        String sql = "INSERT INTO course_category_mapping (course_id, category_id) VALUES (?, ?)";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            for (int categoryId : categoryIds) {
+                st.setInt(1, courseId);
+                st.setInt(2, categoryId);
+                st.addBatch();
+            }
+            st.executeBatch();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Cập nhật phương thức getCourseDetails cho trang admin
+    public Course getCourseDetail(int courseId) throws SQLException {
+        String sql = "SELECT * FROM courses WHERE id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, courseId);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                Course course = new Course();
+                course.setId(rs.getInt("id"));
+                course.setTitle(rs.getString("title"));
+                course.setContent(rs.getString("content"));
+                course.setResearcher(rs.getString("researcher"));
+                course.setDuration(rs.getString("duration"));
+                course.setStatus(rs.getInt("status"));
+                course.setThumbnailUrl(rs.getString("thumbnail_url"));
+
+                // Lấy danh mục
+                course.setCategories(getCategoriesByCourseId(courseId));
+                return course;
+            }
+        }
+        return null;
+    }
 }
