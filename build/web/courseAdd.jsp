@@ -8,9 +8,7 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<c:if test="${empty sessionScope.user}">
-    <c:redirect url="authen?action=login"/>
-</c:if>
+
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -368,6 +366,22 @@
 
     </head>
     <body>
+        <%-- Hiển thị thông báo thành công --%>
+        <c:if test="${not empty successMessage}">
+            <div class="alert alert-success alert-dismissible fade show">
+                ${successMessage}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <c:remove var="successMessage" scope="session"/> <%-- Xóa message sau khi hiển thị --%>
+        </c:if>
+
+        <%-- Hiển thị thông báo lỗi --%>
+        <c:if test="${not empty errorMessage}">
+            <div class="alert alert-danger alert-dismissible fade show">
+                ${errorMessage}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </c:if>
         <div class="container-fluid">
             <div class="row">
                 <!-- Sidebar -->
@@ -466,13 +480,6 @@
                         <a href="courseadmin" class="btn btn-secondary">Quay lại</a>
                     </div>
 
-                    <c:if test="${not empty error}">
-                        <div class="alert alert-danger alert-dismissible fade show">
-                            ${error}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    </c:if>
-
                     <form action="courseadmin" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
                         <input type="hidden" name="action" value="add">
 
@@ -484,14 +491,28 @@
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label class="form-label">Danh mục khóa học <span class="text-danger">*</span></label>
-                                        <select name="categoryId" class="form-select" required>
+                                        <select name="categoryIds" class="form-select" required>
                                             <option value="">-- Chọn danh mục --</option>
+                                            <c:if test="${empty categories}">
+                                                <p class="text-danger">Không có danh mục nào được tải!</p>
+                                            </c:if>
+
                                             <c:forEach items="${categories}" var="category">
                                                 <option value="${category.id}">${category.name}</option>
+                                                <!-- Debug từng item -->
+                                                <!-- ${category.id} - ${category.name}<br/> -->
                                             </c:forEach>
                                         </select>
                                         <div class="invalid-feedback">Vui lòng chọn danh mục khóa học</div>
                                     </div>
+                                    <div class="col-md-6">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
+                                            <input type="date" name="startDate" class="form-control" required>
+                                            <div class="invalid-feedback">Vui lòng chọn ngày bắt đầu khóa học</div>
+                                        </div>
+                                    </div>
+
                                 </div>
 
                                 <div class="row mb-3">
@@ -522,9 +543,11 @@
                                     <div class="col-md-4">
                                         <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
                                         <select name="status" class="form-select" required>
+                                            <option value="" selected disabled>-- Chọn trạng thái --</option>
                                             <option value="1">Active</option>
                                             <option value="0">Inactive</option>
                                         </select>
+                                        <div class="invalid-feedback">Vui lòng chọn trạng thái</div>
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label">Ảnh đại diện <span class="text-danger">*</span></label>
@@ -569,6 +592,16 @@
                             });
                 })();
             });
+
+// Tự động đóng thông báo sau 5 giây
+            setTimeout(function () {
+                var alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function (alert) {
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+
         </script>
     </body>
 </html>

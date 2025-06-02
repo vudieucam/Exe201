@@ -14,12 +14,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import model.Course;
 import model.CourseCategory;
 import model.CourseLesson;
 import model.CourseModule;
+
 import org.apache.commons.io.IOUtils;
 
 @MultipartConfig(
@@ -322,7 +324,6 @@ public class CourseAdminServlet extends HttpServlet {
             List<CourseCategory> categories = courseDAO.getAllCategories();
 
             //System.out.println("DEBUG - Tổng số khóa học: " + (courses != null ? courses.size() : "null"));
-
             request.setAttribute("courses", courses);
             request.setAttribute("categories", categories);
             request.getRequestDispatcher("courseAdmin.jsp").forward(request, response);
@@ -342,22 +343,65 @@ public class CourseAdminServlet extends HttpServlet {
             String content = request.getParameter("content");
             String researcher = request.getParameter("researcher");
             String time = request.getParameter("time");
-            int status = Integer.parseInt(request.getParameter("status"));
-            String[] categoryIds = request.getParameterValues("categoryIds");
+            String statusParam = request.getParameter("status");
+            String categoryId = request.getParameter("categoryIds");
 
             // Validate dữ liệu
             if (title == null || title.trim().isEmpty()) {
                 throw new ServletException("Tên khóa học không được để trống");
             }
+            if (categoryId == null || categoryId.trim().isEmpty()) {
+                throw new ServletException("Danh mục không được để trống");
+            }
+
+            // Xử lý status với giá trị mặc định là 1 (Active)
+            int status = 1;
+            try {
+                if (statusParam != null && !statusParam.trim().isEmpty()) {
+                    status = Integer.parseInt(statusParam);
+                }
+            } catch (NumberFormatException e) {
+                // Giữ giá trị mặc định nếu có lỗi parse
+            }
 
             // Xử lý upload file
-            Part filePart = request.getPart("thumbnail");
             String imagePath = null;
+            Part filePart = request.getPart("thumbnail");
+
+            // DEBUG: Kiểm tra thông tin file upload
+            System.out.println("File Part: " + filePart);
+            if (filePart != null) {
+                System.out.println("File Name: " + filePart.getSubmittedFileName());
+                System.out.println("File Size: " + filePart.getSize());
+                System.out.println("Content Type: " + filePart.getContentType());
+            }
 
             if (filePart != null && filePart.getSize() > 0) {
                 String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+
+                // Kiểm tra extension file
+                if (!fileName.toLowerCase().matches(".*\\.(jpg|jpeg|png|gif)$")) {
+                    throw new ServletException("Chỉ chấp nhận file ảnh (JPG, JPEG, PNG, GIF)");
+                }
+
                 InputStream fileContent = filePart.getInputStream();
                 imagePath = saveUploadedFile(fileName, fileContent);
+
+                // DEBUG: Đường dẫn ảnh sau khi lưu
+                System.out.println("Image saved to: " + imagePath);
+            } else {
+                throw new ServletException("Vui lòng chọn ảnh đại diện cho khóa học");
+            }
+            String startDateParam = request.getParameter("startDate");
+            Date startDate = null;
+            try {
+                if (startDateParam != null && !startDateParam.trim().isEmpty()) {
+                    startDate = java.sql.Date.valueOf(startDateParam); // chuyển từ String sang java.sql.Date
+                } else {
+                    throw new ServletException("Vui lòng chọn ngày bắt đầu");
+                }
+            } catch (IllegalArgumentException e) {
+                throw new ServletException("Ngày bắt đầu không hợp lệ");
             }
 
             // Tạo đối tượng Course
@@ -368,14 +412,11 @@ public class CourseAdminServlet extends HttpServlet {
             newCourse.setDuration(time);
             newCourse.setStatus(status);
             newCourse.setThumbnailUrl(imagePath);
+            newCourse.setCreatedAt(startDate);
 
-            // Chuyển categoryIds từ String[] sang List<Integer>
+            // Chuyển categoryId sang List
             List<Integer> categories = new ArrayList<>();
-            if (categoryIds != null) {
-                for (String id : categoryIds) {
-                    categories.add(Integer.parseInt(id));
-                }
-            }
+            categories.add(Integer.parseInt(categoryId));
 
             // Thêm vào database
             boolean success = courseDAO.addCourseWithCategories(newCourse, categories);
@@ -384,11 +425,17 @@ public class CourseAdminServlet extends HttpServlet {
                 request.getSession().setAttribute("success", "Thêm khóa học thành công");
                 response.sendRedirect("courseadmin");
             } else {
-                request.setAttribute("error", "Thêm khóa học thất bại");
-                request.getRequestDispatcher("courseAdd.jsp").forward(request, response);
+                throw new ServletException("Thêm khóa học thất bại do lỗi database");
             }
         } catch (Exception e) {
+            // Load lại danh mục khi có lỗi
+            List<CourseCategory> categories = courseDAO.getAllCategories();
+            request.setAttribute("categories", categories);
             request.setAttribute("error", "Lỗi khi thêm khóa học: " + e.getMessage());
+
+            // DEBUG: Log lỗi
+            e.printStackTrace();
+
             request.getRequestDispatcher("courseAdd.jsp").forward(request, response);
         }
     }
@@ -396,60 +443,175 @@ public class CourseAdminServlet extends HttpServlet {
     private void updateCourse(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
+            // Lấy các tham số từ request
             String idParam = request.getParameter("id");
-            if (idParam == null || idParam.isEmpty()) {
-                throw new ServletException("ID khóa học không được để trống");
-            }
-
-            int id = Integer.parseInt(idParam);
             String title = request.getParameter("title");
             String content = request.getParameter("content");
             String researcher = request.getParameter("researcher");
             String time = request.getParameter("time");
             String statusParam = request.getParameter("status");
+            String categoryId = request.getParameter("categoryId"); // Đổi từ categoryIds
 
-            if (title == null || content == null || researcher == null || time == null || statusParam == null) {
-                throw new ServletException("Thiếu thông tin bắt buộc");
+            // Validate dữ liệu
+            if (idParam == null || idParam.trim().isEmpty()) {
+                throw new ServletException("ID khóa học không được để trống");
+            }
+            int id = Integer.parseInt(idParam);
+
+            // Lấy thông tin khóa học hiện tại
+            Course existingCourse = courseDAO.getCourseDetails(id);
+            if (existingCourse == null) {
+                throw new ServletException("Không tìm thấy khóa học với ID: " + id);
             }
 
-            int status = Integer.parseInt(statusParam);
-
-            Course course = new Course();
-            course.setId(id);
-            course.setTitle(title);
-            course.setContent(content);
-            course.setResearcher(researcher);
-            course.setDuration(time);
-            course.setStatus(status);
-
-            // Handle file upload if new thumbnail is provided
+            // Xử lý upload file
+            String imagePath = existingCourse.getThumbnailUrl();
             Part filePart = request.getPart("thumbnail");
+
             if (filePart != null && filePart.getSize() > 0) {
                 String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+                if (!fileName.toLowerCase().matches(".*\\.(jpg|jpeg|png|gif)$")) {
+                    throw new ServletException("Chỉ chấp nhận file ảnh (JPG, JPEG, PNG, GIF)");
+                }
+
                 InputStream fileContent = filePart.getInputStream();
-                String imagePath = saveUploadedFile(fileName, fileContent);
-                course.setThumbnailUrl(imagePath);
+                imagePath = saveUploadedFile(fileName, fileContent);
             }
 
-            boolean updated = courseDAO.updateCourse(course);
-            if (!updated) {
+            // Tạo đối tượng Course cập nhật
+            Course updatedCourse = new Course();
+            updatedCourse.setId(id);
+            updatedCourse.setTitle(title != null ? title : existingCourse.getTitle());
+            updatedCourse.setContent(content != null ? content : existingCourse.getContent());
+            updatedCourse.setResearcher(researcher != null ? researcher : existingCourse.getResearcher());
+            updatedCourse.setDuration(time != null ? time : existingCourse.getDuration());
+
+            // Xử lý status
+            try {
+                updatedCourse.setStatus(statusParam != null ? Integer.parseInt(statusParam) : existingCourse.getStatus());
+            } catch (NumberFormatException e) {
+                updatedCourse.setStatus(existingCourse.getStatus());
+            }
+
+            updatedCourse.setThumbnailUrl(imagePath);
+            updatedCourse.setCreatedAt(existingCourse.getCreatedAt());
+            updatedCourse.setUpdatedAt(new Date());
+
+            // Chuyển categoryId sang List
+            List<Integer> categories = new ArrayList<>();
+            if (categoryId != null && !categoryId.isEmpty()) {
+                categories.add(Integer.parseInt(categoryId));
+            } else {
+                // Giữ nguyên category cũ nếu không có thay đổi
+                categories.add(existingCourse.getCategories().get(0).getId());
+            }
+
+            // Cập nhật database
+            boolean success = courseDAO.updateCourseWithCategories(updatedCourse, categories);
+
+            if (success) {
+                request.getSession().setAttribute("success", "Cập nhật khóa học thành công");
+                response.sendRedirect(request.getContextPath() + "/courseadmin?action=edit&id=" + id);
+            } else {
                 throw new ServletException("Cập nhật khóa học thất bại");
             }
-
-            response.sendRedirect(request.getContextPath() + "/courseadmin?action=edit&id=" + id);
-        } catch (NumberFormatException e) {
-            request.setAttribute("error", "ID khóa học không hợp lệ");
-            request.getRequestDispatcher("/courseAdmin.jsp").forward(request, response);
         } catch (Exception e) {
+            e.printStackTrace();
             request.setAttribute("error", "Lỗi khi cập nhật: " + e.getMessage());
-            request.getRequestDispatcher("/courseAdmin.jsp").forward(request, response);
+
+            // Giữ lại thông tin đã nhập
+            String idParam = request.getParameter("id");
+            if (idParam != null && !idParam.trim().isEmpty()) {
+                try {
+                    Course currentCourse = courseDAO.getCourseDetails(Integer.parseInt(idParam));
+                    request.setAttribute("currentCourse", currentCourse);
+                } catch (NumberFormatException ex) {
+                    // Bỏ qua nếu ID không hợp lệ
+                }
+            }
+
+            // Load lại danh sách categories
+            List<CourseCategory> categories = courseDAO.getAllCategories();
+            request.setAttribute("categories", categories);
+
+            request.getRequestDispatcher("courseEdit.jsp").forward(request, response);
         }
+    }
+
+    private void deleteOldImage(String imagePath) {
+        if (imagePath != null && !imagePath.isEmpty()) {
+            String fullPath = getServletContext().getRealPath("") + imagePath;
+            File oldFile = new File(fullPath);
+            if (oldFile.exists()) {
+                oldFile.delete();
+            }
+        }
+    }
+
+    private void handleUpdateError(HttpServletRequest request, HttpServletResponse response, Exception e)
+            throws ServletException, IOException {
+        e.printStackTrace();
+
+        // Lấy lại thông tin đã nhập
+        String idParam = request.getParameter("id");
+        Course currentCourse = new Course();
+
+        try {
+            if (idParam != null && !idParam.trim().isEmpty()) {
+                currentCourse.setId(Integer.parseInt(idParam));
+            }
+        } catch (NumberFormatException ex) {
+            // Ignore invalid ID
+        }
+
+        currentCourse.setTitle(request.getParameter("title"));
+        currentCourse.setContent(request.getParameter("content"));
+        currentCourse.setResearcher(request.getParameter("researcher"));
+        currentCourse.setDuration(request.getParameter("time"));
+
+        try {
+            currentCourse.setStatus(Integer.parseInt(request.getParameter("status")));
+        } catch (NumberFormatException ex) {
+            currentCourse.setStatus(1); // Default
+        }
+
+        // Lấy thông tin ảnh cũ nếu có
+        if (idParam != null && !idParam.trim().isEmpty()) {
+            Course existingCourse = courseDAO.getCourseDetails(Integer.parseInt(idParam));
+            if (existingCourse != null) {
+                currentCourse.setThumbnailUrl(existingCourse.getThumbnailUrl());
+            }
+        }
+
+        // Lấy danh sách categories
+        List<CourseCategory> categories = courseDAO.getAllCategories();
+
+        // Set attributes để hiển thị lại
+        request.setAttribute("currentCourse", currentCourse);
+        request.setAttribute("categories", categories);
+        request.setAttribute("error", "Lỗi khi cập nhật: " + e.getMessage());
+
+        // Forward về trang edit
+        request.getRequestDispatcher("courseEdit.jsp").forward(request, response);
     }
 
     private void deleteCourse(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        int id = Integer.parseInt(request.getParameter("id"));
-        courseDAO.deleteCourse(id);
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            boolean isDeleted = courseDAO.deleteCourse(id);
+
+            if (isDeleted) {
+                request.getSession().setAttribute("success", "Xóa khóa học thành công!");
+            } else {
+                request.getSession().setAttribute("error", "Xóa khóa học thất bại!");
+            }
+        } catch (NumberFormatException e) {
+            request.getSession().setAttribute("error", "ID khóa học không hợp lệ");
+        } catch (Exception e) {
+            request.getSession().setAttribute("error", "Lỗi khi xóa khóa học: " + e.getMessage());
+        }
+
         response.sendRedirect(request.getContextPath() + "/courseadmin?action=list");
     }
 
@@ -593,6 +755,44 @@ public class CourseAdminServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+
+        try {
+            // 1. Lấy các tham số thông thường
+            String title = request.getParameter("title");
+            String action = request.getParameter("action");
+
+            // 2. Xử lý file upload
+            Part filePart = request.getPart("thumbnail"); // "thumbnail" phải trùng với name trong form
+
+            if (filePart != null && filePart.getSize() > 0) {
+                // Thư mục lưu file
+                String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads";
+                File uploadDir = new File(uploadPath);
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdir();
+                }
+
+                // Lấy tên file
+                String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+
+                // Lưu file vào thư mục
+                filePart.write(uploadPath + File.separator + fileName);
+
+                // Lưu đường dẫn vào database (nếu cần)
+                String relativePath = "uploads/" + fileName;
+                // ... code lưu vào database
+            }
+
+            // 3. Xử lý các logic khác
+            // ...
+            // 4. Chuyển hướng sau khi xử lý xong
+            response.sendRedirect("courseadmin?success=true");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", "Lỗi upload file: " + e.getMessage());
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
+        }
     }
+
 }

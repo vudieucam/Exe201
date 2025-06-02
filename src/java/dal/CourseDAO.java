@@ -4,11 +4,15 @@
  */
 package dal;
 
+import java.sql.Timestamp;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import model.Course;
 import model.CourseCategory;
@@ -361,17 +365,6 @@ public class CourseDAO extends DBConnect {
             }
         }
         return null; // hoặc throw exception nếu không tìm thấy
-    }
-
-    public boolean deleteCourse(int id) {
-        String sql = "DELETE FROM courses WHERE id = ?";
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
-            st.setInt(1, id);
-            return st.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
     }
 
     public boolean updateCourseStatus(int id, int status) {
@@ -938,29 +931,6 @@ public class CourseDAO extends DBConnect {
         return null;
     }
 
-    // Thêm hàm cập nhật thông tin khóa học đầy đủ
-    public boolean updateCourse(Course course) {
-        String sql = "UPDATE courses SET title = ?, content = ?, researcher = ?, "
-                + "video_url = ?, status = ?, duration = ?, thumbnail_url = ?, "
-                + "updated_at = GETDATE() WHERE id = ?";
-
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
-            st.setString(1, course.getTitle());
-            st.setString(2, course.getContent());
-            st.setString(3, course.getResearcher());
-            st.setString(4, course.getVideoUrl());
-            st.setInt(5, course.getStatus());
-            st.setString(6, course.getDuration());
-            st.setString(7, course.getThumbnailUrl());
-            st.setInt(8, course.getId());
-
-            return st.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
     // Thêm hàm xóa hình ảnh khóa học
     public boolean deleteCourseImage(int imageId) {
         String sql = "DELETE FROM course_images WHERE id = ?";
@@ -975,7 +945,8 @@ public class CourseDAO extends DBConnect {
 
     // Thêm phương thức mới
     public boolean addCourseWithCategories(Course course, List<Integer> categoryIds) {
-        String sql = "INSERT INTO courses (title, content, researcher, duration, status, thumbnail_url) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO courses (title, content, researcher, duration, status, thumbnail_url, post_date) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
         try (PreparedStatement st = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             st.setString(1, course.getTitle());
             st.setString(2, course.getContent());
@@ -983,6 +954,7 @@ public class CourseDAO extends DBConnect {
             st.setString(4, course.getDuration());
             st.setInt(5, course.getStatus());
             st.setString(6, course.getThumbnailUrl());
+            st.setDate(7, new java.sql.Date(System.currentTimeMillis())); // Thêm ngày hiện tại
 
             int affectedRows = st.executeUpdate();
             if (affectedRows == 0) {
@@ -1002,19 +974,61 @@ public class CourseDAO extends DBConnect {
         return false;
     }
 
-    private boolean addCourseCategories(int courseId, List<Integer> categoryIds) {
-        String sql = "INSERT INTO course_category_mapping (course_id, category_id) VALUES (?, ?)";
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
-            for (int categoryId : categoryIds) {
-                st.setInt(1, courseId);
-                st.setInt(2, categoryId);
-                st.addBatch();
+    public boolean updateCourseWithCategories(Course course, List<Integer> categoryIds) {
+        try {
+            connection.setAutoCommit(false);
+
+            // 1. Cập nhật thông tin course
+            String updateSql = "UPDATE courses SET title=?, content=?, researcher=?, duration=?, "
+                    + "status=?, thumbnail_url=?, updated_at=? WHERE id=?";
+
+            try (PreparedStatement st = connection.prepareStatement(updateSql)) {
+                st.setString(1, course.getTitle());
+                st.setString(2, course.getContent());
+                st.setString(3, course.getResearcher());
+                st.setString(4, course.getDuration());
+                st.setInt(5, course.getStatus());
+                st.setString(6, course.getThumbnailUrl());
+                st.setDate(7, new java.sql.Date(System.currentTimeMillis())); // Thêm ngày hiện tại
+                st.setInt(8, course.getId());
+
+                if (st.executeUpdate() == 0) {
+                    connection.rollback();
+                    return false;
+                }
             }
-            st.executeBatch();
+
+            // 2. Xóa các mapping cũ
+            String deleteSql = "DELETE FROM course_category_mapping WHERE course_id=?";
+            try (PreparedStatement st = connection.prepareStatement(deleteSql)) {
+                st.setInt(1, course.getId());
+                st.executeUpdate();
+            }
+
+            // 3. Thêm các mapping mới
+            if (!categoryIds.isEmpty() && !addCourseCategories(course.getId(), categoryIds)) {
+                connection.rollback();
+                return false;
+            }
+
+            connection.commit();
+            course.setUpdatedAt(new java.sql.Date(System.currentTimeMillis()));
             return true;
+
         } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
             e.printStackTrace();
             return false;
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1036,9 +1050,274 @@ public class CourseDAO extends DBConnect {
 
                 // Lấy danh mục
                 course.setCategories(getCategoriesByCourseId(courseId));
+
+                // Lấy updated_at dạng Timestamp (có ngày giờ)
+                Timestamp ts = rs.getTimestamp("updated_at");
+                if (ts != null) {
+                    course.setUpdatedAt(new Date(ts.getTime()));
+                }
+
                 return course;
             }
         }
         return null;
     }
+
+    public boolean deleteCourse(int id) throws SQLException {
+        connection.setAutoCommit(false);
+
+        try {
+            // 1. Xóa lesson_attachments
+            String deleteAttachmentsSQL = "DELETE a FROM lesson_attachments a "
+                    + "INNER JOIN course_lessons l ON a.lesson_id = l.id "
+                    + "INNER JOIN course_modules m ON l.module_id = m.id "
+                    + "WHERE m.course_id = ?";
+            try (PreparedStatement st = connection.prepareStatement(deleteAttachmentsSQL)) {
+                st.setInt(1, id);
+                st.executeUpdate();
+            }
+
+            // 2. Xóa course_lessons
+            String deleteLessonsSQL = "DELETE l FROM course_lessons l "
+                    + "INNER JOIN course_modules m ON l.module_id = m.id "
+                    + "WHERE m.course_id = ?";
+            try (PreparedStatement st = connection.prepareStatement(deleteLessonsSQL)) {
+                st.setInt(1, id);
+                st.executeUpdate();
+            }
+
+            // 3. Xóa course_modules
+            String deleteModulesSQL = "DELETE FROM course_modules WHERE course_id = ?";
+            try (PreparedStatement st = connection.prepareStatement(deleteModulesSQL)) {
+                st.setInt(1, id);
+                st.executeUpdate();
+            }
+
+            // 4. Xóa course_reviews
+            String deleteReviewsSQL = "DELETE FROM course_reviews WHERE course_id = ?";
+            try (PreparedStatement st = connection.prepareStatement(deleteReviewsSQL)) {
+                st.setInt(1, id);
+                st.executeUpdate();
+            }
+
+            // 5. Xóa course_access
+            String deleteAccessSQL = "DELETE FROM course_access WHERE course_id = ?";
+            try (PreparedStatement st = connection.prepareStatement(deleteAccessSQL)) {
+                st.setInt(1, id);
+                st.executeUpdate();
+            }
+
+            // 6. Xóa course_images
+            String deleteImagesSQL = "DELETE FROM course_images WHERE course_id = ?";
+            try (PreparedStatement st = connection.prepareStatement(deleteImagesSQL)) {
+                st.setInt(1, id);
+                st.executeUpdate();
+            }
+
+            // 7. Xóa course_category_mapping
+            String deleteCategoryMappingSQL = "DELETE FROM course_category_mapping WHERE course_id = ?";
+            try (PreparedStatement st = connection.prepareStatement(deleteCategoryMappingSQL)) {
+                st.setInt(1, id);
+                st.executeUpdate();
+            }
+
+            // 8. Xóa bản ghi trong course_categories (nếu cần - chỉ khi mapping không đủ)
+            // Bỏ qua nếu không liên quan trực tiếp tới khóa học
+            // 9. Xóa chính course
+            String deleteCourseSQL = "DELETE FROM courses WHERE id = ?";
+            try (PreparedStatement st = connection.prepareStatement(deleteCourseSQL)) {
+                st.setInt(1, id);
+                int affectedRows = st.executeUpdate();
+
+                connection.commit();
+                return affectedRows > 0;
+            }
+        } catch (SQLException e) {
+            connection.rollback();
+            throw e;
+        } finally {
+            connection.setAutoCommit(true);
+        }
+    }
+
+    public boolean checkCourseExists(int courseId) throws SQLException {
+        String sql = "SELECT 1 FROM courses WHERE id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, courseId);
+            try (ResultSet rs = st.executeQuery()) {
+                return rs.next(); // Trả về true nếu có kết quả
+            }
+        }
+    }
+
+    private boolean addCourseCategories(int courseId, List<Integer> categoryIds) throws SQLException {
+        String sql = "INSERT INTO course_category_mapping (course_id, category_id) VALUES (?, ?)";
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            for (Integer categoryId : categoryIds) {
+                st.setInt(1, courseId);
+                st.setInt(2, categoryId);
+                st.addBatch();
+            }
+            int[] results = st.executeBatch();
+
+            for (int result : results) {
+                if (result != Statement.SUCCESS_NO_INFO && result <= 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public List<Integer> getCourseCategoryIds(int courseId) throws SQLException {
+        List<Integer> categoryIds = new ArrayList<>();
+        String sql = "SELECT category_id FROM course_category_mapping WHERE course_id = ?";
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, courseId);
+            ResultSet rs = st.executeQuery();
+
+            while (rs.next()) {
+                categoryIds.add(rs.getInt("category_id"));
+            }
+        }
+        return categoryIds;
+    }
+
+    public static void main(String[] args) {
+        CourseDAO courseDAO = new CourseDAO();
+
+        try {
+            // 1. Lấy thông tin course hiện tại
+            System.out.println("=== THÔNG TIN TRƯỚC KHI UPDATE ===");
+            Course currentCourse = courseDAO.getCourseDetails(14);
+            if (currentCourse == null) {
+                System.out.println("Không tìm thấy course với id=14");
+                return;
+            }
+            System.out.println("Title: " + currentCourse.getTitle());
+            System.out.println("Content: " + currentCourse.getContent().substring(0, Math.min(50, currentCourse.getContent().length())) + "...");
+
+            // 2. Chuẩn bị dữ liệu update
+            Course updatedCourse = new Course();
+
+            updatedCourse.setId(14);
+            updatedCourse.setTitle(currentCourse.getTitle());
+            updatedCourse.setContent("Nội dung mới đã được cập nhật vào " + new java.util.Date());
+            updatedCourse.setResearcher(currentCourse.getResearcher());
+            updatedCourse.setDuration(currentCourse.getDuration());
+            updatedCourse.setStatus(currentCourse.getStatus());
+            updatedCourse.setThumbnailUrl(currentCourse.getThumbnailUrl());
+
+            // Lấy danh sách category hiện tại
+            List<Integer> currentCategories = courseDAO.getCourseCategoryIds(14);
+
+            // 3. Thực hiện update
+            System.out.println("\n=== ĐANG THỰC HIỆN UPDATE ===");
+            boolean success = courseDAO.updateCourseWithCategories(updatedCourse, currentCategories);
+
+            if (success) {
+                System.out.println("✅ UPDATE THÀNH CÔNG!");
+
+                // Kiểm tra kết quả
+                Course afterUpdate = courseDAO.getCourseDetails(14);
+                System.out.println("\n=== THÔNG TIN SAU KHI UPDATE ===");
+                System.out.println("Content: " + afterUpdate.getContent());
+                Date updatedAt = afterUpdate.getUpdatedAt();
+                if (updatedAt != null) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    System.out.println("Updated At: " + sdf.format(updatedAt));
+                } else {
+                    System.out.println("Updated At: null");
+                }
+
+            } else {
+                System.out.println("❌ UPDATE THẤT BẠI!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+    }
+// Helper method để in thông tin khóa học
+
+    private static void printCourseInfo(Course course) {
+        System.out.println("ID: " + course.getId());
+        System.out.println("Title: " + course.getTitle());
+        System.out.println("Content: " + (course.getContent() != null
+                ? course.getContent().substring(0, Math.min(50, course.getContent().length())) + "..."
+                : "null"));
+        System.out.println("Researcher: " + course.getResearcher());
+        System.out.println("Duration: " + course.getDuration());
+        System.out.println("Status: " + (course.getStatus() == 1 ? "Active" : "Inactive"));
+        System.out.println("Thumbnail: " + course.getThumbnailUrl());
+        System.out.println("Last Updated: " + course.getUpdatedAt());
+    }
+//    public static void main(String[] args) {
+//        CourseDAO courseDAO = new CourseDAO();
+//
+//        // ID khóa học muốn test xóa (ở đây test với id=13)
+//        int courseIdToDelete = 13;
+//
+//        System.out.println("Bắt đầu test xóa khóa học ID = " + courseIdToDelete);
+//
+//        try {
+//            // Kiểm tra xem khóa học có tồn tại trước khi xóa không
+//            boolean courseExists = courseDAO.checkCourseExists(courseIdToDelete);
+//            System.out.println("Khóa học có tồn tại trước khi xóa: " + courseExists);
+//
+//            if (courseExists) {
+//                // Thực hiện xóa
+//                System.out.println("Đang thực hiện xóa...");
+//                boolean deleteResult = courseDAO.deleteCourse(courseIdToDelete);
+//
+//                System.out.println("Kết quả xóa: " + (deleteResult ? "THÀNH CÔNG" : "THẤT BẠI"));
+//
+//                // Kiểm tra lại sau khi xóa
+//                courseExists = courseDAO.checkCourseExists(courseIdToDelete);
+//                System.out.println("Khóa học có tồn tại sau khi xóa: " + courseExists);
+//            } else {
+//                System.out.println("Khóa học không tồn tại, không thể xóa");
+//            }
+//        } catch (Exception e) {
+//            System.err.println("Lỗi khi test xóa khóa học:");
+//            e.printStackTrace();
+//        }
+//    }
+//    public static void main(String[] args) {
+//        // 1. Khởi tạo DAO
+//        CourseDAO courseDAO = new CourseDAO();
+//
+//        // 2. Tạo dữ liệu test
+//        Course newCourse = new Course();
+//        newCourse.setTitle("Khóa học Test Java");
+//        newCourse.setContent("Nội dung test khóa học");
+//        newCourse.setResearcher("Nguyễn Văn Test");
+//        newCourse.setDuration("10 giờ");
+//        newCourse.setStatus(1); // 1 = Active
+//        newCourse.setThumbnailUrl("/uploads/test.jpg");
+//
+//        List<Integer> categoryIds = new ArrayList<>();
+//        categoryIds.add(1); // ID danh mục 1
+//        categoryIds.add(3); // ID danh mục 3
+//
+//        // 3. Test phương thức
+//        System.out.println("=== Bắt đầu test addCourseWithCategories() ===");
+//        boolean result = courseDAO.addCourseWithCategories(newCourse, categoryIds);
+//
+//        // 4. Kiểm tra kết quả
+//        if (result) {
+//            System.out.println("✅ Thêm khóa học thành công");
+//
+//            // In ra danh sách khóa học để kiểm tra
+//            System.out.println("\nDanh sách khóa học sau khi thêm:");
+//            List<Course> courses = courseDAO.getAllCourses();
+//            courses.forEach(c -> System.out.println(c.getId() + " - " + c.getTitle()));
+//        } else {
+//            System.out.println("❌ Thêm khóa học thất bại");
+//        }
+//
+//        System.out.println("=== Kết thúc test ===");
+//    }
 }

@@ -1,10 +1,4 @@
 <%-- 
-    Document   : courseEdit
-    Created on : Jun 2, 2025, 3:58:02 PM
-    Author     : FPT
---%>
-
-<%-- 
     Document   : courseAdd
     Created on : Jun 2, 2025, 3:57:53 PM
     Author     : FPT
@@ -14,9 +8,7 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<c:if test="${empty sessionScope.user}">
-    <c:redirect url="authen?action=login"/>
-</c:if>
+
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -469,7 +461,11 @@
                 <div class="col-md-10 p-4">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h2>Chỉnh sửa Khóa học</h2>
-                        <a href="courseadmin" class="btn btn-secondary">Quay lại</a>
+                        <div class="mb-3">
+                            <a href="${pageContext.request.contextPath}/courseadmin" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Quay lại danh sách
+                            </a>
+                        </div>
                     </div>
 
                     <c:if test="${not empty success}">
@@ -492,85 +488,80 @@
                         <input type="hidden" name="action" value="update">
                         <input type="hidden" name="id" value="${currentCourse.id}">
 
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <h4>Thông tin cơ bản</h4>
+                        <!-- Thông tin cơ bản -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">ID Khóa học</label>
+                                <input type="text" class="form-control" value="${currentCourse.id}" readonly>
                             </div>
-                            <div class="card-body">
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">ID Khóa học</label>
-                                        <input type="text" class="form-control" value="${currentCourse.id}" readonly>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Tên khóa học <span class="text-danger">*</span></label>
-                                        <input type="text" name="title" class="form-control" value="${currentCourse.title}" required>
-                                        <div class="invalid-feedback">Vui lòng nhập tên khóa học</div>
-                                    </div>
-                                </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tên khóa học <span class="text-danger">*</span></label>
+                                <input type="text" name="title" class="form-control" 
+                                       value="${fn:escapeXml(currentCourse.title)}" required>
+                                <div class="invalid-feedback">Vui lòng nhập tên khóa học</div>
+                            </div>
+                        </div>
 
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Giảng viên <span class="text-danger">*</span></label>
-                                        <input type="text" name="researcher" class="form-control" value="${currentCourse.researcher}" required>
-                                        <div class="invalid-feedback">Vui lòng nhập tên giảng viên</div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Danh mục <span class="text-danger">*</span></label>
-                                        <select name="categoryId" class="form-select" required>
-                                            <option value="">-- Chọn danh mục --</option>
-                                            <c:forEach items="${categories}" var="category">
-                                                <option value="${category.id}" ${currentCourse.categoryId == category.id ? 'selected' : ''}>
-                                                    ${category.name}
-                                                </option>
-                                            </c:forEach>
-                                        </select>
-                                        <div class="invalid-feedback">Vui lòng chọn danh mục</div>
-                                    </div>
-                                </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Giảng viên <span class="text-danger">*</span></label>
+                                <input type="text" name="researcher" class="form-control" 
+                                       value="${fn:escapeXml(currentCourse.researcher)}" required>
+                                <div class="invalid-feedback">Vui lòng nhập tên giảng viên</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Danh mục <span class="text-danger">*</span></label>
+                                <select name="categoryId" class="form-select" required>
+                                    <option value="">-- Chọn danh mục --</option>
+                                    <c:forEach items="${categories}" var="category">
+                                        <option value="${category.id}" 
+                                                <c:if test="${not empty currentCourse.categories && currentCourse.categories[0].id == category.id}">selected</c:if>>
+                                            ${fn:escapeXml(category.name)}
+                                        </option>
+                                    </c:forEach>
+                                </select>
+                                <div class="invalid-feedback">Vui lòng chọn danh mục</div>
+                            </div>
+                        </div>
 
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Ảnh hiện tại</label>
-                                        <c:choose>
-                                            <c:when test="${not empty currentCourse.imageUrl}">
-                                                <div>
-                                                    <img src="${pageContext.request.contextPath}/${currentCourse.imageUrl}" 
-                                                         alt="Ảnh khóa học" style="max-height: 100px;">
-                                                </div>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <div class="text-muted">Chưa có ảnh</div>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Cập nhật ảnh đại diện</label>
-                                        <input type="file" name="thumbnail" class="form-control" accept="image/*">
-                                    </div>
-                                </div>
+                        <!-- Ảnh đại diện -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Ảnh hiện tại</label>
+                                <c:if test="${not empty currentCourse.thumbnailUrl}">
+                                    <img src="${pageContext.request.contextPath}/${currentCourse.thumbnailUrl}" 
+                                         alt="Ảnh khóa học" style="max-height: 100px;" class="img-thumbnail">
+                                </c:if>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Cập nhật ảnh đại diện</label>
+                                <input type="file" name="thumbnail" class="form-control" accept="image/*">
+                            </div>
+                        </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label">Nội dung chi tiết <span class="text-danger">*</span></label>
-                                    <textarea name="content" class="form-control" rows="5" required>${not empty currentCourse.content ? fn:escapeXml(currentCourse.content) : ''}</textarea>
-                                    <div class="invalid-feedback">Vui lòng nhập nội dung khóa học</div>
-                                </div>
+                        <!-- Nội dung -->
+                        <div class="mb-3">
+                            <label class="form-label">Nội dung chi tiết <span class="text-danger">*</span></label>
+                            <textarea name="content" class="form-control" rows="5" required>
+                                ${fn:escapeXml(currentCourse.content)}
+                            </textarea>
+                            <div class="invalid-feedback">Vui lòng nhập nội dung khóa học</div>
+                        </div>
 
-                                <div class="row mb-3">
-                                    <div class="col-md-3">
-                                        <label class="form-label">Thời lượng <span class="text-danger">*</span></label>
-                                        <input type="text" name="time" class="form-control" 
-                                               value="${not empty currentCourse.time ? currentCourse.time : ''}" required>
-                                        <div class="invalid-feedback">Vui lòng nhập thời lượng</div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
-                                        <select name="status" class="form-select" required>
-                                            <option value="1" ${currentCourse.status == 1 ? 'selected' : ''}>Active</option>
-                                            <option value="0" ${currentCourse.status == 0 ? 'selected' : ''}>Inactive</option>
-                                        </select>
-                                    </div>
-                                </div>
+                        <!-- Thời lượng và trạng thái -->
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Thời lượng <span class="text-danger">*</span></label>
+                                <input type="text" name="time" class="form-control" 
+                                       value="${fn:escapeXml(currentCourse.duration)}" required>
+                                <div class="invalid-feedback">Vui lòng nhập thời lượng</div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                                <select name="status" class="form-select" required>
+                                    <option value="1" ${currentCourse.status == 1 ? 'selected' : ''}>Active</option>
+                                    <option value="0" ${currentCourse.status == 0 ? 'selected' : ''}>Inactive</option>
+                                </select>
                             </div>
                         </div>
 
@@ -602,10 +593,10 @@
                                                             <div class="d-flex justify-content-between mb-3">
                                                                 <p class="mb-0">${module.description}</p>
                                                                 <div>
-                                                                    <button type="button" class="btn btn-sm btn-outline-primary" 
-                                                                            onclick="editModule(${module.id}, '${fn:escapeXml(module.title)}', '${fn:escapeXml(module.description)}')">
-                                                                        <i class="bi bi-pencil"></i> Sửa
-                                                                    </button>
+                                                                    <a href="${pageContext.request.contextPath}/courseadmin?action=edit&id=${course.id}" 
+                                                                       class="btn btn-sm btn-outline-primary me-1" title="Sửa">
+                                                                        <i class="bi bi-pencil"></i>
+                                                                    </a>
                                                                     <button type="button" class="btn btn-sm btn-outline-danger" 
                                                                             onclick="confirmDeleteModule(${module.id})">
                                                                         <i class="bi bi-trash"></i> Xóa

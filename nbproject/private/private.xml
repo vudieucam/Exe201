@@ -3,15 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/src/java/controller/homepage/HomeServlet.java</file>
+            <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/src/java/dal/CustomerCourseDAO.java</file>
             <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/src/java/dal/CourseDAO.java</file>
-            <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/src/java/AuthenController/AuthenServlet.java</file>
-            <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/src/java/controller/Admin/AdminServlet.java</file>
             <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/web/courseAdmin.jsp</file>
-            <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/web/Home.jsp</file>
+            <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/src/java/model/Course.java</file>
             <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/src/java/controller/Admin/CourseAdminServlet.java</file>
-            <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/web/Admin.jsp</file>
-            <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/web/courseAdd.jsp</file>
             <file>file:/C:/Users/FPT/OneDrive/Documents/NetBeansProjects/PetTech/web/courseEdit.jsp</file>
         </group>
     </open-files>

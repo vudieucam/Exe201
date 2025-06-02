@@ -64,13 +64,17 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>PetTech Admin Dashboard</title>
+        <!-- CSS -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"/>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
 
+        <!-- JS -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> <!-- ĐÃ THÊM -->
+        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <style>
             :root {
@@ -476,7 +480,7 @@
                         {targets: [6], orderable: false} // Tắt sắp xếp cho cột hành động
                     ],
                     language: {
-                        url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/vi.json'
+                        url: '${pageContext.request.contextPath}/assets/datatables/vi.json'
                     },
                     initComplete: function () {
                         // Thêm ô tìm kiếm cho từng cột
@@ -569,10 +573,6 @@
                 var modal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
                 modal.show();
             }
-
-
-
-
         </script>
     </head>
     <body>
@@ -607,9 +607,10 @@
                             <div class="row">
                                 <div class="col-md-8">
                                     <div class="d-flex gap-2">
-                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+                                        <a href="${pageContext.request.contextPath}/courseadmin?action=add" class="btn btn-primary">
                                             <i class="bi bi-plus-circle me-1"></i> Thêm khóa học
-                                        </button>
+                                        </a>
+
 
                                         <!-- Nút thêm danh mục -->
                                         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
@@ -646,7 +647,7 @@
                                                 <tr>
                                                     <td>${course.id}</td>
                                                     <td>
-                                                        <a href="courseadmin?action=edit&id=${course.id}" class="text-primary fw-bold">
+                                                        <a href="courseadmin?action=update&id=${course.id}" class="text-primary fw-bold">
                                                             ${course.title}
                                                         </a>
                                                     </td>
@@ -673,7 +674,7 @@
                                                     </td>
                                                     <td>
                                                         <div class="d-flex">
-                                                            <a href="courseadmin?action=edit&id=${course.id}" 
+                                                            <a href="courseadmin?action=update&id=${course.id}" 
                                                                class="btn btn-sm btn-outline-primary me-1" title="Sửa">
                                                                 <i class="bi bi-pencil"></i>
                                                             </a>
@@ -896,7 +897,8 @@
                                     <div class="col-md-6">
                                         <div class="col-md-6">
                                             <label class="form-label">Danh mục*</label>
-                                            <select name="categoryId" class="form-select" required>
+                                            <select name="categoryIds" class="form-select" required multiple>
+
                                                 <option value="">-- Chọn danh mục --</option>
                                                 <c:forEach items="${categories}" var="category">
                                                     <option value="${category.id}">${category.name}</option>
@@ -1068,13 +1070,7 @@
             </div>
         </div>
         <!-- Scripts -->
-        <!-- Add these new script includes for DataTables buttons -->
-        <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-        <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
-        <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
+
 
     </body>
 </html>
