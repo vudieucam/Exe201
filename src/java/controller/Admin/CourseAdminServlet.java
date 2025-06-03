@@ -29,7 +29,6 @@ import org.apache.commons.io.IOUtils;
         maxFileSize = 1024 * 1024 * 5, // 5MB
         maxRequestSize = 1024 * 1024 * 10 // 10MB
 )
-
 public class CourseAdminServlet extends HttpServlet {
 // Thêm các hằng số ở đầu class
 
@@ -640,17 +639,42 @@ public class CourseAdminServlet extends HttpServlet {
 
     private void addModule(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        int courseId = Integer.parseInt(request.getParameter("courseId"));
-        String title = request.getParameter("title");
-        String description = request.getParameter("description");
+        try {
+            int courseId = Integer.parseInt(request.getParameter("courseId"));
+            String title = request.getParameter("title").trim();
+            String description = request.getParameter("description").trim();
 
-        CourseModule module = new CourseModule();
-        module.setCourseId(courseId);
-        module.setTitle(title);
-        module.setDescription(description);
+            // Validate input
+            if (title.isEmpty()) {
+                request.setAttribute("error", "Tên module không được để trống");
+                response.sendRedirect(request.getContextPath() + "/courseadmin?action=edit&id=" + courseId);
+                return;
+            }
 
-        courseDAO.addModule(module);
-        response.sendRedirect(request.getContextPath() + "/courseadmin?action=edit&id=" + courseId);
+            // Check if course exists
+            if (!courseDAO.courseExists(courseId)) {
+                request.setAttribute("error", "Khóa học không tồn tại");
+                response.sendRedirect(request.getContextPath() + "/courseadmin");
+                return;
+            }
+
+            CourseModule module = new CourseModule();
+            module.setCourseId(courseId);
+            module.setTitle(title);
+            module.setDescription(description);
+            module.setOrderIndex(courseDAO.getNextModuleOrder(courseId)); // Set order index
+
+            if (courseDAO.addModule(module)) {
+                request.setAttribute("success", "Thêm module thành công");
+            } else {
+                request.setAttribute("error", "Thêm module thất bại");
+            }
+
+            response.sendRedirect(request.getContextPath() + "/courseadmin?action=edit&id=" + courseId);
+        } catch (NumberFormatException e) {
+            request.setAttribute("error", "ID khóa học không hợp lệ");
+            response.sendRedirect(request.getContextPath() + "/courseadmin");
+        }
     }
 
     private void updateModule(HttpServletRequest request, HttpServletResponse response)
@@ -746,53 +770,126 @@ public class CourseAdminServlet extends HttpServlet {
         return "uploads/" + uniqueFileName;
     }
 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            String action = request.getParameter("action");
+
+            if ("update".equals(action)) {
+                // Validate ID first
+                int id;
+                try {
+                    id = Integer.parseInt(request.getParameter("id"));
+                } catch (NumberFormatException e) {
+                    request.getSession().setAttribute("error", "Invalid course ID");
+                    response.sendRedirect("courseadmin");
+                    return;
+                }
+
+                // Initialize DAO early
+                CourseDAO dao = new CourseDAO();
+                Course currentCourse = dao.getCourseDetails(id);
+                if (currentCourse == null) {
+                    request.getSession().setAttribute("error", "Course not found");
+                    response.sendRedirect("courseadmin");
+                    return;
+                }
+
+                // Process file upload
+                String fileName = null;
+                Part filePart = request.getPart("thumbnail");
+
+                if (filePart != null && filePart.getSize() > 0) {
+                    // Validate file size (e.g., 5MB max)
+                    if (filePart.getSize() > 5 * 1024 * 1024) {
+                        request.getSession().setAttribute("error", "File size exceeds 5MB limit");
+                        response.sendRedirect("courseadmin?action=update&id=" + id);
+                        return;
+                    }
+
+                    // Sanitize filename and validate extension
+                    fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+                    if (!fileName.matches("(?i).+\\.(jpg|jpeg|png|gif)$")) {
+                        request.getSession().setAttribute("error", "Only image files are allowed");
+                        response.sendRedirect("courseadmin?action=update&id=" + id);
+                        return;
+                    }
+
+                    // Generate unique filename to prevent overwrites
+                    String fileExt = fileName.substring(fileName.lastIndexOf('.'));
+                    String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
+                    String uniqueName = baseName + "_" + System.currentTimeMillis() + fileExt;
+
+                    String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads";
+                    File uploadDir = new File(uploadPath);
+                    if (!uploadDir.exists()) {
+                        uploadDir.mkdir();
+                    }
+
+                    // Save file
+                    try {
+                        filePart.write(uploadPath + File.separator + uniqueName);
+                        fileName = "uploads/" + uniqueName;
+                    } catch (IOException e) {
+                        request.getSession().setAttribute("error", "Failed to save uploaded file");
+                        response.sendRedirect("courseadmin?action=update&id=" + id);
+                        return;
+                    }
+                }
+
+                // Create and populate course object
+                Course course = new Course();
+                course.setId(id);
+                course.setTitle(request.getParameter("title"));
+                course.setContent(request.getParameter("content"));
+                course.setResearcher(request.getParameter("researcher"));
+                course.setDuration(request.getParameter("duration"));
+
+                try {
+                    course.setStatus(Integer.parseInt(request.getParameter("status")));
+                } catch (NumberFormatException e) {
+                    course.setStatus(0); // default value
+                }
+
+                // Set thumbnail - new or existing
+                course.setThumbnailUrl(fileName != null ? fileName : currentCourse.getThumbnailUrl());
+
+                // Process categories
+                List<Integer> categories = new ArrayList<>();
+                String[] categoryIds = request.getParameterValues("categoryIds");
+                if (categoryIds != null) {
+                    for (String catId : categoryIds) {
+                        try {
+                            categories.add(Integer.parseInt(catId));
+                        } catch (NumberFormatException e) {
+                            // log and skip invalid category IDs
+                        }
+                    }
+                }
+
+                // Update course
+                boolean success = dao.updateCourseWithCategories(course, categories);
+
+                if (success) {
+                    request.getSession().setAttribute("success", "Course updated successfully!");
+                } else {
+                    request.getSession().setAttribute("error", "Failed to update course");
+                }
+
+                response.sendRedirect("courseadmin?action=update&id=" + id);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.getSession().setAttribute("error", "An error occurred: " + e.getMessage());
+            response.sendRedirect("courseadmin");
+        }
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         processRequest(request, response);
-    }
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        try {
-            // 1. Lấy các tham số thông thường
-            String title = request.getParameter("title");
-            String action = request.getParameter("action");
-
-            // 2. Xử lý file upload
-            Part filePart = request.getPart("thumbnail"); // "thumbnail" phải trùng với name trong form
-
-            if (filePart != null && filePart.getSize() > 0) {
-                // Thư mục lưu file
-                String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads";
-                File uploadDir = new File(uploadPath);
-                if (!uploadDir.exists()) {
-                    uploadDir.mkdir();
-                }
-
-                // Lấy tên file
-                String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-
-                // Lưu file vào thư mục
-                filePart.write(uploadPath + File.separator + fileName);
-
-                // Lưu đường dẫn vào database (nếu cần)
-                String relativePath = "uploads/" + fileName;
-                // ... code lưu vào database
-            }
-
-            // 3. Xử lý các logic khác
-            // ...
-            // 4. Chuyển hướng sau khi xử lý xong
-            response.sendRedirect("courseadmin?success=true");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Lỗi upload file: " + e.getMessage());
-            request.getRequestDispatcher("/error.jsp").forward(request, response);
-        }
     }
 
 }

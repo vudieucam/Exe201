@@ -542,9 +542,7 @@
                         <!-- Nội dung -->
                         <div class="mb-3">
                             <label class="form-label">Nội dung chi tiết <span class="text-danger">*</span></label>
-                            <textarea name="content" class="form-control" rows="5" required>
-                                ${fn:escapeXml(currentCourse.content)}
-                            </textarea>
+                            <textarea name="content" class="form-control" rows="5" required>${fn:escapeXml(currentCourse.content)}</textarea>
                             <div class="invalid-feedback">Vui lòng nhập nội dung khóa học</div>
                         </div>
 

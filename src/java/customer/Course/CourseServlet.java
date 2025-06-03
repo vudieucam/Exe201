@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
 import java.util.List;
 import model.Course;
+import model.CourseCategory;
 
 /**
  *
@@ -90,6 +91,10 @@ public class CourseServlet extends HttpServlet {
 
     private void handleCourseList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // Lấy danh sách tất cả danh mục khóa học
+        List<CourseCategory> courseCategories = CustomercourseDAO.getAllCategories();
+        request.setAttribute("courseCategories", courseCategories);
+
         // Lấy danh sách khóa học nổi bật
         List<Course> featuredCourses = CustomercourseDAO.getFeaturedCourses(9);
         request.setAttribute("featuredCourses", featuredCourses);

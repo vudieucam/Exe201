@@ -925,9 +925,9 @@
                                 <div class="dropdown-header">
                                     <i class="fa fa-book mr-2"></i>Danh mục khóa học
                                 </div>
-                                <c:forEach items="${featuredCourses}" var="course" end="8">
-                                    <a class="dropdown-item" href="coursedetail?id=${course.id}">
-                                        ${fn:substring(course.title, 0, 50)}${fn:length(course.title) > 50 ? '...' : ''}
+                                <c:forEach items="${courseCategories}" var="category">
+                                    <a class="dropdown-item" href="course?categoryId=${category.id}">
+                                        ${category.name}
                                     </a>
                                 </c:forEach>
                                 <div class="dropdown-divider"></div>
@@ -935,6 +935,7 @@
                                     <i class="fa fa-arrow-right mr-2"></i>Xem tất cả
                                 </a>
                             </div>
+
                         </li>
                         <li class="nav-item"><a href="expert" class="nav-link">Chuyên gia</a></li>
                         <li class="nav-item"><a href="product" class="nav-link">Sản phẩm</a></li>

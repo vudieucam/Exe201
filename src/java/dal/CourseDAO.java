@@ -381,12 +381,48 @@ public class CourseDAO extends DBConnect {
 
     public boolean addModule(CourseModule module) {
         String sql = "INSERT INTO course_modules (course_id, title, description, order_index) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
+        try (PreparedStatement st = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             st.setInt(1, module.getCourseId());
             st.setString(2, module.getTitle());
             st.setString(3, module.getDescription());
             st.setInt(4, module.getOrderIndex());
-            return st.executeUpdate() > 0;
+
+            int affectedRows = st.executeUpdate();
+            if (affectedRows > 0) {
+                try (ResultSet rs = st.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        module.setId(rs.getInt(1));
+                        return true;
+                    }
+                }
+            }
+            return false;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public int getNextModuleOrder(int courseId) {
+        String sql = "SELECT COALESCE(MAX(order_index), 0) + 1 FROM course_modules WHERE course_id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, courseId);
+            try (ResultSet rs = st.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 1;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 1;
+        }
+    }
+
+    public boolean courseExists(int courseId) {
+        String sql = "SELECT 1 FROM courses WHERE id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, courseId);
+            try (ResultSet rs = st.executeQuery()) {
+                return rs.next();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -900,7 +936,8 @@ public class CourseDAO extends DBConnect {
     // Cập nhật hàm getCourseDetails để lấy đầy đủ thông tin
     public Course getCourseDetails(int courseId) {
         String sql = "SELECT c.id, c.title, c.content, c.post_date, c.researcher, c.duration, c.status, "
-                + "COALESCE(c.thumbnail_url, '/images/corgin-1.jpg') AS thumbnail_url "
+                + "COALESCE(c.thumbnail_url, '/images/corgin-1.jpg') AS thumbnail_url, "
+                + "c.updated_at " // Thêm cột này
                 + "FROM courses c "
                 + "WHERE c.id = ? AND c.status = 1";
 
@@ -913,15 +950,19 @@ public class CourseDAO extends DBConnect {
                 course.setId(rs.getInt("id"));
                 course.setTitle(rs.getString("title"));
                 course.setContent(rs.getString("content"));
-                course.setPostDate(rs.getDate("post_date"));
                 course.setResearcher(rs.getString("researcher"));
                 course.setDuration(rs.getString("duration"));
                 course.setStatus(rs.getInt("status"));
                 course.setThumbnailUrl(rs.getString("thumbnail_url"));
 
-                // Lấy danh mục khóa học
-                course.setCategories(getCategoriesByCourseId(course.getId()));
+                // Lấy danh mục
+                course.setCategories(getCategoriesByCourseId(courseId));
 
+                // Lấy updated_at dạng Timestamp (có ngày giờ)
+                Timestamp ts = rs.getTimestamp("updated_at");
+                if (ts != null) {
+                    course.setUpdatedAt(new Date(ts.getTime()));
+                }
                 return course;
             }
         } catch (SQLException e) {
@@ -1191,9 +1232,9 @@ public class CourseDAO extends DBConnect {
         try {
             // 1. Lấy thông tin course hiện tại
             System.out.println("=== THÔNG TIN TRƯỚC KHI UPDATE ===");
-            Course currentCourse = courseDAO.getCourseDetails(14);
+            Course currentCourse = courseDAO.getCourseDetails(15);
             if (currentCourse == null) {
-                System.out.println("Không tìm thấy course với id=14");
+                System.out.println("Không tìm thấy course với id=15");
                 return;
             }
             System.out.println("Title: " + currentCourse.getTitle());
@@ -1202,7 +1243,7 @@ public class CourseDAO extends DBConnect {
             // 2. Chuẩn bị dữ liệu update
             Course updatedCourse = new Course();
 
-            updatedCourse.setId(14);
+            updatedCourse.setId(15);
             updatedCourse.setTitle(currentCourse.getTitle());
             updatedCourse.setContent("Nội dung mới đã được cập nhật vào " + new java.util.Date());
             updatedCourse.setResearcher(currentCourse.getResearcher());
@@ -1211,7 +1252,7 @@ public class CourseDAO extends DBConnect {
             updatedCourse.setThumbnailUrl(currentCourse.getThumbnailUrl());
 
             // Lấy danh sách category hiện tại
-            List<Integer> currentCategories = courseDAO.getCourseCategoryIds(14);
+            List<Integer> currentCategories = courseDAO.getCourseCategoryIds(15);
 
             // 3. Thực hiện update
             System.out.println("\n=== ĐANG THỰC HIỆN UPDATE ===");
@@ -1221,7 +1262,7 @@ public class CourseDAO extends DBConnect {
                 System.out.println("✅ UPDATE THÀNH CÔNG!");
 
                 // Kiểm tra kết quả
-                Course afterUpdate = courseDAO.getCourseDetails(14);
+                Course afterUpdate = courseDAO.getCourseDetails(15);
                 System.out.println("\n=== THÔNG TIN SAU KHI UPDATE ===");
                 System.out.println("Content: " + afterUpdate.getContent());
                 Date updatedAt = afterUpdate.getUpdatedAt();
@@ -1254,6 +1295,7 @@ public class CourseDAO extends DBConnect {
         System.out.println("Thumbnail: " + course.getThumbnailUrl());
         System.out.println("Last Updated: " + course.getUpdatedAt());
     }
+
 //    public static void main(String[] args) {
 //        CourseDAO courseDAO = new CourseDAO();
 //

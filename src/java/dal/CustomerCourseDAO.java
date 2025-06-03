@@ -21,6 +21,26 @@ import model.UserProgress;
  */
 public class CustomerCourseDAO extends DBConnect {
 
+    public List<CourseCategory> getAllCategories() {
+        List<CourseCategory> categories = new ArrayList<>();
+        String sql = "SELECT id, name, description FROM course_categories";
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                CourseCategory category = new CourseCategory();
+                category.setId(rs.getInt("id"));
+                category.setName(rs.getString("name"));
+                category.setDescription(rs.getString("description"));
+                categories.add(category);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace(); // hoặc dùng logger
+        }
+
+        return categories;
+    }
+
     private List<CourseCategory> getCategoriesByCourseId(int courseId) throws SQLException {
         List<CourseCategory> categories = new ArrayList<>();
         String sql = "SELECT cc.id, cc.name FROM course_category_mapping ccm "
