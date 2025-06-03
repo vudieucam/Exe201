@@ -16,11 +16,11 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.util.List;
-import model.Blog;
-import model.Course;
-import model.Order;
-import model.Payments;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import model.User;
 import listener.SessionCounterListener;
 
@@ -44,76 +44,50 @@ public class AdminServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User currentUser = (User) session.getAttribute("user");
 
-        // Kiểm tra đăng nhập
-        if (currentUser == null) {
-            response.sendRedirect("authen?action=login");
-            return;
-        }
-
-        // Kiểm tra quyền truy cập, chỉ cho phép role 2 hoặc 3
-        if (currentUser.getRoleId() == 1) {
-            response.sendRedirect("home.jsp");
+        if (!checkAdminPermission(currentUser)) {
+            response.sendRedirect(currentUser == null ? "authen?action=login" : "home");
             return;
         }
 
         try {
-            // Lấy thống kê tổng quan
-            long totalUsers = userDAO.countAllUsers();
-            long totalCourses = courseDAO.countAllCourses();
-            long totalOrders = orderDAO.countAllOrders();
-            double totalRevenue = paymentDAO.getTotalRevenue();
+            // Sử dụng ExecutorService để chạy song song các task không phụ thuộc
+            ExecutorService executor = Executors.newFixedThreadPool(3);
 
-            // Lấy các hoạt động gần đây
-            List<User> recentUsers = userDAO.getRecentUsers(5);
-            List<Order> recentOrders = orderDAO.getRecentOrders(5);
-            List<Course> recentCourses = courseDAO.getRecentCourses(5);
-            List<Payments> recentPayments = paymentDAO.getRecentPayments(5);
+            Future<Long> totalUsersFuture = executor.submit(() -> userDAO.countAllUsers());
+            Future<Long> totalCoursesFuture = executor.submit(() -> courseDAO.countAllCourses());
+            Future<Double> totalRevenueFuture = executor.submit(() -> paymentDAO.getTotalRevenue());
 
-            // Lấy các khóa học phổ biến
-            List<Course> popularCourses = courseDAO.getPopularCourses(5);
+            // Lấy các thống kê khác
+            Map<String, Object> stats = new HashMap<>();
+            stats.put("onlineUsers", SessionCounterListener.getActiveSessions());
+            stats.put("totalVisits", getVisitCountFromContext());
 
-            // Lấy các bài blog mới nhất
-            List<Blog> recentBlogs = blogDAO.getRecentBlogs(3);
+            // Kết hợp kết quả
+            stats.put("totalUsers", totalUsersFuture.get());
+            stats.put("totalCourses", totalCoursesFuture.get());
+            stats.put("totalRevenue", totalRevenueFuture.get());
 
-            // Thống kê truy cập =============================================
-            // Cách 1: Sử dụng SessionCounterListener (recommended)
-            int onlineUsers = SessionCounterListener.getActiveSessions();
+            // Đóng executor
+            executor.shutdown();
 
-            // Cách 2: Sử dụng Application Scope (nếu không dùng listener)
-            int totalVisits = 0;
-            Integer counterObj = (Integer) getServletContext().getAttribute("visitorCounter");
-            if (counterObj != null) {
-                totalVisits = counterObj;
-            }
-
-            // Cách 3: Lấy từ database nếu cần lưu trữ lâu dài
-            // int totalVisitsFromDB = visitorDAO.getTotalVisits();
-            // ==============================================================
-            // Set các thuộc tính cho request
-            request.setAttribute("totalVisits", totalVisits);
-            request.setAttribute("onlineUsers", onlineUsers);
-            request.setAttribute("totalUsers", totalUsers);
-            request.setAttribute("totalCourses", totalCourses);
-            request.setAttribute("totalOrders", totalOrders);
-            request.setAttribute("totalRevenue", totalRevenue);
-
-            request.setAttribute("recentUsers", recentUsers);
-            request.setAttribute("recentOrders", recentOrders);
-            request.setAttribute("recentCourses", recentCourses);
-            request.setAttribute("recentPayments", recentPayments);
-
-            request.setAttribute("popularCourses", popularCourses);
-            request.setAttribute("recentBlogs", recentBlogs);
-
-            // Forward tới trang admin dashboard
+            // Set attributes
+            request.setAttribute("stats", stats);
             request.getRequestDispatcher("Admin.jsp").forward(request, response);
 
         } catch (Exception e) {
-            e.printStackTrace();
-            // Chuyển hướng đến trang lỗi
-            request.setAttribute("errorMessage", "Đã xảy ra lỗi khi tải thống kê");
+            //logError(e); // Method ghi log riêng
+            request.setAttribute("errorMessage", "Lỗi hệ thống");
             request.getRequestDispatcher("/error.jsp").forward(request, response);
         }
+    }
+
+    private boolean checkAdminPermission(User user) {
+        return user != null && (user.getRoleId() == 2 || user.getRoleId() == 3);
+    }
+
+    private int getVisitCountFromContext() {
+        Integer count = (Integer) getServletContext().getAttribute("visitCount");
+        return count != null ? count : 0;
     }
 
     @Override

@@ -4,7 +4,7 @@
  */
 package model;
 
-import java.sql.Timestamp; 
+import java.sql.Timestamp;
 import java.util.Date;
 
 /**
@@ -19,19 +19,19 @@ public class User {
     private String fullname;
     private String phone;
     private String address;
-    private int roleId;
-    private boolean status;
+    private int roleId; // 1: user, 2: staff, 3: admin
+    private boolean status; // true: active, false: inactive
+    private Date createdAt;
     private String verificationToken;
-    private Timestamp createdAt; // thêm nếu muốn theo dõi ngày tạo
+    private int servicePackageId;
     private boolean isActive;
-    private Integer servicePackageId;
     private String activationToken;
-    private java.util.Date tokenExpiry;
+    private Date tokenExpiry;
 
     public User() {
     }
 
-    public User(int id, String email, String password, String fullname, String phone, String address, int roleId, boolean status, String verificationToken, Timestamp createdAt, boolean isActive, Integer servicePackageId, String activationToken, Date tokenExpiry) {
+    public User(int id, String email, String password, String fullname, String phone, String address, int roleId, boolean status, Date createdAt, String verificationToken, int servicePackageId, boolean isActive, String activationToken, Date tokenExpiry) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -40,10 +40,10 @@ public class User {
         this.address = address;
         this.roleId = roleId;
         this.status = status;
-        this.verificationToken = verificationToken;
         this.createdAt = createdAt;
-        this.isActive = isActive;
+        this.verificationToken = verificationToken;
         this.servicePackageId = servicePackageId;
+        this.isActive = isActive;
         this.activationToken = activationToken;
         this.tokenExpiry = tokenExpiry;
     }
@@ -112,6 +112,14 @@ public class User {
         this.status = status;
     }
 
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public String getVerificationToken() {
         return verificationToken;
     }
@@ -120,12 +128,12 @@ public class User {
         this.verificationToken = verificationToken;
     }
 
-    public Timestamp getCreatedAt() {
-        return createdAt;
+    public int getServicePackageId() {
+        return servicePackageId;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
+    public void setServicePackageId(int servicePackageId) {
+        this.servicePackageId = servicePackageId;
     }
 
     public boolean isIsActive() {
@@ -134,14 +142,6 @@ public class User {
 
     public void setIsActive(boolean isActive) {
         this.isActive = isActive;
-    }
-
-    public Integer getServicePackageId() {
-        return servicePackageId;
-    }
-
-    public void setServicePackageId(Integer servicePackageId) {
-        this.servicePackageId = servicePackageId;
     }
 
     public String getActivationToken() {
@@ -160,6 +160,27 @@ public class User {
         this.tokenExpiry = tokenExpiry;
     }
 
-   
-   
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("User{");
+        sb.append("id=").append(id);
+        sb.append(", email=").append(email);
+        sb.append(", password=").append(password);
+        sb.append(", fullname=").append(fullname);
+        sb.append(", phone=").append(phone);
+        sb.append(", address=").append(address);
+        sb.append(", roleId=").append(roleId);
+        sb.append(", status=").append(status);
+        sb.append(", createdAt=").append(createdAt);
+        sb.append(", verificationToken=").append(verificationToken);
+        sb.append(", servicePackageId=").append(servicePackageId);
+        sb.append(", isActive=").append(isActive);
+        sb.append(", activationToken=").append(activationToken);
+        sb.append(", tokenExpiry=").append(tokenExpiry);
+        sb.append('}');
+        return sb.toString();
+    }
+
+    
 }

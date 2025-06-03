@@ -484,8 +484,8 @@
                         <c:remove var="error" scope="session"/>
                     </c:if>
 
-                    <form action="courseadmin" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
-                        <input type="hidden" name="action" value="update">
+                    <form action="courseedit" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+
                         <input type="hidden" name="id" value="${currentCourse.id}">
 
                         <!-- Thông tin cơ bản -->
@@ -562,101 +562,6 @@
                                 </select>
                             </div>
                         </div>
-
-                        <!-- Modules Section -->
-                        <div class="card mb-4">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h4>Modules</h4>
-                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModuleModal">
-                                    <i class="bi bi-plus"></i> Thêm Module
-                                </button>
-                            </div>
-                            <div class="card-body">
-                                <c:choose>
-                                    <c:when test="${not empty modules}">
-                                        <div class="accordion" id="modulesAccordion">
-                                            <c:forEach items="${modules}" var="module">
-                                                <c:set var="lessons" value="${module.lessons}" />
-                                                <div class="accordion-item mb-2">
-                                                    <h2 class="accordion-header" id="heading${module.id}">
-                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
-                                                                data-bs-target="#collapse${module.id}" aria-expanded="false">
-                                                            ${module.title}
-                                                            <span class="badge bg-primary ms-2">${not empty lessons ? fn:length(lessons) : 0} bài học</span>
-                                                        </button>
-                                                    </h2>
-                                                    <div id="collapse${module.id}" class="accordion-collapse collapse" 
-                                                         aria-labelledby="heading${module.id}" data-bs-parent="#modulesAccordion">
-                                                        <div class="accordion-body">
-                                                            <div class="d-flex justify-content-between mb-3">
-                                                                <p class="mb-0">${module.description}</p>
-                                                                <div>
-                                                                    <a href="${pageContext.request.contextPath}/courseadmin?action=edit&id=${course.id}" 
-                                                                       class="btn btn-sm btn-outline-primary me-1" title="Sửa">
-                                                                        <i class="bi bi-pencil"></i>
-                                                                    </a>
-                                                                    <button type="button" class="btn btn-sm btn-outline-danger" 
-                                                                            onclick="confirmDeleteModule(${module.id})">
-                                                                        <i class="bi bi-trash"></i> Xóa
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- Lessons List -->
-                                                            <div class="module-lesson mt-3">
-                                                                <h5 class="d-flex justify-content-between align-items-center">
-                                                                    <span>Bài học</span>
-                                                                    <button type="button" class="btn btn-sm btn-primary" 
-                                                                            data-bs-toggle="modal" data-bs-target="#addLessonModal${module.id}">
-                                                                        <i class="bi bi-plus"></i> Thêm bài học
-                                                                    </button>
-                                                                </h5>
-
-                                                                <c:choose>
-                                                                    <c:when test="${not empty lessons}">
-                                                                        <div class="list-group">
-                                                                            <c:forEach items="${lessons}" var="lesson">
-                                                                                <div class="list-group-item lesson-item">
-                                                                                    <div class="d-flex justify-content-between align-items-center">
-                                                                                        <div>
-                                                                                            <h6 class="mb-1">${lesson.title}</h6>
-                                                                                            <c:if test="${not empty lesson.videoUrl}">
-                                                                                                <small><a href="${lesson.videoUrl}" target="_blank">Xem video</a></small>
-                                                                                            </c:if>
-                                                                                        </div>
-                                                                                        <div>
-                                                                                            <button type="button" class="btn btn-sm btn-outline-primary"
-                                                                                                    onclick="editLesson(${lesson.id}, '${fn:escapeXml(lesson.title)}', '${fn:escapeXml(lesson.content)}', '${not empty lesson.videoUrl ? fn:escapeXml(lesson.videoUrl) : ''}')">
-                                                                                                <i class="bi bi-pencil"></i>
-                                                                                            </button>
-                                                                                            <button type="button" class="btn btn-sm btn-outline-danger"
-                                                                                                    onclick="confirmDeleteLesson(${lesson.id})">
-                                                                                                <i class="bi bi-trash"></i>
-                                                                                            </button>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </c:forEach>
-                                                                        </div>
-                                                                    </c:when>
-                                                                    <c:otherwise>
-                                                                        <p class="text-muted">Chưa có bài học nào trong module này</p>
-                                                                    </c:otherwise>
-                                                                </c:choose>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </c:forEach>
-                                        </div>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <p class="text-muted">Khóa học này chưa có module nào</p>
-                                    </c:otherwise>
-                                </c:choose>
-                            </div>
-                        </div>
-
                         <div class="text-end">
                             <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
                             <a href="courseadmin" class="btn btn-secondary">Hủy bỏ</a>

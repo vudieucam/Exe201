@@ -19,13 +19,12 @@ public class Course {
     private List<CourseImage> images;
     private List<CourseModule> modules;
     private List<CourseReview> reviews;
-    
-    // Constructors
+    private boolean isPaid; // false: free, true: paid
+
     public Course() {
     }
 
-    public Course(int id, String title, String content, Date postDate, String researcher, String videoUrl, 
-                 int status, String duration, String thumbnailUrl, Date createdAt, Date updatedAt) {
+    public Course(int id, String title, String content, Date postDate, String researcher, String videoUrl, int status, String duration, String thumbnailUrl, Date createdAt, Date updatedAt, List<CourseCategory> categories, List<CourseImage> images, List<CourseModule> modules, List<CourseReview> reviews, boolean isPaid) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -37,9 +36,13 @@ public class Course {
         this.thumbnailUrl = thumbnailUrl;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.categories = categories;
+        this.images = images;
+        this.modules = modules;
+        this.reviews = reviews;
+        this.isPaid = isPaid;
     }
 
-    // Getters and Setters
     public int getId() {
         return id;
     }
@@ -159,4 +162,38 @@ public class Course {
     public void setReviews(List<CourseReview> reviews) {
         this.reviews = reviews;
     }
+
+    public boolean isIsPaid() {
+        return isPaid;
+    }
+
+    public void setIsPaid(boolean isPaid) {
+        this.isPaid = isPaid;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Course{");
+        sb.append("id=").append(id);
+        sb.append(", title=").append(title);
+        sb.append(", content=").append(content);
+        sb.append(", postDate=").append(postDate);
+        sb.append(", researcher=").append(researcher);
+        sb.append(", videoUrl=").append(videoUrl);
+        sb.append(", status=").append(status);
+        sb.append(", duration=").append(duration);
+        sb.append(", thumbnailUrl=").append(thumbnailUrl);
+        sb.append(", createdAt=").append(createdAt);
+        sb.append(", updatedAt=").append(updatedAt);
+        sb.append(", categories=").append(categories);
+        sb.append(", images=").append(images);
+        sb.append(", modules=").append(modules);
+        sb.append(", reviews=").append(reviews);
+        sb.append(", isPaid=").append(isPaid);
+        sb.append('}');
+        return sb.toString();
+    }
+    
+    
 }

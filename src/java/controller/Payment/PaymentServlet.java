@@ -24,7 +24,6 @@ public class PaymentServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Có thể forward sang JSP hoặc báo lỗi rõ ràng hơn
         response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "GET không được hỗ trợ. Vui lòng sử dụng POST.");
     }
 
@@ -42,7 +41,6 @@ public class PaymentServlet extends HttpServlet {
         if (packageIdParam != null && !packageIdParam.trim().isEmpty()) {
             packageId = Integer.parseInt(packageIdParam);
         } else {
-            // Xử lý lỗi – ví dụ: chuyển về trang lỗi, hoặc thông báo người dùng
             request.setAttribute("error", "Thiếu thông tin gói dịch vụ");
             request.getRequestDispatcher("error.jsp").forward(request, response);
             return;
@@ -54,10 +52,8 @@ public class PaymentServlet extends HttpServlet {
             ServicePackage pkg = packageDAO.getPackageById(packageId);
 
             if ("payAndRegister".equals(action)) {
-                // Xử lý đăng ký mới và thanh toán
                 handleNewRegistrationPayment(request, response, session, pkg, paymentMethod);
             } else if ("upgrade".equals(action)) {
-                // Xử lý nâng cấp gói dịch vụ
                 handleUpgradePayment(request, response, session, pkg, paymentMethod);
             } else {
                 session.setAttribute("error", "Hành động không hợp lệ");
@@ -81,46 +77,32 @@ public class PaymentServlet extends HttpServlet {
             return;
         }
 
-        // Tạo token xác minh
         String token = UUID.randomUUID().toString();
         pendingUser.setVerificationToken(token);
-        pendingUser.setStatus(false); // chưa xác minh
-        pendingUser.setRoleId(1);     // mặc định là khách hàng
+        pendingUser.setStatus(false);
+        pendingUser.setRoleId(1);
 
-        // Tạo mã xác nhận (dùng để xác thực hoặc duyệt giao dịch)
         String confirmationCode = UUID.randomUUID().toString();
 
-        if (pendingUser == null) {
-            session.setAttribute("error", "Không tìm thấy thông tin đăng ký.");
-            response.sendRedirect("signup.jsp");
-            return;
-        }
-
-// Sử dụng pendingUser bình thường
         boolean paymentSuccess = packageDAO.recordPayment(
-                null, // Vì là đăng ký mới, không có user cũ
+                pendingUser.getId(), // Changed from null to pendingUser.getId()
                 pkg.getId(),
-                pendingUser.getId(), // Sử dụng pendingUser đã kiểm tra null
                 paymentMethod,
                 pkg.getPrice(),
                 confirmationCode
         );
 
         if (paymentSuccess) {
-            // Đăng ký tài khoản sau khi lưu thông tin thanh toán
             boolean registerSuccess = userDAO.register(pendingUser);
 
             if (registerSuccess) {
-                // Gửi email xác minh
                 sendUpgradeEmail(request, pendingUser, pkg);
 
-                // Xóa thông tin tạm
                 session.removeAttribute("pendingUser");
                 session.removeAttribute("oldEmail");
                 session.removeAttribute("oldFullname");
                 session.removeAttribute("oldPhone");
 
-                // Đặt thông báo thành công và điều hướng
                 session.setAttribute("successMessage", "Đăng ký và thanh toán thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.");
                 session.setAttribute("pkg", pkg);
                 session.setAttribute("paymentMethod", paymentMethod);
@@ -147,29 +129,26 @@ public class PaymentServlet extends HttpServlet {
             return;
         }
 
-        // Kiểm tra nếu user đã có gói này
-        if (user.getServicePackageId() != null && user.getServicePackageId().equals(pkg.getId())) {
+        // Changed these checks since servicePackageId is int (primitive) and can't be null
+        if (user.getServicePackageId() == pkg.getId()) {
             session.setAttribute("notification", "Bạn đã đăng ký gói này rồi!");
             response.sendRedirect("pricing.jsp");
             return;
         }
 
-        // Kiểm tra nếu user đang cố downgrade gói
-        if (user.getServicePackageId() != null && user.getServicePackageId() > pkg.getId()) {
+        if (user.getServicePackageId() > pkg.getId()) {
             session.setAttribute("notification", "Bạn không thể chuyển xuống gói thấp hơn!");
             response.sendRedirect("pricing.jsp");
             return;
         }
 
-        // Tạo mã xác nhận thanh toán (có thể dùng cho admin xác nhận sau này)
         String confirmationCode = UUID.randomUUID().toString();
 
-        BigDecimal amount = pkg.getPrice(); // đảm bảo là BigDecimal
-
-        boolean paymentSuccess = packageDAO.recordPayment(user != null ? user.getId() : null,
-                pkg.getId(), user.getId(),
+        boolean paymentSuccess = packageDAO.recordPayment(
+                user.getId(),
+                pkg.getId(),
                 paymentMethod,
-                amount,
+                pkg.getPrice(),
                 confirmationCode
         );
 
@@ -180,7 +159,6 @@ public class PaymentServlet extends HttpServlet {
                 user.setServicePackageId(pkg.getId());
                 session.setAttribute("user", user);
 
-                // Gửi email xác nhận nâng cấp
                 sendUpgradeEmail(request, user, pkg);
 
                 session.setAttribute("successMessage", "Nâng cấp gói dịch vụ thành công!");
@@ -223,8 +201,8 @@ public class PaymentServlet extends HttpServlet {
             SendMailOK.send(
                     "smtp.gmail.com",
                     user.getEmail(),
-                    "vdc120403@gmail.com", // ← Gợi ý: nên để vào file cấu hình
-                    "ednn nwbo zbyq gahs", // ← Gợi ý: nên mã hóa/ẩn thông tin mật khẩu
+                    "vdc120403@gmail.com",
+                    "ednn nwbo zbyq gahs",
                     "Thông báo nâng cấp gói dịch vụ PetTech",
                     emailBody
             );
@@ -232,5 +210,4 @@ public class PaymentServlet extends HttpServlet {
             e.printStackTrace();
         }
     }
-
 }

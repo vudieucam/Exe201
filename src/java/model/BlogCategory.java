@@ -4,22 +4,29 @@
  */
 package model;
 
+import java.util.Date;
+
 /**
  *
  * @author FPT
  */
 public class BlogCategory {
+
     private int categoryId;
     private String categoryName;
     private String description;
+    private Date createdAt;
+    private boolean status; // true: active, false: inactive
 
     public BlogCategory() {
     }
 
-    public BlogCategory(int categoryId, String categoryName, String description) {
+    public BlogCategory(int categoryId, String categoryName, String description, Date createdAt, boolean status) {
         this.categoryId = categoryId;
         this.categoryName = categoryName;
         this.description = description;
+        this.createdAt = createdAt;
+        this.status = status;
     }
 
     public int getCategoryId() {
@@ -45,5 +52,34 @@ public class BlogCategory {
     public void setDescription(String description) {
         this.description = description;
     }
-    
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("BlogCategory{");
+        sb.append("categoryId=").append(categoryId);
+        sb.append(", categoryName=").append(categoryName);
+        sb.append(", description=").append(description);
+        sb.append(", createdAt=").append(createdAt);
+        sb.append(", status=").append(status);
+        sb.append('}');
+        return sb.toString();
+    }
+
 }

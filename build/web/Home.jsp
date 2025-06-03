@@ -1042,7 +1042,7 @@
                     <div class="col-md-6 d-flex justify-content-md-end align-items-center">
                         <c:choose>
                             <c:when test="${not empty sessionScope.user}">
-                                <!-- Hiển thị tên người dùng và nút đăng xuất -->
+                                <!-- Hiển thị khi đã đăng nhập -->
                                 <div class="d-flex align-items-center">
                                     <a class="login-link d-flex align-items-center mr-3" href="authen?action=editprofile">
                                         <i class="fa fa-user-circle mr-2" style="font-size: 1.4rem; color: #6d4aff;"></i>
@@ -1055,7 +1055,7 @@
                                 </div>
                             </c:when>
                             <c:otherwise>
-                                <!-- Nếu chưa đăng nhập, hiển thị nút đăng nhập/đăng ký -->
+                                <!-- Hiển thị khi chưa đăng nhập -->
                                 <a href="authen?action=login" class="login-link d-flex align-items-center mr-3">
                                     <i class="fa fa-sign-in mr-2"></i>
                                     <span>Đăng Nhập</span>
@@ -1090,9 +1090,9 @@
                                 <div class="dropdown-header">
                                     <i class="fa fa-book mr-2"></i>Danh mục khóa học
                                 </div>
-                                <c:forEach items="${featuredCourses}" var="course" end="8">
-                                    <a class="dropdown-item" href="coursedetail?id=${course.id}">
-                                        ${fn:substring(course.title, 0, 50)}${fn:length(course.title) > 50 ? '...' : ''}
+                                <c:forEach items="${courseCategories}" var="category">
+                                    <a class="dropdown-item" href="course?categoryId=${category.id}">
+                                        ${category.name}
                                     </a>
                                 </c:forEach>
                                 <div class="dropdown-divider"></div>
@@ -1206,13 +1206,13 @@
                 </div>
 
                 <div class="row">
-                    
-                        <c:if test="${not empty featuredCourses}">
-                            <c:forEach var="featuredCourses" items="${featuredCourses}">
+                    <c:choose>
+                        <c:when test="${not empty featuredCourses}">
+                            <c:forEach var="course" items="${featuredCourses}">
                                 <div class="col-lg-4 col-md-6 mb-4">
                                     <div class="course-card">
                                         <div class="course-img-container">
-                                            <c:set var="imageUrl" value="${featuredCourses.imageUrl}" />
+                                            <c:set var="imageUrl" value="${course.imageUrl}" />
                                             <c:set var="defaultImage" value="${pageContext.request.contextPath}/images/corgin-1.jpg" />
                                             <c:choose>
                                                 <c:when test="${not empty imageUrl}">
@@ -1233,30 +1233,30 @@
                                                 </c:otherwise>
                                             </c:choose>
 
-                                            <img src="${finalImagePath}" alt="${featuredCourses.title}" class="course-img"
+                                            <img src="${finalImagePath}" alt="${course.title}" class="course-img"
                                                  onerror="this.onerror=null; this.src='${defaultImage}'">
                                         </div>
 
                                         <div class="course-body">
-                                            <h3 class="course-title">${featuredCourses.title}</h3>
+                                            <h3 class="course-title">${course.title}</h3>
 
                                             <div class="course-meta">
                                                 <i class="fa fa-clock-o"></i> 
-                                                <c:out value="${featuredCourses.time != null ? featuredCourses.time : 'Đang cập nhật'}" />
+                                                <c:out value="${course.time != null ? course.time : 'Đang cập nhật'}" />
                                             </div>
 
-                                            <c:if test="${not empty featuredCourses.researcher}">
+                                            <c:if test="${not empty course.researcher}">
                                                 <div class="course-meta">
-                                                    <i class="fa fa-user"></i> ${featuredCourses.researcher}
+                                                    <i class="fa fa-user"></i> ${course.researcher}
                                                 </div>
                                             </c:if>
 
                                             <p class="course-desc">
                                                 <c:choose>
-                                                    <c:when test="${not empty featuredCourses.content}">
-                                                        <c:out value="${fn:length(featuredCourses.content) > 100 
-                                                                        ? fn:substring(featuredCourses.content, 0, 100).concat('...') 
-                                                                        : featuredCourses.content}" />
+                                                    <c:when test="${not empty course.content}">
+                                                        <c:out value="${fn:length(course.content) > 100 
+                                                                        ? fn:substring(course.content, 0, 100).concat('...') 
+                                                                        : course.content}" />
                                                     </c:when>
                                                     <c:otherwise>
                                                         Nội dung đang được cập nhật...
@@ -1265,17 +1265,17 @@
                                             </p>
 
                                             <div class="course-meta">
-                                                <i class="fa fa-calendar"></i> ${featuredCourses.time}
+                                                <i class="fa fa-calendar"></i> ${course.time}
                                             </div>
 
                                             <c:choose>
                                                 <c:when test="${not empty sessionScope.user}">
-                                                    <a href="${pageContext.request.contextPath}/coursedetail?id=${featuredCourses.id}" class="course-btn">
+                                                    <a href="${pageContext.request.contextPath}/coursedetail?id=${course.id}" class="course-btn">
                                                         Xem chi tiết <i class="fa fa-arrow-right"></i>
                                                     </a>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <a href="authen?action=login&redirect=${pageContext.request.contextPath}/coursedetail?id=${featuredCourses.id}"
+                                                    <a href="authen?action=login&redirect=${pageContext.request.contextPath}/coursedetail?id=${course.id}"
                                                        class="course-btn">
                                                         Xem chi tiết <i class="fa fa-arrow-right"></i>
                                                     </a>
@@ -1285,186 +1285,194 @@
                                     </div>
                                 </div>
                             </c:forEach>
-                        </c:if>
-
-                        <c:if test="${empty featuredCourses}">
+                        </c:when>
+                        <c:otherwise>
                             <div class="col-12 text-center">
-                                <div class="alert alert-info" style="background-color: #e2d9ff; border-color: #6d4aff; color: #3a3a3a;">
+                                <div class="alert alert-info">
                                     <i class="fa fa-paw"></i> Hiện chưa có khóa học nào. Vui lòng quay lại sau!
                                 </div>
                             </div>
-                        </c:if>
-                        <div class="row mt-4">
-                            <div class="col text-center">
-                                <a href="course" class="btn btn-outline-primary px-4 py-2">Xem tất cả khóa học</a>
-                            </div>
-                        </div>
+                        </c:otherwise>
+                    </c:choose>
+                </div> <!-- Đóng div row -->
+
+                <div class="row mt-4">
+                    <div class="col text-center">
+                        <a href="course" class="btn btn-outline-primary px-4 py-2">Xem tất cả khóa học</a>
                     </div>
-            </section>
+                </div>
+            </div>
+        </section>
 
 
 
-            <!-- Testimonials -->
-            <section class="ftco-section bg-light">
-                <div class="container">
-                    <div class="row justify-content-center pb-5 mb-3">
-                        <div class="col-md-7 heading-section text-center ftco-animate">
-                            <div class="course-header">
-                                <h2>Học viên nói gì về chúng tôi</h2>
-                                <p>Những phản hồi từ học viên đã tham gia các khóa học tại PetTech</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4 ftco-animate">
-                            <div class="testimonial-card text-center">
-                                <img src="images/staff-5.jpg" class="testimonial-img" alt="Nguyen Van B">
-                                <h5>Nguyen Van B</h5>
-                                <div class="text-warning mb-3">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                </div>
-                                <p>"Khóa học chăm sóc chó con rất hữu ích, giúp mình tự tin hơn khi nuôi bé Cún nhà mình."</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4 ftco-animate">
-                            <div class="testimonial-card text-center">
-                                <img src="images/staff-7.jpg" class="testimonial-img" alt="Ngoc A">
-                                <h5>Ngoc A</h5>
-                                <div class="text-warning mb-3">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star-half-alt"></i>
-                                </div>
-                                <p>"Nội dung bài giảng dễ hiểu, hình ảnh minh họa sinh động. Mình đã áp dụng thành công cho bé Mèo nhà mình."</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4 ftco-animate">
-                            <div class="testimonial-card text-center">
-                                <img src="images/staff-8.jpg" class="testimonial-img" alt="Minh C">
-                                <h5>Minh C</h5>
-                                <div class="text-warning mb-3">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                </div>
-                                <p>"Giảng viên nhiệt tình, luôn sẵn sàng giải đáp thắc mắc. Mình sẽ đăng ký thêm các khóa học khác."</p>
-                            </div>
+        <!-- Testimonials -->
+        <section class="ftco-section bg-light">
+            <div class="container">
+                <div class="row justify-content-center pb-5 mb-3">
+                    <div class="col-md-7 heading-section text-center ftco-animate">
+                        <div class="course-header">
+                            <h2>Học viên nói gì về chúng tôi</h2>
+                            <p>Những phản hồi từ học viên đã tham gia các khóa học tại PetTech</p>
                         </div>
                     </div>
                 </div>
-            </section>
-
-
-
-            <!-- Footer -->
-            <footer class="footer">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-md-6 col-lg-3 mb-4 mb-md-0">
-                            <h2 class="footer-heading">PetTech</h2>
-                            <p>Hệ thống đào tạo và cung cấp giải pháp chăm sóc thú cưng hàng đầu Việt Nam.</p>
-                            <ul class="ftco-footer-social p-0">
-                                <li class="ftco-animate"><a href="#"><span class="fab fa-facebook-f"></span></a></li>
-                                <li class="ftco-animate"><a href="#"><span class="fab fa-instagram"></span></a></li>
-                                <li class="ftco-animate"><a href="#"><span class="fab fa-youtube"></span></a></li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6 col-lg-3 mb-4 mb-md-0">
-                            <h2 class="footer-heading">Liên kết nhanh</h2>
-                            <ul class="list-unstyled">
-                                <li><a href="home" class="py-2 d-block">Trang chủ</a></li>
-                                <li><a href="course" class="py-2 d-block">Khóa học</a></li>
-                                <li><a href="products" class="py-2 d-block">Sản phẩm</a></li>
-                                <li><a href="pricing" class="py-2 d-block">Gói dịch vụ</a></li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6 col-lg-3 mb-4 mb-md-0">
-                            <h2 class="footer-heading">Hỗ trợ</h2>
-                            <ul class="list-unstyled">
-                                <li><a href="faq" class="py-2 d-block">Câu hỏi thường gặp</a></li>
-                                <li><a href="contact" class="py-2 d-block">Liên hệ</a></li>
-                                <li><a href="policy" class="py-2 d-block">Chính sách bảo mật</a></li>
-                                <li><a href="terms" class="py-2 d-block">Điều khoản dịch vụ</a></li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6 col-lg-3 mb-4 mb-md-0">
-                            <h2 class="footer-heading">Liên hệ</h2>
-                            <div class="block-23 mb-3">
-                                <ul>
-                                    <li><span class="icon fa fa-map"></span><span class="text">Khu CNC Láng Hòa Lạc</span></li>
-                                    <li><a href="#"><span class="icon fa fa-phone"></span><span class="text">+84 352 138 596</span></a></li>
-                                    <li><a href="#"><span class="icon fa fa-paper-plane"></span><span class="text">pettech@email.com</span></a></li>
-                                </ul>
+                <div class="row">
+                    <div class="col-md-4 ftco-animate">
+                        <div class="testimonial-card text-center">
+                            <img src="images/staff-5.jpg" class="testimonial-img" alt="Nguyen Van B">
+                            <h5>Nguyen Van B</h5>
+                            <div class="text-warning mb-3">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
                             </div>
+                            <p>"Khóa học chăm sóc chó con rất hữu ích, giúp mình tự tin hơn khi nuôi bé Cún nhà mình."</p>
                         </div>
                     </div>
-                    <div class="row mt-5">
-                        <div class="col-md-12 text-center">
-                            <p class="copyright">
-                                Copyright &copy;<script>document.write(new Date().getFullYear());</script> Bản quyền thuộc về PetTech
-                            </p>
+                    <div class="col-md-4 ftco-animate">
+                        <div class="testimonial-card text-center">
+                            <img src="images/staff-7.jpg" class="testimonial-img" alt="Ngoc A">
+                            <h5>Ngoc A</h5>
+                            <div class="text-warning mb-3">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <p>"Nội dung bài giảng dễ hiểu, hình ảnh minh họa sinh động. Mình đã áp dụng thành công cho bé Mèo nhà mình."</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 ftco-animate">
+                        <div class="testimonial-card text-center">
+                            <img src="images/staff-8.jpg" class="testimonial-img" alt="Minh C">
+                            <h5>Minh C</h5>
+                            <div class="text-warning mb-3">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <p>"Giảng viên nhiệt tình, luôn sẵn sàng giải đáp thắc mắc. Mình sẽ đăng ký thêm các khóa học khác."</p>
                         </div>
                     </div>
                 </div>
-            </footer>
+            </div>
+        </section>
+
+
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6 col-lg-3 mb-4 mb-md-0">
+                        <h2 class="footer-heading">PetTech</h2>
+                        <p>Hệ thống đào tạo và cung cấp giải pháp chăm sóc thú cưng hàng đầu Việt Nam.</p>
+                        <ul class="ftco-footer-social p-0">
+                            <li class="ftco-animate"><a href="#"><span class="fab fa-facebook-f"></span></a></li>
+                            <li class="ftco-animate"><a href="#"><span class="fab fa-instagram"></span></a></li>
+                            <li class="ftco-animate"><a href="#"><span class="fab fa-youtube"></span></a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-4 mb-md-0">
+                        <h2 class="footer-heading">Liên kết nhanh</h2>
+                        <ul class="list-unstyled">
+                            <li><a href="home" class="py-2 d-block">Trang chủ</a></li>
+                            <li><a href="course" class="py-2 d-block">Khóa học</a></li>
+                            <li><a href="products" class="py-2 d-block">Sản phẩm</a></li>
+                            <li><a href="pricing" class="py-2 d-block">Gói dịch vụ</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-4 mb-md-0">
+                        <h2 class="footer-heading">Hỗ trợ</h2>
+                        <ul class="list-unstyled">
+                            <li><a href="faq" class="py-2 d-block">Câu hỏi thường gặp</a></li>
+                            <li><a href="contact" class="py-2 d-block">Liên hệ</a></li>
+                            <li><a href="policy" class="py-2 d-block">Chính sách bảo mật</a></li>
+                            <li><a href="terms" class="py-2 d-block">Điều khoản dịch vụ</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6 col-lg-3 mb-4 mb-md-0">
+                        <h2 class="footer-heading">Liên hệ</h2>
+                        <div class="block-23 mb-3">
+                            <ul>
+                                <li><span class="icon fa fa-map"></span><span class="text">Khu CNC Láng Hòa Lạc</span></li>
+                                <li><a href="#"><span class="icon fa fa-phone"></span><span class="text">+84 352 138 596</span></a></li>
+                                <li><a href="#"><span class="icon fa fa-paper-plane"></span><span class="text">pettech@email.com</span></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-5">
+                    <div class="col-md-12 text-center">
+                        <p class="copyright">
+                            Copyright &copy;<script>document.write(new Date().getFullYear());</script> Bản quyền thuộc về PetTech
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </footer>
 
 
 
 
-            <!-- loader -->
-            <div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00"/></svg></div>
+        <!-- loader -->
+        <div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00"/></svg></div>
 
 
-            <script>
-                $(document).ready(function () {
-                    $('#userDropdown').on('click', function (e) {
-                        e.preventDefault();
-                        console.log("Click ok");
-                    });
-                });
-            </script>
+        <script src="js/jquery.min.js"></script>
+        <script src="js/jquery-migrate-3.0.1.min.js"></script>
+        <script src="js/popper.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/jquery.easing.1.3.js"></script>
+        <script src="js/jquery.waypoints.min.js"></script>
+        <script src="js/jquery.stellar.min.js"></script>
+        <script src="js/jquery.animateNumber.min.js"></script>
+        <script src="js/bootstrap-datepicker.js"></script>
+        <script src="js/jquery.timepicker.min.js"></script>
+        <script src="js/owl.carousel.min.js"></script>
+        <script src="js/jquery.magnific-popup.min.js"></script>
+        <script src="js/scrollax.min.js"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&sensor=false"></script>
+        <script src="js/google-map.js"></script>
+        <script src="js/main.js"></script>
 
+        <script>
+                                // Back to top button
+                                $(window).scroll(function () {
+                                    if ($(this).scrollTop() > 300) {
+                                        $('.back-to-top').fadeIn('slow');
+                                    } else {
+                                        $('.back-to-top').fadeOut('slow');
+                                    }
+                                });
 
-            <script src="js/jquery.min.js"></script>
-            <script src="js/jquery-migrate-3.0.1.min.js"></script>
-            <script src="js/popper.min.js"></script>
-            <script src="js/bootstrap.min.js"></script>
-            <script src="js/jquery.easing.1.3.js"></script>
-            <script src="js/jquery.waypoints.min.js"></script>
-            <script src="js/jquery.stellar.min.js"></script>
-            <script src="js/jquery.animateNumber.min.js"></script>
-            <script src="js/bootstrap-datepicker.js"></script>
-            <script src="js/jquery.timepicker.min.js"></script>
-            <script src="js/owl.carousel.min.js"></script>
-            <script src="js/jquery.magnific-popup.min.js"></script>
-            <script src="js/scrollax.min.js"></script>
-            <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&sensor=false"></script>
-            <script src="js/google-map.js"></script>
-            <script src="js/main.js"></script>
-
-            <script>
-                // Back to top button
-                $(window).scroll(function () {
-                    if ($(this).scrollTop() > 300) {
-                        $('.back-to-top').fadeIn('slow');
-                    } else {
-                        $('.back-to-top').fadeOut('slow');
-                    }
-                });
-
-                $('.back-to-top').click(function (e) {
-                    e.preventDefault();
-                    $('html, body').animate({scrollTop: 0}, 500);
-                    return false;
-                });
-            </script>
-        </body>
-    </html>
+                                $('.back-to-top').click(function (e) {
+                                    e.preventDefault();
+                                    $('html, body').animate({scrollTop: 0}, 500);
+                                    return false;
+                                });
+                                $(document).ready(function () {
+                                    $('#userDropdown').on('click', function (e) {
+                                        e.preventDefault();
+                                        console.log("Click ok");
+                                    });
+                                });
+        </script>
+        <c:if test="${not empty errorMessage}">
+            <div class="alert alert-danger text-center">
+                ${errorMessage}
+            </div>
+        </c:if>
+        <script>
+            console.log("Debug Info:");
+            console.log("Course Categories:", ${not empty courseCategories ? courseCategories.size() : 0});
+            console.log("Featured Courses:", ${not empty featuredCourses ? featuredCourses.size() : 0});
+        </script>
+    </body>
+</html>

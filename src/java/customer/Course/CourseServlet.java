@@ -96,7 +96,7 @@ public class CourseServlet extends HttpServlet {
         request.setAttribute("courseCategories", courseCategories);
 
         // Lấy danh sách khóa học nổi bật
-        List<Course> featuredCourses = CustomercourseDAO.getFeaturedCourses(9);
+        List<Course> featuredCourses = CustomercourseDAO.getFeaturedCourses(6);
         request.setAttribute("featuredCourses", featuredCourses);
 
         // Xử lý phân trang và tìm kiếm

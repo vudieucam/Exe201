@@ -5,6 +5,7 @@
 package customer.Course;
 
 import dal.CourseDAO;
+import dal.CourseModuleDAO;
 import dal.CustomerCourseDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import model.Course;
+import model.CourseCategory;
 import model.CourseLesson;
 import model.CourseModule;
 
@@ -45,35 +47,67 @@ public class CourseDetailServlet extends HttpServlet {
 
     private CustomerCourseDAO CustomercourseDAO = new CustomerCourseDAO();
     private CourseDAO courseDAO = new CourseDAO();
+    private CourseModuleDAO courseModuleDAO = new CourseModuleDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            // Lấy danh sách khóa học nổi bật cho menu dropdown
+            // Debug: In ra tham số request
+            System.out.println("Request parameters - id: " + request.getParameter("id")
+                    + ", lesson: " + request.getParameter("lesson"));
+
+            // Lấy danh sách danh mục và khóa học nổi bật
+            List<CourseCategory> courseCategories = CustomercourseDAO.getAllCategories();
+            request.setAttribute("courseCategories", courseCategories);
+
             List<Course> featuredCourses = CustomercourseDAO.getFeaturedCourses(9);
             request.setAttribute("featuredCourses", featuredCourses);
 
             String idRaw = request.getParameter("id");
-            String lessonIdRaw = request.getParameter("lesson");
 
+            // Kiểm tra tham số id
             if (idRaw == null || idRaw.isEmpty()) {
-                request.getSession().setAttribute("errorMessage", "Thiếu ID khóa học");
-                response.sendRedirect("course");
+                request.setAttribute("errorMessage", "Thiếu ID khóa học");
+                request.getRequestDispatcher("course_detail.jsp").forward(request, response);
                 return;
             }
 
-            int courseId = Integer.parseInt(idRaw);
+            int courseId;
+            try {
+                courseId = Integer.parseInt(idRaw);
+            } catch (NumberFormatException e) {
+                request.setAttribute("errorMessage", "ID khóa học không hợp lệ");
+                request.getRequestDispatcher("course_detail.jsp").forward(request, response);
+                return;
+            }
+
+            System.out.println("=== DEBUG START ===");
+            System.out.println("Request URL: " + request.getRequestURL());
+            System.out.println("Query String: " + request.getQueryString());
+            System.out.println("Session ID: " + request.getSession().getId());
+
+            Course course = courseDAO.getCourseById(courseId);
+            System.out.println("Course object from DAO: " + course);
+            if (course != null) {
+                System.out.println("Course details - ID: " + course.getId()
+                        + ", Title: " + course.getTitle());
+            }
+            System.out.println("=== DEBUG END ===");
+
+            if (course == null) {
+                request.setAttribute("errorMessage", "Không tìm thấy khóa học với ID: " + courseId);
+                request.getRequestDispatcher("course_detail.jsp").forward(request, response);
+                return;
+            }
+
+            // Xử lý bài học
+            String lessonIdRaw = request.getParameter("lesson");
             int lessonId = (lessonIdRaw != null && !lessonIdRaw.isEmpty()) ? Integer.parseInt(lessonIdRaw) : 0;
 
-            Course course = courseDAO.getCourseById(courseId); // Sửa từ getCourseDetails() sang getCourseById()
-            if (course == null) {
-                request.getSession().setAttribute("errorMessage", "Không tìm thấy khóa học");
-                response.sendRedirect("course");
-                return;
-            }
+            List<CourseModule> modules = courseModuleDAO.getCourseModules(courseId);
+            System.out.println("Number of modules: " + modules.size());
 
-            List<CourseModule> modules = courseDAO.getCourseModules(courseId);
             Map<Integer, List<CourseLesson>> moduleLessonsMap = new HashMap<>();
             CourseLesson currentLesson = null;
             List<CourseLesson> allLessons = new ArrayList<>();
@@ -93,8 +127,8 @@ public class CourseDetailServlet extends HttpServlet {
             // Nếu chỉ định lessonId
             if (lessonId > 0) {
                 currentLesson = CustomercourseDAO.getLessonDetails(lessonId);
+                System.out.println("Current lesson: " + currentLesson);
 
-                // Kiểm tra xem lesson có thuộc khóa học này không
                 if (currentLesson != null) {
                     boolean valid = false;
                     for (CourseLesson lesson : allLessons) {
@@ -109,12 +143,12 @@ public class CourseDetailServlet extends HttpServlet {
                 }
             }
 
-            // Căn lề và xuống dòng HTML
+            // Format nội dung bài học
             if (currentLesson != null && currentLesson.getContent() != null) {
                 currentLesson.setContent(currentLesson.getContent().replace("\n", "<br>"));
             }
 
-            // Tìm vị trí hiện tại và bài liền trước / sau
+            // Tìm bài học trước/sau
             int currentIndex = -1;
             if (currentLesson != null) {
                 for (int i = 0; i < allLessons.size(); i++) {
@@ -129,7 +163,7 @@ public class CourseDetailServlet extends HttpServlet {
             CourseLesson nextLesson = (currentIndex >= 0 && currentIndex < allLessons.size() - 1)
                     ? allLessons.get(currentIndex + 1) : null;
 
-            // Đưa ra view
+            // Đặt các thuộc tính vào request
             request.setAttribute("course", course);
             request.setAttribute("modules", modules);
             request.setAttribute("moduleLessonsMap", moduleLessonsMap);
@@ -137,14 +171,13 @@ public class CourseDetailServlet extends HttpServlet {
             request.setAttribute("previousLesson", previousLesson);
             request.setAttribute("nextLesson", nextLesson);
 
+            // Forward đến trang JSP
             request.getRequestDispatcher("course_detail.jsp").forward(request, response);
 
-        } catch (NumberFormatException e) {
-            request.getSession().setAttribute("errorMessage", "ID không hợp lệ");
-            response.sendRedirect("course");
         } catch (Exception e) {
-            request.getSession().setAttribute("errorMessage", "Lỗi: " + e.getMessage());
-            response.sendRedirect("course");
+            e.printStackTrace();
+            request.setAttribute("errorMessage", "Lỗi hệ thống: " + e.getMessage());
+            request.getRequestDispatcher("course_detail.jsp").forward(request, response);
         }
     }
 

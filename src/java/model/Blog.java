@@ -25,11 +25,12 @@ public class Blog {
     private boolean isFeatured;
     private Date createdAt;
     private Date updatedAt;
+    private int status;
 
     public Blog() {
     }
 
-    public Blog(int blogId, String title, String content, String shortDescription, String imageUrl, int categoryId, String categoryName, Integer authorId, String authorName, int viewCount, boolean isFeatured, Date createdAt, Date updatedAt) {
+    public Blog(int blogId, String title, String content, String shortDescription, String imageUrl, int categoryId, String categoryName, Integer authorId, String authorName, int viewCount, boolean isFeatured, Date createdAt, Date updatedAt, int status) {
         this.blogId = blogId;
         this.title = title;
         this.content = content;
@@ -43,6 +44,7 @@ public class Blog {
         this.isFeatured = isFeatured;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.status = status;
     }
 
     public int getBlogId() {
@@ -149,7 +151,18 @@ public class Blog {
         this.updatedAt = updatedAt;
     }
 
-    
-    
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "Blog{" + "blogId=" + blogId + ", title=" + title + ", content=" + content + ", shortDescription=" + shortDescription + ", imageUrl=" + imageUrl + ", categoryId=" + categoryId + ", categoryName=" + categoryName + ", authorId=" + authorId + ", authorName=" + authorName + ", viewCount=" + viewCount + ", isFeatured=" + isFeatured + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", status=" + status + '}';
+    }
+
     
 }

@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 public class CourseModule {
+
     private int id;
     private int courseId;
     private String title;
@@ -11,14 +12,13 @@ public class CourseModule {
     private int orderIndex;
     private Date createdAt;
     private Date updatedAt;
+    private boolean status; // true: active, false: inactive
     private List<CourseLesson> lessons;
-    
-    // Constructors
+
     public CourseModule() {
     }
 
-    public CourseModule(int id, int courseId, String title, String description, 
-                       int orderIndex, Date createdAt, Date updatedAt) {
+    public CourseModule(int id, int courseId, String title, String description, int orderIndex, Date createdAt, Date updatedAt, boolean status, List<CourseLesson> lessons) {
         this.id = id;
         this.courseId = courseId;
         this.title = title;
@@ -26,9 +26,10 @@ public class CourseModule {
         this.orderIndex = orderIndex;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.status = status;
+        this.lessons = lessons;
     }
 
-    // Getters and Setters
     public int getId() {
         return id;
     }
@@ -85,6 +86,14 @@ public class CourseModule {
         this.updatedAt = updatedAt;
     }
 
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
     public List<CourseLesson> getLessons() {
         return lessons;
     }
@@ -92,4 +101,22 @@ public class CourseModule {
     public void setLessons(List<CourseLesson> lessons) {
         this.lessons = lessons;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("CourseModule{");
+        sb.append("id=").append(id);
+        sb.append(", courseId=").append(courseId);
+        sb.append(", title=").append(title);
+        sb.append(", description=").append(description);
+        sb.append(", orderIndex=").append(orderIndex);
+        sb.append(", createdAt=").append(createdAt);
+        sb.append(", updatedAt=").append(updatedAt);
+        sb.append(", status=").append(status);
+        sb.append(", lessons=").append(lessons);
+        sb.append('}');
+        return sb.toString();
+    }
+
 }

@@ -12,15 +12,15 @@
 <%@page import="model.CourseModule" %>
 <%@page import="model.CourseLesson" %>
 <%@page import="dal.CourseDAO" %>
+<%@page import="dal.CourseModuleDAO" %>
 <%@page import="java.util.List" %>
 <%@page import="java.text.SimpleDateFormat" %>
 <%@page import="java.util.Date" %>
 
-
 <%
     // Khởi tạo DAO
     CourseDAO courseDAO = new CourseDAO();
-
+    CourseModuleDAO courseModuleDAO = new CourseModuleDAO();
     // Xử lý courseId
     int courseId = 0;
     try {
@@ -44,8 +44,8 @@
     Course currentCourse = null;
     if (courseId > 0) {
         try {
-            currentCourse = courseDAO.getCourseDetails(courseId);
-            modules = courseDAO.getCourseModules(courseId);
+            currentCourse = courseDAO.getCourseDetail(courseId);
+            modules = courseModuleDAO.getCourseModules(courseId);
 
             // Kiểm tra course có tồn tại không
             if (currentCourse == null) {
@@ -56,7 +56,6 @@
         }
     }
 %>
-
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -72,7 +71,7 @@
 
         <!-- JS -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> <!-- ĐÃ THÊM -->
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -463,7 +462,7 @@
                 cursor: not-allowed;
             }
         </style>
-        <!-- Thêm phần script để xử lý AJAX -->
+
         <script>
             $(document).ready(function () {
                 $('#courseTable').DataTable({
@@ -472,23 +471,21 @@
                         'copy', 'csv', 'excel', 'pdf', 'print'
                     ],
                     columnDefs: [
-                        {targets: 0, type: 'num'}, // Cột ID sắp xếp số
-                        {targets: 1, type: 'string'}, // Cột Tên khóa học sắp xếp chuỗi
-                        {targets: 2, type: 'string'}, // Cột Giảng viên sắp xếp chuỗi
-                        {targets: 3, type: 'string'}, // Cột Danh mục sắp xếp chuỗi
-                        {targets: 4, type: 'string'}, // Cột Thời lượng sắp xếp chuỗi
-                        {targets: [6], orderable: false} // Tắt sắp xếp cho cột hành động
+                        {targets: 0, type: 'num'},
+                        {targets: 1, type: 'string'},
+                        {targets: 2, type: 'string'},
+                        {targets: 3, type: 'string'},
+                        {targets: 4, type: 'string'},
+                        {targets: [6], orderable: false}
                     ],
                     language: {
                         url: '${pageContext.request.contextPath}/assets/datatables/vi.json'
                     },
                     initComplete: function () {
-                        // Thêm ô tìm kiếm cho từng cột
                         this.api().columns().every(function () {
                             var column = this;
                             var header = $(column.header());
 
-                            // Chỉ thêm search cho các cột không phải hành động
                             if (header.index() !== 6) {
                                 var input = $('<input type="text" class="column-search form-control form-control-sm" placeholder="Tìm..."/>')
                                         .appendTo(header)
@@ -498,7 +495,6 @@
                                             }
                                         });
 
-                                // Thêm icon sort cho header
                                 header.css('position', 'relative');
                                 $('<span class="sort-icon"><i class="bi bi-arrow-down-up"></i></span>')
                                         .appendTo(header)
@@ -510,41 +506,9 @@
                     }
                 });
 
-                // Style cho phần search
                 $('.dataTables_filter input').addClass('form-control form-control-sm');
             });
-            // Function to edit module
-            function editModule(moduleId, title, description) {
-                document.getElementById('editModuleId').value = moduleId;
-                document.getElementById('editModuleTitle').value = title;
-                document.getElementById('editModuleDescription').value = description;
-                var editModal = new bootstrap.Modal(document.getElementById('editModuleModal'));
-                editModal.show();
-            }
 
-            // Function to delete module
-            function deleteModule(moduleId) {
-                if (confirm('Bạn có chắc chắn muốn xóa module này? Tất cả bài học trong module cũng sẽ bị xóa.')) {
-                    window.location.href = 'courseadmin?action=deleteModule&id=' + moduleId;
-                }
-            }
-
-            // Function to edit lesson
-            function editLesson(lessonId, title, content, videoUrl) {
-                document.getElementById('editLessonId').value = lessonId;
-                document.getElementById('editLessonTitle').value = title;
-                document.getElementById('editLessonContent').value = content;
-                document.getElementById('editLessonVideoUrl').value = videoUrl || '';
-                var editModal = new bootstrap.Modal(document.getElementById('editLessonModal'));
-                editModal.show();
-            }
-
-            // Function to delete lesson
-            function deleteLesson(lessonId) {
-                if (confirm('Bạn có chắc chắn muốn xóa bài học này?')) {
-                    window.location.href = 'courseadmin?action=deleteLesson&id=' + lessonId;
-                }
-            }
             function deleteCourse(id) {
                 if (confirm("Bạn có chắc muốn xóa khóa học này không?")) {
                     window.location.href = 'courseadmin?action=delete&id=' + id;
@@ -554,32 +518,132 @@
             function toggleCourseStatus(id) {
                 window.location.href = 'courseadmin?action=toggleStatus&id=' + id;
             }
-            // Initialize Select2
+
             $(document).ready(function () {
                 $('.form-select').select2({
                     minimumResultsForSearch: Infinity
                 });
             });
-            // Xử lý khi click nút chỉnh sửa danh mục
+
             function openEditCategoryModal(id, name) {
                 document.getElementById('editCategoryId').value = id;
                 document.getElementById('editCategoryName').value = name;
-
-                // Cập nhật action cho form
                 document.getElementById('editCategoryForm').action =
                         '${pageContext.request.contextPath}/courseadmin?action=updateCategory';
-
-                // Mở modal
                 var modal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
                 modal.show();
             }
+
+            function showCourseModules(courseId, courseTitle) {
+                // Ẩn các phần không cần thiết
+                document.querySelector('.tab-content > h2').style.display = 'none';
+                document.getElementById('courseTable_wrapper').style.display = 'none';
+                document.querySelector('.filter-section').style.display = 'none';
+
+                // Hiển thị phần modules
+                const modulesSection = document.getElementById('courseModulesSection');
+                modulesSection.style.display = 'block';
+                modulesSection.querySelector('#courseTitle').textContent = courseTitle;
+
+                // Load nội dung modules
+                loadCourseModules(courseId);
+            }
+
+            function loadCourseModules(courseId) {
+                fetch('${pageContext.request.contextPath}/courseadmin?action=getModules&courseId=' + courseId)
+                        .then(response => {
+                            if (!response.ok)
+                                throw new Error('Network response was not ok');
+                            return response.text();
+                        })
+                        .then(html => {
+                            document.getElementById('moduleListContainer').innerHTML = html;
+                            // Khởi tạo lại các accordion nếu cần
+                            $('.accordion').each(function () {
+                                new bootstrap.Collapse(this, {toggle: false});
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error loading modules:', error);
+                            document.getElementById('moduleListContainer').innerHTML =
+                                    '<div class="alert alert-danger">Lỗi khi tải danh sách modules</div>';
+                        });
+            }
+
+            function backToCourseList() {
+                document.querySelector('.tab-content > h2').style.display = 'block';
+                document.getElementById('courseTable').style.display = 'table';
+                document.querySelector('.filter-section').style.display = 'block';
+                document.getElementById('courseModulesSection').style.display = 'none';
+            }
+
+
         </script>
     </head>
     <body>
         <div class="container-fluid">
             <div class="row">
                 <!-- Sidebar -->
-                <%@include file="sidebar.jsp" %>
+                <div class="col-md-2 sidebar p-0">
+                    <div class="sidebar-brand">
+                        <img src="images/logo_pettech.jpg" alt="Logo">
+                        <h4 class="mb-0">PetTech</h4>
+                    </div>
+                    <ul class="nav flex-column mt-3">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="admin">
+                                <i class="bi bi-speedometer2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="userAdmin.jsp">
+                                <i class="bi bi-people"></i>Người dùng
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="courseadmin">
+                                <i class="bi bi-book"></i>Khóa học
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="productsAdmin.jsp">
+                                <i class="bi bi-cart"></i>Sản phẩm
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="ordersAdmin.jsp">
+                                <i class="bi bi-receipt"></i>Đơn hàng
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="paymentsAdmin.jsp">
+                                <i class="bi bi-credit-card"></i>Thanh toán
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="blogsAdmin.jsp">
+                                <i class="bi bi-newspaper"></i>Blog
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="partnersAdmin.jsp">
+                                <i class="bi bi-building"></i>Đối tác
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="reports.jsp">
+                                <i class="bi bi-graph-up"></i>Báo cáo
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="settings.jsp">
+                                <i class="bi bi-gear"></i>Cài đặt
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+
                 <!-- Main Content -->
                 <div class="col-md-10 p-4">
                     <div class="tab-content">
@@ -598,7 +662,6 @@
                             </div>
                             <c:remove var="error" scope="session"/>
                         </c:if>
-                        <!-- Courses Tab -->
 
                         <h2 class="mb-4">Quản lý Khóa học</h2>
 
@@ -607,19 +670,15 @@
                             <div class="row">
                                 <div class="col-md-8">
                                     <div class="d-flex gap-2">
-                                        <a href="${pageContext.request.contextPath}/courseadmin?action=add" class="btn btn-primary">
+                                        <a href="${pageContext.request.contextPath}/courseadd" class="btn btn-primary">
                                             <i class="bi bi-plus-circle me-1"></i> Thêm khóa học
                                         </a>
 
-
-                                        <!-- Nút thêm danh mục -->
                                         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
                                             <i class="bi bi-tags me-1"></i> Quản lý Danh mục
                                         </button>
                                     </div>
                                 </div>
-
-
                             </div>
                         </div>
 
@@ -647,7 +706,7 @@
                                                 <tr>
                                                     <td>${course.id}</td>
                                                     <td>
-                                                        <a href="courseadmin?action=update&id=${course.id}" class="text-primary fw-bold">
+                                                        <a href="javascript:void(0)" onclick="showCourseModules(${course.id}, '${fn:escapeXml(course.title)}')" class="text-primary fw-bold">
                                                             ${course.title}
                                                         </a>
                                                     </td>
@@ -674,7 +733,7 @@
                                                     </td>
                                                     <td>
                                                         <div class="d-flex">
-                                                            <a href="courseadmin?action=update&id=${course.id}" 
+                                                            <a href="courseedit?id=${course.id}" 
                                                                class="btn btn-sm btn-outline-primary me-1" title="Sửa">
                                                                 <i class="bi bi-pencil"></i>
                                                             </a>
@@ -696,6 +755,117 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Phần hiển thị modules của khóa học -->
+                        <div id="courseModulesSection" class="card mb-4" style="display:none;">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h4 id="courseTitle" class="mb-0"></h4>
+                                    <small class="text-muted">Danh sách modules</small>
+                                </div>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="backToCourseList()">
+                                    <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="moduleListContainer">
+                                    <!-- Nội dung modules sẽ được load động ở đây -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modules Section -->
+                        <c:if test="${not empty currentCourse}">
+                            <div class="card mb-4">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h4>Modules của khóa học: ${currentCourse.title}</h4>
+                                    <a href="moduleadd.jsp?courseId=${currentCourse.id}" class="btn btn-primary">
+                                        <i class="bi bi-plus"></i> Thêm Module
+                                    </a>
+                                </div>
+                                <div class="card-body">
+                                    <c:choose>
+                                        <c:when test="${not empty modules}">
+                                            <div class="accordion" id="modulesAccordion">
+                                                <c:forEach items="${modules}" var="module">
+                                                    <c:set var="lessons" value="${module.lessons}" />
+                                                    <div class="accordion-item mb-2">
+                                                        <h2 class="accordion-header" id="heading${module.id}">
+                                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                                                    data-bs-target="#collapse${module.id}" aria-expanded="false">
+                                                                ${module.title}
+                                                                <span class="badge bg-primary ms-2">${not empty lessons ? fn:length(lessons) : 0} bài học</span>
+                                                            </button>
+                                                        </h2>
+                                                        <div id="collapse${module.id}" class="accordion-collapse collapse" 
+                                                             aria-labelledby="heading${module.id}" data-bs-parent="#modulesAccordion">
+                                                            <div class="accordion-body">
+                                                                <div class="d-flex justify-content-between mb-3">
+                                                                    <p class="mb-0">${module.description}</p>
+                                                                    <div>
+                                                                        <a href="moduleedit.jsp?id=${module.id}" class="btn btn-sm btn-outline-primary">
+                                                                            <i class="bi bi-pencil"></i> Sửa
+                                                                        </a>
+                                                                        <button class="btn btn-sm btn-outline-danger" 
+                                                                                onclick="deleteModule(${module.id})">
+                                                                            <i class="bi bi-trash"></i> Xóa
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Lessons List -->
+                                                                <div class="module-lesson mt-3">
+                                                                    <h5 class="d-flex justify-content-between align-items-center">
+                                                                        <span>Bài học</span>
+                                                                        <a href="lessonadd.jsp?moduleId=${module.id}" class="btn btn-sm btn-primary">
+                                                                            <i class="bi bi-plus"></i> Thêm bài học
+                                                                        </a>
+                                                                    </h5>
+
+                                                                    <c:choose>
+                                                                        <c:when test="${not empty lessons}">
+                                                                            <div class="list-group">
+                                                                                <c:forEach items="${lessons}" var="lesson">
+                                                                                    <div class="list-group-item lesson-item">
+                                                                                        <div class="d-flex justify-content-between align-items-center">
+                                                                                            <div>
+                                                                                                <h6 class="mb-1">${lesson.title}</h6>
+                                                                                                <c:if test="${not empty lesson.videoUrl}">
+                                                                                                    <small><a href="${lesson.videoUrl}" target="_blank">Xem video</a></small>
+                                                                                                </c:if>
+                                                                                            </div>
+                                                                                            <div>
+                                                                                                <a href="lessonedit.jsp?id=${lesson.id}" class="btn btn-sm btn-outline-primary">
+                                                                                                    <i class="bi bi-pencil"></i>
+                                                                                                </a>
+                                                                                                <button class="btn btn-sm btn-outline-danger"
+                                                                                                        onclick="deleteLesson(${lesson.id})">
+                                                                                                    <i class="bi bi-trash"></i>
+                                                                                                </button>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </c:forEach>
+                                                                            </div>
+                                                                        </c:when>
+                                                                        <c:otherwise>
+                                                                            <p class="text-muted">Chưa có bài học nào trong module này</p>
+                                                                        </c:otherwise>
+                                                                    </c:choose>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </c:forEach>
+                                            </div>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <p class="text-muted">Khóa học này chưa có module nào</p>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </div>
+                        </c:if>
 
                         <!-- Modal Thêm Danh mục -->
                         <div class="modal fade" id="categoryManagementModal" tabindex="-1" aria-hidden="true">
@@ -769,240 +939,26 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- THÊM PHẦN NÀY ĐỂ HIỂN THỊ VÀ QUẢN LÝ MODULE/LESSON -->
-                        <!-- Modules Section -->
-                        <div class="card mb-4">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h4>Modules</h4>
-                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModuleModal">
-                                    <i class="bi bi-plus"></i> Thêm Module
-                                </button>
-                            </div>
-                            <div class="card-body">
-                                <c:choose>
-                                    <c:when test="${not empty modules}">
-                                        <div class="accordion" id="modulesAccordion">
-                                            <c:forEach items="${modules}" var="module">
-                                                <c:set var="lessons" value="${module.lessons}" />
-                                                <div class="accordion-item mb-2">
-                                                    <h2 class="accordion-header" id="heading${module.id}">
-                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
-                                                                data-bs-target="#collapse${module.id}" aria-expanded="false">
-                                                            ${module.title}
-                                                            <span class="badge bg-primary ms-2">${not empty lessons ? fn:length(lessons) : 0} bài học</span>
-                                                        </button>
-                                                    </h2>
-                                                    <div id="collapse${module.id}" class="accordion-collapse collapse" 
-                                                         aria-labelledby="heading${module.id}" data-bs-parent="#modulesAccordion">
-                                                        <div class="accordion-body">
-                                                            <div class="d-flex justify-content-between mb-3">
-                                                                <p class="mb-0">${module.description}</p>
-                                                                <div>
-                                                                    <button class="btn btn-sm btn-outline-primary" 
-                                                                            onclick="editModule(${module.id}, '${fn:escapeXml(module.title)}', '${fn:escapeXml(module.description)}')">
-                                                                        <i class="bi bi-pencil"></i> Sửa
-                                                                    </button>
-                                                                    <button class="btn btn-sm btn-outline-danger" 
-                                                                            onclick="deleteModule(${module.id})">
-                                                                        <i class="bi bi-trash"></i> Xóa
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- Lessons List -->
-                                                            <div class="module-lesson mt-3">
-                                                                <h5 class="d-flex justify-content-between align-items-center">
-                                                                    <span>Bài học</span>
-                                                                    <button class="btn btn-sm btn-primary" 
-                                                                            data-bs-toggle="modal" data-bs-target="#addLessonModal${module.id}">
-                                                                        <i class="bi bi-plus"></i> Thêm bài học
-                                                                    </button>
-                                                                </h5>
-
-                                                                <c:choose>
-                                                                    <c:when test="${not empty lessons}">
-                                                                        <div class="list-group">
-                                                                            <c:forEach items="${lessons}" var="lesson">
-                                                                                <div class="list-group-item lesson-item">
-                                                                                    <div class="d-flex justify-content-between align-items-center">
-                                                                                        <div>
-                                                                                            <h6 class="mb-1">${lesson.title}</h6>
-                                                                                            <c:if test="${not empty lesson.videoUrl}">
-                                                                                                <small><a href="${lesson.videoUrl}" target="_blank">Xem video</a></small>
-                                                                                            </c:if>
-                                                                                        </div>
-                                                                                        <div>
-                                                                                            <button class="btn btn-sm btn-outline-primary"
-                                                                                                    onclick="editLesson(${lesson.id}, '${fn:escapeXml(lesson.title)}', '${fn:escapeXml(lesson.content)}', '${not empty lesson.videoUrl ? fn:escapeXml(lesson.videoUrl) : ''}')">
-                                                                                                <i class="bi bi-pencil"></i>
-                                                                                            </button>
-                                                                                            <button class="btn btn-sm btn-outline-danger"
-                                                                                                    onclick="deleteLesson(${lesson.id})">
-                                                                                                <i class="bi bi-trash"></i>
-                                                                                            </button>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </c:forEach>
-                                                                        </div>
-                                                                    </c:when>
-                                                                    <c:otherwise>
-                                                                        <p class="text-muted">Chưa có bài học nào trong module này</p>
-                                                                    </c:otherwise>
-                                                                </c:choose>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </c:forEach>
-                                        </div>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <p class="text-muted">Khóa học này chưa có module nào</p>
-                                    </c:otherwise>
-                                </c:choose>
-                            </div>
-                        </div>
-
-
-                        <!-- KẾT THÚC PHẦN MODULE/LESSON -->
-
-                    </div>
-                </div>
-            </div>
-
-            <!-- Add Module Modal -->
-            <div class="modal fade" id="addModuleModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <form action="${pageContext.request.contextPath}/courseadmin?action=addModule" method="POST">
-                            <input type="hidden" name="courseId" value="${not empty course ? course.id : ''}">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Thêm Module mới</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="mb-3">
-                                    <label class="form-label">Tên Module*</label>
-                                    <input type="text" name="title" class="form-control" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Mô tả</label>
-                                    <textarea name="description" class="form-control" rows="3"></textarea>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                                <button type="submit" class="btn btn-primary">Thêm Module</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Edit Module Modal -->
-            <div class="modal fade" id="editModuleModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <form action="${pageContext.request.contextPath}/courseadmin?action=updateModule" method="POST">
-                            <input type="hidden" name="courseId" value="${not empty course ? course.id : ''}">
-                            <input type="hidden" name="moduleId" id="editModuleId">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Chỉnh sửa Module</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="mb-3">
-                                    <label class="form-label">Tên Module*</label>
-                                    <input type="text" name="title" id="editModuleTitle" class="form-control" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Mô tả</label>
-                                    <textarea name="description" id="editModuleDescription" class="form-control" rows="3"></textarea>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Add Lesson Modal (dynamic - one for each module) -->
-            <c:if test="${not empty modules}">
-                <c:forEach items="${modules}" var="module">
-                    <div class="modal fade" id="addLessonModal${module.id}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <form action="${pageContext.request.contextPath}/courseadmin?action=addLesson" method="POST">
-                                    <input type="hidden" name="moduleId" value="${module.id}">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Thêm bài học mới</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="mb-3">
-                                            <label class="form-label">Tên bài học*</label>
-                                            <input type="text" name="title" class="form-control" required>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Nội dung*</label>
-                                            <textarea name="content" class="form-control" rows="5" required></textarea>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Video URL (nếu có)</label>
-                                            <input type="url" name="videoUrl" class="form-control" placeholder="https://youtube.com/watch?v=...">
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                                        <button type="submit" class="btn btn-primary">Thêm bài học</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </c:forEach>
-            </c:if>
-
-            <!-- Edit Lesson Modal (dynamic) -->
-            <div class="modal fade" id="editLessonModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <form action="${pageContext.request.contextPath}/courseadmin?action=updateLesson" method="POST">
-                            <input type="hidden" name="lessonId" id="editLessonId">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Chỉnh sửa bài học</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="mb-3">
-                                    <label class="form-label">Tên bài học*</label>
-                                    <input type="text" name="title" id="editLessonTitle" class="form-control" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Nội dung*</label>
-                                    <textarea name="content" id="editLessonContent" class="form-control" rows="5" required></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Video URL (nếu có)</label>
-                                    <input type="url" name="videoUrl" id="editLessonVideoUrl" class="form-control">
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
-                            </div>
-                        </form>
                     </div>
                 </div>
             </div>
         </div>
+
         <!-- Scripts -->
+        <script>
+            // Function to delete module
+            function deleteModule(moduleId) {
+                if (confirm('Bạn có chắc chắn muốn xóa module này? Tất cả bài học trong module cũng sẽ bị xóa.')) {
+                    window.location.href = 'courseadmin?action=deleteModule&id=' + moduleId;
+                }
+            }
 
-
+            // Function to delete lesson
+            function deleteLesson(lessonId) {
+                if (confirm('Bạn có chắc chắn muốn xóa bài học này?')) {
+                    window.location.href = 'courseadmin?action=deleteLesson&id=' + lessonId;
+                }
+            }
+        </script>
     </body>
 </html>

@@ -80,15 +80,14 @@ public class PackageServlet extends HttpServlet {
                 upgradePackage(request, response);
                 break;
             case "payAndRegister":
-            try {
-                payAndRegister(request, response);
-            } catch (SQLException e) {
-                e.printStackTrace();
-                request.getSession().setAttribute("error", "Lỗi khi xử lý đăng ký: " + e.getMessage());
-                response.sendRedirect("signup.jsp");
-            }
-            break;
-
+                try {
+                    payAndRegister(request, response);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    request.getSession().setAttribute("error", "Lỗi khi xử lý đăng ký: " + e.getMessage());
+                    response.sendRedirect("signup.jsp");
+                }
+                break;
             case "confirmPayment":
                 processPayment(request, response);
                 break;
@@ -115,13 +114,14 @@ public class PackageServlet extends HttpServlet {
         try {
             int packageId = Integer.parseInt(request.getParameter("packageId"));
 
-            if (user.getServicePackageId() != null && user.getServicePackageId() == packageId) {
+            // Changed these checks since servicePackageId is int (primitive) and can't be null
+            if (user.getServicePackageId() == packageId) {
                 session.setAttribute("notification", "Bạn đã đăng ký gói này rồi!");
                 reloadPackages(request, response);
                 return;
             }
 
-            if (user.getServicePackageId() != null && user.getServicePackageId() > packageId) {
+            if (user.getServicePackageId() > packageId) {
                 session.setAttribute("notification", "Bạn không thể chuyển xuống gói thấp hơn!");
                 reloadPackages(request, response);
                 return;
@@ -159,13 +159,14 @@ public class PackageServlet extends HttpServlet {
             int packageId = Integer.parseInt(request.getParameter("packageId"));
             String paymentMethod = request.getParameter("paymentMethod");
 
-            if (user.getServicePackageId() != null && user.getServicePackageId() == packageId) {
+            // Changed these checks since servicePackageId is int (primitive) and can't be null
+            if (user.getServicePackageId() == packageId) {
                 session.setAttribute("notification", "Bạn đã đăng ký gói này rồi!");
                 reloadPackages(request, response);
                 return;
             }
 
-            if (user.getServicePackageId() != null && user.getServicePackageId() > packageId) {
+            if (user.getServicePackageId() > packageId) {
                 session.setAttribute("notification", "Bạn không thể chuyển xuống gói thấp hơn!");
                 reloadPackages(request, response);
                 return;
@@ -182,7 +183,6 @@ public class PackageServlet extends HttpServlet {
                 }
             }
 
-            // Chỉ xử lý thanh toán cho gói trả phí
             ServicePackage pkg = PackageDAO.getPackageById(packageId);
             if (pkg != null) {
                 request.setAttribute("pkg", pkg);
@@ -213,7 +213,6 @@ public class PackageServlet extends HttpServlet {
         User pendingUser = (User) session.getAttribute("pendingUser");
 
         if (pendingUser == null) {
-            // Lấy dữ liệu từ form
             String email = request.getParameter("email");
             String password = request.getParameter("password");
             String confirmPassword = request.getParameter("confirm_password");
@@ -223,7 +222,6 @@ public class PackageServlet extends HttpServlet {
             int packageId = Integer.parseInt(request.getParameter("packageId"));
             String paymentMethod = request.getParameter("paymentMethod");
 
-            // Validate dữ liệu
             boolean hasError = false;
 
             if (!password.equals(confirmPassword)) {
@@ -262,7 +260,6 @@ public class PackageServlet extends HttpServlet {
             }
 
             if (hasError) {
-                // Lưu lại giá trị đã nhập
                 session.setAttribute("oldEmail", email);
                 session.setAttribute("oldFullname", fullname);
                 session.setAttribute("oldPhone", phone);
@@ -271,7 +268,6 @@ public class PackageServlet extends HttpServlet {
                 return;
             }
 
-            // Tạo user tạm
             pendingUser = new User();
             pendingUser.setEmail(email);
             pendingUser.setPassword(password);
@@ -282,16 +278,10 @@ public class PackageServlet extends HttpServlet {
             session.setAttribute("pendingUser", pendingUser);
         }
 
-        // Xử lý theo loại gói
         if (isFreePackage(pendingUser.getServicePackageId())) {
-            // Xử lý đăng ký gói free
-
             try {
-                // Trước khi gọi register()
                 pendingUser.setRoleId(1);
-                // 1. Đăng ký user trước
                 if (userDAO.register(pendingUser)) {
-                    // 2. Lấy user vừa tạo
                     User createdUser = userDAO.getUserByEmail(pendingUser.getEmail());
 
                     if (createdUser == null) {
@@ -300,10 +290,8 @@ public class PackageServlet extends HttpServlet {
                         return;
                     }
 
-                    // 3. Kích hoạt tài khoản
                     userDAO.setActive(createdUser.getId(), true);
 
-                    // 4. Tạo bản ghi User_Service
                     UserService service = new UserService();
                     service.setUserId(createdUser.getId());
                     service.setPackageId(createdUser.getServicePackageId());
@@ -319,11 +307,9 @@ public class PackageServlet extends HttpServlet {
                     UserServiceDAO userServiceDAO = new UserServiceDAO();
                     userServiceDAO.save(service);
 
-                    // 5. Gửi email xác minh
                     String token = UUID.randomUUID().toString();
                     pendingUser.setVerificationToken(token);
                     pendingUser.setStatus(false);
-                    // Cập nhật token và status vào DB
                     boolean updated = userDAO.updateVerificationTokenAndStatus(createdUser.getId(), token, false);
                     if (!updated) {
                         session.setAttribute("error", "Lỗi lưu token xác minh.");
@@ -384,7 +370,6 @@ public class PackageServlet extends HttpServlet {
                             emailBody
                     );
 
-                    // Xóa session tạm
                     session.removeAttribute("pendingUser");
                     session.removeAttribute("oldEmail");
                     session.removeAttribute("oldFullname");
@@ -405,7 +390,6 @@ public class PackageServlet extends HttpServlet {
                 return;
             }
         } else {
-            // Chuyển đến trang thanh toán cho gói trả phí
             try {
                 ServicePackage pkg = PackageDAO.getPackageById(pendingUser.getServicePackageId());
                 request.setAttribute("pkg", pkg);
@@ -432,11 +416,9 @@ public class PackageServlet extends HttpServlet {
         try {
             ServicePackage pkg = PackageDAO.getPackageById(packageId);
 
-            // Tạo payment record
             String confirmationCode = UUID.randomUUID().toString().substring(0, 8);
             boolean paymentRecorded = PackageDAO.recordPayment(
-                    user != null ? user.getId() : null,
-                    pendingUser != null ? pendingUser.getId() : null,
+                    user != null ? user.getId() : 0, // Changed to use 0 instead of null
                     packageId,
                     paymentMethod,
                     pkg.getPrice(),
@@ -445,31 +427,24 @@ public class PackageServlet extends HttpServlet {
 
             if (paymentRecorded) {
                 if (pendingUser != null) {
-                    // Trường hợp đăng ký mới
                     String activationToken = UUID.randomUUID().toString();
 
-                    // Lưu token kích hoạt vào session
                     pendingUser.setActivationToken(activationToken);
-                    pendingUser.setTokenExpiry(calculateExpiryDate(24)); // 24 giờ hết hạn
+                    pendingUser.setTokenExpiry(calculateExpiryDate(24));
                     session.setAttribute("pendingUser", pendingUser);
 
-                    // Gửi email chờ xác nhận thanh toán
                     sendPaymentConfirmationEmail(pendingUser, pkg, confirmationCode, request);
 
-                    // Xóa thông tin đăng ký tạm
                     session.removeAttribute("oldEmail");
                     session.removeAttribute("oldFullname");
                     session.removeAttribute("oldPhone");
                     session.removeAttribute("oldAddress");
 
-                    // Chuyển đến trang thông báo chờ xác nhận
                     session.setAttribute("message", "Vui lòng kiểm tra email để xác nhận thanh toán. Bạn có 10 phút để hoàn tất quy trình.");
                     request.getRequestDispatcher("payment_success.jsp").forward(request, response);
                 } else {
-                    // Trường hợp nâng cấp gói
                     sendPaymentConfirmationEmail(user, pkg, confirmationCode, request);
 
-                    // Chuyển đến trang thông báo chờ xác nhận
                     session.setAttribute("notification", "Yêu cầu nâng cấp gói của bạn đã được ghi nhận. Vui lòng kiểm tra email để xác nhận thanh toán.");
                     response.sendRedirect("login.jsp");
                 }
@@ -553,5 +528,4 @@ public class PackageServlet extends HttpServlet {
         cal.add(Calendar.HOUR, expiryTimeInHours);
         return cal.getTime();
     }
-
 }

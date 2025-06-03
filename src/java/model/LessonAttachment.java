@@ -1,25 +1,26 @@
 package model;
 
 public class LessonAttachment {
+
     private int id;
     private int lessonId;
     private String fileName;
     private String fileUrl;
     private int fileSize;
-    
-    // Constructors
+    private boolean status; // true: active, false: inactive
+
     public LessonAttachment() {
     }
 
-    public LessonAttachment(int id, int lessonId, String fileName, String fileUrl, int fileSize) {
+    public LessonAttachment(int id, int lessonId, String fileName, String fileUrl, int fileSize, boolean status) {
         this.id = id;
         this.lessonId = lessonId;
         this.fileName = fileName;
         this.fileUrl = fileUrl;
         this.fileSize = fileSize;
+        this.status = status;
     }
 
-    // Getters and Setters
     public int getId() {
         return id;
     }
@@ -59,4 +60,27 @@ public class LessonAttachment {
     public void setFileSize(int fileSize) {
         this.fileSize = fileSize;
     }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("LessonAttachment{");
+        sb.append("id=").append(id);
+        sb.append(", lessonId=").append(lessonId);
+        sb.append(", fileName=").append(fileName);
+        sb.append(", fileUrl=").append(fileUrl);
+        sb.append(", fileSize=").append(fileSize);
+        sb.append(", status=").append(status);
+        sb.append('}');
+        return sb.toString();
+    }
+
 }

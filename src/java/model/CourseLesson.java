@@ -4,24 +4,23 @@ import java.util.Date;
 import java.util.List;
 
 public class CourseLesson {
+
     private int id;
     private int moduleId;
     private String title;
     private String content;
     private String videoUrl;
-    private int duration;
+    private int duration; // minutes
     private int orderIndex;
     private Date createdAt;
     private Date updatedAt;
+    private boolean status; // true: active, false: inactive
     private List<LessonAttachment> attachments;
-    
-    // Constructors
+
     public CourseLesson() {
     }
 
-    public CourseLesson(int id, int moduleId, String title, String content, 
-                       String videoUrl, int duration, int orderIndex, 
-                       Date createdAt, Date updatedAt) {
+    public CourseLesson(int id, int moduleId, String title, String content, String videoUrl, int duration, int orderIndex, Date createdAt, Date updatedAt, boolean status, List<LessonAttachment> attachments) {
         this.id = id;
         this.moduleId = moduleId;
         this.title = title;
@@ -31,9 +30,10 @@ public class CourseLesson {
         this.orderIndex = orderIndex;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.status = status;
+        this.attachments = attachments;
     }
 
-    // Getters and Setters
     public int getId() {
         return id;
     }
@@ -106,6 +106,14 @@ public class CourseLesson {
         this.updatedAt = updatedAt;
     }
 
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
     public List<LessonAttachment> getAttachments() {
         return attachments;
     }
@@ -113,4 +121,24 @@ public class CourseLesson {
     public void setAttachments(List<LessonAttachment> attachments) {
         this.attachments = attachments;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("CourseLesson{");
+        sb.append("id=").append(id);
+        sb.append(", moduleId=").append(moduleId);
+        sb.append(", title=").append(title);
+        sb.append(", content=").append(content);
+        sb.append(", videoUrl=").append(videoUrl);
+        sb.append(", duration=").append(duration);
+        sb.append(", orderIndex=").append(orderIndex);
+        sb.append(", createdAt=").append(createdAt);
+        sb.append(", updatedAt=").append(updatedAt);
+        sb.append(", status=").append(status);
+        sb.append(", attachments=").append(attachments);
+        sb.append('}');
+        return sb.toString();
+    }
+
 }

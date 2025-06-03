@@ -28,137 +28,149 @@ public class AuthenServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String action = request.getParameter("action") != null
-                ? request.getParameter("action")
-                : "";
+        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
 
-        String url;
-        switch (action) {
-            case "login":
-                url = "login.jsp";
+        try {
+            switch (action) {
+                case "login":
+                    request.getRequestDispatcher("login.jsp").forward(request, response);
+                    break;
+                case "logout":
+                try {
+                    logout(request, response);
+                } catch (IOException ex) {
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                }
                 break;
-            case "logout":
-                url = logout(request, response);
-                break;
+                case "editprofile":
+                    updateProfile(request, response);
+                    break;
+                case "changepassword":
+                    changePassword(request, response);
+                    break;
+                case "resetpassword":
+                    resetPassword(request, response);
+                    break;
+                case "verify":
+                    verifyEmail(request, response);
+                    break;
 
-            case "editprofile":
-                url = "editProfile.jsp";
-                break;
-            case "changepassword":
-                url = "changePassword.jsp";
-                break;
-            case "resetpassword":
-                url = "resetPassword.jsp";
-                break;
-            case "verify":
-                url = verifyEmail(request, response);
-                break;
-            default:
-                url = "home";
+                default:
+                    response.sendRedirect("home");
+            }
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
-
-        request.getRequestDispatcher(url).forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String action = request.getParameter("action") != null
-                ? request.getParameter("action")
-                : "";
+        String action = request.getParameter("action") != null ? request.getParameter("action") : "";
 
-        String url;
-        switch (action) {
-            case "login":
-                url = login(request, response);
-                break;
-            case "editprofile":
-                url = updateProfile(request, response);
-                break;
-            case "changepassword":
-                url = changePassword(request, response);
-                break;
-            case "resetpassword":
-                url = resetPassword(request, response);
-                break;
-            default:
-                url = "home";
+        try {
+            switch (action) {
+                case "login":
+                    login(request, response);
+                    break;
+                case "editprofile":
+                    updateProfile(request, response);
+                    break;
+                case "changepassword":
+                    changePassword(request, response);
+                    break;
+                case "resetpassword":
+                    resetPassword(request, response);
+                    break;
+                default:
+                    response.sendRedirect("home");
+            }
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
-
-        request.getRequestDispatcher(url).forward(request, response);
     }
 
-    private String login(HttpServletRequest request, HttpServletResponse response)
+    private void login(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         String email = request.getParameter("email");
         String password = request.getParameter("password");
-        String rememberMe = request.getParameter("remember_me"); // Thêm dòng này để lấy thông tin checkbox remember me
+        String rememberMe = request.getParameter("remember_me");
 
         try {
             User user = userDAO.login(email, password);
 
             if (user == null) {
                 request.setAttribute("notification", "❌ Sai email hoặc mật khẩu. Vui lòng thử lại.");
-                return "login.jsp";
+                request.getRequestDispatcher("login.jsp").forward(request, response);
+                return;
             }
 
             if (!user.isStatus()) {
                 request.setAttribute("notification", "⚠️ Tài khoản chưa được kích hoạt. Vui lòng kiểm tra email.");
-                return "login.jsp";
+                request.getRequestDispatcher("login.jsp").forward(request, response);
+                return;
             }
+
             if (!user.isIsActive()) {
                 request.setAttribute("notification", "⚠️ Gói dịch vụ của bạn chưa được kích hoạt. Vui lòng chọn gói hoặc chờ xác nhận.");
-                return "login.jsp";
+                request.getRequestDispatcher("login.jsp").forward(request, response);
+                return;
             }
 
             // Lưu user vào session
             HttpSession session = request.getSession();
             session.setAttribute("user", user);
 
-            // Thêm phần xử lý cookie khi người dùng chọn "Nhớ mật khẩu"
+            // Xử lý remember me
             if (rememberMe != null) {
-                // Tạo cookie cho email và password
                 Cookie cEmail = new Cookie("cEmail", email);
                 Cookie cPassword = new Cookie("cPassword", password);
-
-                // Đặt thời gian sống cho cookie là 6 tháng 
                 cEmail.setMaxAge(60 * 60 * 24 * 30 * 6);
                 cPassword.setMaxAge(60 * 60 * 24 * 30 * 6);
-
-                // Thêm cookie vào response
                 response.addCookie(cEmail);
                 response.addCookie(cPassword);
             }
 
-            // In debug ra console (tuỳ môi trường)
             System.out.println("Đăng nhập thành công: " + user.getFullname() + " | Vai trò: " + user.getRoleId());
 
-            // Chuyển hướng theo vai trò
-            switch (user.getRoleId()) {
-                case 3:
-                    return "admin"; // Trang admin
-                case 2:
-                    return "admin"; // Trang nhân viên
-                default:
-                    String redirect = request.getParameter("redirect");
-                    if (redirect != null && !redirect.isEmpty()) {
-                        response.sendRedirect(redirect);
-                        return null; // Ngăn forward
-                    }
-                    return "home"; // Người dùng thông thường
+            // Xác định URL chuyển hướng
+            String redirectUrl;
+
+            // Ưu tiên tham số redirect trong URL
+            String redirectParam = request.getParameter("redirect");
+            if (redirectParam != null && !redirectParam.isEmpty()) {
+                redirectUrl = redirectParam;
+            } // Nếu không có tham số redirect, kiểm tra role
+            else {
+                switch (user.getRoleId()) {
+                    case 2: // admin
+                    case 3: // staff
+                        redirectUrl = "admin";
+                        break;
+                    default: // user
+                        redirectUrl = "home";
+                }
             }
 
+            // Thực hiện chuyển hướng
+            response.sendRedirect(redirectUrl);
+
         } catch (SQLException ex) {
-            ex.printStackTrace();
             request.setAttribute("error", "🚨 Lỗi hệ thống: " + ex.getMessage());
-            return "login.jsp";
+            request.getRequestDispatcher("login.jsp").forward(request, response);
         }
     }
 
-    private String logout(HttpServletRequest request, HttpServletResponse response) {
-        request.getSession().removeAttribute("user");
-        return "Home.jsp";
+    private void logout(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        HttpSession session = request.getSession(false);
+
+        if (session != null) {
+            session.invalidate();
+        }
+
+        response.sendRedirect("home");
     }
 
     private String updateProfile(HttpServletRequest request, HttpServletResponse response)

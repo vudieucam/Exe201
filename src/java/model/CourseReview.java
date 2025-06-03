@@ -9,22 +9,23 @@ public class CourseReview {
     private int rating;
     private String comment;
     private Date createdAt;
+    private boolean status;
     private User user; // Thêm thông tin user
-    
-    // Constructors
+
     public CourseReview() {
     }
 
-    public CourseReview(int id, int courseId, int userId, int rating, String comment, Date createdAt) {
+    public CourseReview(int id, int courseId, int userId, int rating, String comment, Date createdAt, boolean status, User user) {
         this.id = id;
         this.courseId = courseId;
         this.userId = userId;
         this.rating = rating;
         this.comment = comment;
         this.createdAt = createdAt;
+        this.status = status;
+        this.user = user;
     }
 
-    // Getters and Setters
     public int getId() {
         return id;
     }
@@ -73,6 +74,14 @@ public class CourseReview {
         this.createdAt = createdAt;
     }
 
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
     public User getUser() {
         return user;
     }
@@ -80,4 +89,22 @@ public class CourseReview {
     public void setUser(User user) {
         this.user = user;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("CourseReview{");
+        sb.append("id=").append(id);
+        sb.append(", courseId=").append(courseId);
+        sb.append(", userId=").append(userId);
+        sb.append(", rating=").append(rating);
+        sb.append(", comment=").append(comment);
+        sb.append(", createdAt=").append(createdAt);
+        sb.append(", status=").append(status);
+        sb.append(", user=").append(user);
+        sb.append('}');
+        return sb.toString();
+    }
+    
+    
 }

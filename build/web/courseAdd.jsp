@@ -480,9 +480,8 @@
                         <a href="courseadmin" class="btn btn-secondary">Quay lại</a>
                     </div>
 
-                    <form action="courseadmin" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
-                        <input type="hidden" name="action" value="add">
-
+                    <form action="courseadd" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        
                         <div class="card mb-4">
                             <div class="card-header">
                                 <h4>Thông tin cơ bản</h4>
