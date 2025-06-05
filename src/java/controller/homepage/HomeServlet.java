@@ -54,12 +54,16 @@ public class HomeServlet extends HttpServlet {
             request.setAttribute("featuredCourses", featuredCourses);
 
             // Forward đến trang JSP
-            request.getRequestDispatcher("Home.jsp").forward(request, response);
+            request.getRequestDispatcher("/Home.jsp").forward(request, response);
 
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("errorMessage", "Đã xảy ra lỗi khi tải dữ liệu trang chủ");
-            request.getRequestDispatcher("Home.jsp").forward(request, response);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error loading home page: " + e.getMessage());
+            return;
+//            e.printStackTrace();
+//            request.setAttribute("errorMessage", "Đã xảy ra lỗi khi tải dữ liệu trang chủ");
+            //request.getRequestDispatcher("/Home.jsp").forward(request, response);
+
         }
     }
 

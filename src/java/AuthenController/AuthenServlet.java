@@ -339,21 +339,22 @@ public class AuthenServlet extends HttpServlet {
         }
     }
 
-    private String verifyEmail(HttpServletRequest request, HttpServletResponse response)
+    private void verifyEmail(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String token = request.getParameter("token");
+        HttpSession session = request.getSession();
 
         try {
             if (userDAO.verifyUser(token)) {
-                request.setAttribute("notification", "Xác thực email thành công. Bạn có thể đăng nhập ngay bây giờ.");
+                session.setAttribute("notification", "Xác thực email thành công. Bạn có thể đăng nhập ngay bây giờ.");
             } else {
-                request.setAttribute("notification", "Liên kết xác thực không hợp lệ hoặc đã được sử dụng.");
+                session.setAttribute("notification", "Liên kết xác thực không hợp lệ hoặc đã được sử dụng.");
             }
 
-            return "login.jsp";
+            response.sendRedirect("login.jsp");
         } catch (SQLException ex) {
-            request.setAttribute("error", "Lỗi hệ thống: " + ex.getMessage());
-            return "login.jsp";
+            session.setAttribute("error", "Lỗi hệ thống: " + ex.getMessage());
+            response.sendRedirect("login.jsp");
         }
     }
 

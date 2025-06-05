@@ -7,6 +7,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <%@page import="model.User" %>
 <%@page import="model.Course" %>
@@ -27,7 +28,7 @@
 
         <link href="https://fonts.googleapis.com/css?family=Montserrat:200,300,400,500,600,700,800&display=swap" rel="stylesheet">
 
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
         <link rel="stylesheet" href="css/animate.css">
 
@@ -35,15 +36,12 @@
         <link rel="stylesheet" href="css/owl.theme.default.min.css">
         <link rel="stylesheet" href="css/magnific-popup.css">
 
+
         <link rel="stylesheet" href="css/bootstrap-datepicker.css">
         <link rel="stylesheet" href="css/jquery.timepicker.css">
 
         <link rel="stylesheet" href="css/flaticon.css">
         <link rel="stylesheet" href="css/style.css">
-
-
-        <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-
 
         <style>
             .navbar-brand {
@@ -1205,96 +1203,91 @@
                     <p>Các khóa học được yêu thích nhất tại PetTech</p>
                 </div>
 
-                <div class="row">
-                    <c:choose>
-                        <c:when test="${not empty featuredCourses}">
-                            <c:forEach var="course" items="${featuredCourses}">
-                                <div class="col-lg-4 col-md-6 mb-4">
-                                    <div class="course-card">
-                                        <div class="course-img-container">
-                                            <c:set var="imageUrl" value="${course.imageUrl}" />
-                                            <c:set var="defaultImage" value="${pageContext.request.contextPath}/images/corgin-1.jpg" />
-                                            <c:choose>
-                                                <c:when test="${not empty imageUrl}">
-                                                    <c:choose>
-                                                        <c:when test="${fn:startsWith(imageUrl, '/')}">
-                                                            <c:set var="finalImagePath" value="${pageContext.request.contextPath}${imageUrl}" />
-                                                        </c:when>
-                                                        <c:when test="${fn:startsWith(imageUrl, 'http')}">
-                                                            <c:set var="finalImagePath" value="${imageUrl}" />
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <c:set var="finalImagePath" value="${pageContext.request.contextPath}/${imageUrl}" />
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <c:set var="finalImagePath" value="${defaultImage}" />
-                                                </c:otherwise>
-                                            </c:choose>
-
-                                            <img src="${finalImagePath}" alt="${course.title}" class="course-img"
-                                                 onerror="this.onerror=null; this.src='${defaultImage}'">
-                                        </div>
-
-                                        <div class="course-body">
-                                            <h3 class="course-title">${course.title}</h3>
-
-                                            <div class="course-meta">
-                                                <i class="fa fa-clock-o"></i> 
-                                                <c:out value="${course.time != null ? course.time : 'Đang cập nhật'}" />
-                                            </div>
-
-                                            <c:if test="${not empty course.researcher}">
-                                                <div class="course-meta">
-                                                    <i class="fa fa-user"></i> ${course.researcher}
-                                                </div>
-                                            </c:if>
-
-                                            <p class="course-desc">
+                <div class = row>
+                    <c:if test="${not empty featuredCourses}">
+                        <c:forEach var="course" items="${featuredCourses}">
+                            <div class="col-lg-4 col-md-6 mb-4">
+                                <div class="course-card">
+                                    <div class="course-img-container">
+                                        <c:set var="imageUrl" value="${course.thumbnailUrl}" />
+                                        <c:set var="defaultImage" value="${pageContext.request.contextPath}/images/corgin-1.jpg" />
+                                        <c:choose>
+                                            <c:when test="${not empty imageUrl}">
                                                 <c:choose>
-                                                    <c:when test="${not empty course.content}">
-                                                        <c:out value="${fn:length(course.content) > 100 
-                                                                        ? fn:substring(course.content, 0, 100).concat('...') 
-                                                                        : course.content}" />
+                                                    <c:when test="${fn:startsWith(imageUrl, '/')}">
+                                                        <c:set var="finalImagePath" value="${pageContext.request.contextPath}${imageUrl}" />
+                                                    </c:when>
+                                                    <c:when test="${fn:startsWith(imageUrl, 'http')}">
+                                                        <c:set var="finalImagePath" value="${imageUrl}" />
                                                     </c:when>
                                                     <c:otherwise>
-                                                        Nội dung đang được cập nhật...
+                                                        <c:set var="finalImagePath" value="${pageContext.request.contextPath}/${imageUrl}" />
                                                     </c:otherwise>
                                                 </c:choose>
-                                            </p>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <c:set var="finalImagePath" value="${defaultImage}" />
+                                            </c:otherwise>
+                                        </c:choose>
 
+                                        <img src="${finalImagePath}" alt="${course.title}" class="course-img"
+                                             onerror="this.onerror=null; this.src='${defaultImage}'">
+                                    </div>
+
+                                    <div class="course-body">
+                                        <h3 class="course-title">${course.title}</h3>
+
+                                        <div class="course-meta">
+                                            <i class="fa fa-clock-o"></i> 
+                                            <c:out value="${not empty course.duration ? course.duration : 'Đang cập nhật'}" />
+                                        </div>
+
+                                        <c:if test="${not empty course.researcher}">
                                             <div class="course-meta">
-                                                <i class="fa fa-calendar"></i> ${course.time}
+                                                <i class="fa fa-user"></i> ${course.researcher}
                                             </div>
+                                        </c:if>
 
+                                        <p class="course-desc">
                                             <c:choose>
-                                                <c:when test="${not empty sessionScope.user}">
-                                                    <a href="${pageContext.request.contextPath}/coursedetail?id=${course.id}" class="course-btn">
-                                                        Xem chi tiết <i class="fa fa-arrow-right"></i>
-                                                    </a>
+                                                <c:when test="${not empty course.content}">
+                                                    <c:out value="${fn:length(course.content) > 100 
+                                                                    ? fn:substring(course.content, 0, 100).concat('...') 
+                                                                    : course.content}" />
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <a href="authen?action=login&redirect=${pageContext.request.contextPath}/coursedetail?id=${course.id}"
-                                                       class="course-btn">
-                                                        Xem chi tiết <i class="fa fa-arrow-right"></i>
-                                                    </a>
+                                                    Nội dung đang được cập nhật...
                                                 </c:otherwise>
                                             </c:choose>
-                                        </div>
+                                        </p>
+
+                                        <c:choose>
+                                            <c:when test="${not empty sessionScope.user}">
+                                                <a href="${pageContext.request.contextPath}/coursedetail?id=${course.id}" class="course-btn">
+                                                    Xem chi tiết <i class="fa fa-arrow-right"></i>
+                                                </a>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <a href="authen?action=login&redirect=${pageContext.request.contextPath}/coursedetail?id=${course.id}"
+                                                   class="course-btn">
+                                                    Xem chi tiết <i class="fa fa-arrow-right"></i>
+                                                </a>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </div>
                                 </div>
-                            </c:forEach>
-                        </c:when>
-                        <c:otherwise>
-                            <div class="col-12 text-center">
-                                <div class="alert alert-info">
-                                    <i class="fa fa-paw"></i> Hiện chưa có khóa học nào. Vui lòng quay lại sau!
-                                </div>
                             </div>
-                        </c:otherwise>
-                    </c:choose>
-                </div> <!-- Đóng div row -->
+                        </c:forEach>
+                    </c:if>
+
+                    <c:if test="${empty featuredCourses}">
+                        <div class="col-12 text-center">
+                            <div class="alert alert-info" style="background-color: #e2d9ff; border-color: #6d4aff; color: #3a3a3a;">
+                                <i class="fa fa-paw"></i> Không tìm thấy khóa học nào phù hợp!
+                            </div>
+                        </div>
+                    </c:if>
+                </div>
 
                 <div class="row mt-4">
                     <div class="col text-center">
@@ -1421,9 +1414,13 @@
 
 
 
-        <!-- loader -->
-        <div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00"/></svg></div>
-
+        <!-- Loader -->
+        <div id="ftco-loader" class="show fullscreen">
+            <svg class="circular" width="48px" height="48px">
+            <circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/>
+            <circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00"/>
+            </svg>
+        </div>
 
         <script src="js/jquery.min.js"></script>
         <script src="js/jquery-migrate-3.0.1.min.js"></script>
@@ -1442,37 +1439,38 @@
         <script src="js/google-map.js"></script>
         <script src="js/main.js"></script>
 
-        <script>
-                                // Back to top button
-                                $(window).scroll(function () {
-                                    if ($(this).scrollTop() > 300) {
-                                        $('.back-to-top').fadeIn('slow');
-                                    } else {
-                                        $('.back-to-top').fadeOut('slow');
-                                    }
-                                });
 
-                                $('.back-to-top').click(function (e) {
-                                    e.preventDefault();
-                                    $('html, body').animate({scrollTop: 0}, 500);
-                                    return false;
-                                });
+        <!-- Custom JavaScript -->
+        <script>
                                 $(document).ready(function () {
+                                    // Back to top button
+                                    $(window).scroll(function () {
+                                        if ($(this).scrollTop() > 300) {
+                                            $('.back-to-top').fadeIn('slow');
+                                        } else {
+                                            $('.back-to-top').fadeOut('slow');
+                                        }
+                                    });
+
+                                    $('.back-to-top').click(function (e) {
+                                        e.preventDefault();
+                                        $('html, body').animate({scrollTop: 0}, 500);
+                                        return false;
+                                    });
+
                                     $('#userDropdown').on('click', function (e) {
                                         e.preventDefault();
                                         console.log("Click ok");
                                     });
+
+            <c:if test="${not empty errorMessage}">
+                                    alert("${errorMessage}");
+            </c:if>
+
+                                    console.log("Debug Info:");
+                                    console.log("Course Categories:", ${not empty courseCategories ? courseCategories.size() : 0});
+                                    console.log("Featured Courses:", ${not empty featuredCourses ? featuredCourses.size() : 0});
                                 });
-        </script>
-        <c:if test="${not empty errorMessage}">
-            <div class="alert alert-danger text-center">
-                ${errorMessage}
-            </div>
-        </c:if>
-        <script>
-            console.log("Debug Info:");
-            console.log("Course Categories:", ${not empty courseCategories ? courseCategories.size() : 0});
-            console.log("Featured Courses:", ${not empty featuredCourses ? featuredCourses.size() : 0});
         </script>
     </body>
 </html>

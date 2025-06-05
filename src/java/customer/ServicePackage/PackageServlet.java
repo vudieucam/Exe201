@@ -81,13 +81,13 @@ public class PackageServlet extends HttpServlet {
                 break;
             case "payAndRegister":
                 try {
-                    payAndRegister(request, response);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    request.getSession().setAttribute("error", "Lỗi khi xử lý đăng ký: " + e.getMessage());
-                    response.sendRedirect("signup.jsp");
-                }
-                break;
+                payAndRegister(request, response);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                request.getSession().setAttribute("error", "Lỗi khi xử lý đăng ký: " + e.getMessage());
+                response.sendRedirect("signup.jsp");
+            }
+            break;
             case "confirmPayment":
                 processPayment(request, response);
                 break;
@@ -318,8 +318,9 @@ public class PackageServlet extends HttpServlet {
                     }
 
                     String verificationLink = request.getScheme() + "://"
-                            + request.getServerName() + ":"
-                            + request.getServerPort()
+                            + request.getServerName()
+                            + (request.getServerPort() != 80 && request.getServerPort() != 443
+                            ? ":" + request.getServerPort() : "")
                             + request.getContextPath()
                             + "/authen?action=verify&token=" + token;
 
