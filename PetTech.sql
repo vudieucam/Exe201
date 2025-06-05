@@ -41,6 +41,9 @@ DROP TABLE IF EXISTS courses;
 DROP TABLE IF EXISTS product_categories;
 DROP TABLE IF EXISTS course_categories;
 DROP TABLE IF EXISTS service_packages;
+DROP TABLE IF EXISTS site_statistics;
+DROP TABLE IF EXISTS course_statistics;
+DROP TABLE IF EXISTS user_sessions;
 DROP TABLE IF EXISTS audit_log;
 GO
 
@@ -328,6 +331,61 @@ CREATE TABLE user_packages (
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (service_package_id) REFERENCES service_packages(id)
 );
+
+CREATE TABLE user_reset_tokens (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    user_id INT NOT NULL,
+    reset_token NVARCHAR(255) NOT NULL,
+    expiry DATETIME NOT NULL,
+    status BIT DEFAULT 1,
+    created_at DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- Giữ lại bảng daily_statistics (đã đầy đủ hơn)
+CREATE TABLE daily_statistics (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    date DATE NOT NULL UNIQUE,
+    total_visits INT DEFAULT 0,
+    unique_visitors INT DEFAULT 0,
+    new_users INT DEFAULT 0,
+    avg_session_duration INT DEFAULT 0,
+    page_views INT DEFAULT 0,
+    total_users INT DEFAULT 0,  -- Thêm từ user_statistics
+    active_users INT DEFAULT 0, -- Thêm từ user_statistics/site_statistics
+    new_registrations INT DEFAULT 0, -- Thêm từ user_statistics
+    premium_users INT DEFAULT 0, -- Thêm từ user_statistics
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+
+-- Giữ lại bảng course_statistics (phiên bản thứ 2 đầy đủ hơn)
+CREATE TABLE course_statistics (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    course_id INT NOT NULL,
+    date DATE NOT NULL,
+    views INT DEFAULT 0,
+    enrollments INT DEFAULT 0,
+    avg_view_duration INT DEFAULT 0,
+    completion_rate DECIMAL(5,2) DEFAULT 0,
+    FOREIGN KEY (course_id) REFERENCES courses(id),
+    CONSTRAINT uc_course_date UNIQUE (course_id, date)
+);
+
+-- Giữ lại bảng user_sessions (không trùng lặp)
+CREATE TABLE user_sessions (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    user_id INT,
+    session_id NVARCHAR(255) NOT NULL,
+    ip_address NVARCHAR(50),
+    user_agent NVARCHAR(255),
+    login_time DATETIME NOT NULL,
+    logout_time DATETIME,
+    duration INT,
+    status BIT DEFAULT 1,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
 
 -- Bảng audit log
 CREATE TABLE audit_log (
@@ -843,3 +901,72 @@ VALUES
 ('users', 1, 'UPDATE', '{"status":0}', '{"status":1}', 4, 1),
 ('products', 1, 'CREATE', NULL, '{"name":"Thức ăn cho chó vị gà 5kg","price":350000}', 3, 1),
 ('orders', 1, 'UPDATE', '{"status":"processing"}', '{"status":"completed"}', 2, 1);
+
+-- Add update 
+INSERT INTO course_statistics (course_id, date, views, enrollments, avg_view_duration, completion_rate)
+VALUES
+(1, DATEADD(day, -7, GETDATE()), 150, 50, 1800, 65.5),
+(1, DATEADD(day, -6, GETDATE()), 120, 45, 1750, 68.2),
+(1, DATEADD(day, -5, GETDATE()), 180, 60, 1900, 70.1),
+(2, DATEADD(day, -7, GETDATE()), 200, 70, 2100, 72.3),
+(2, DATEADD(day, -6, GETDATE()), 170, 65, 2050, 71.5),
+(3, DATEADD(day, -5, GETDATE()), 90, 30, 1600, 60.8),
+(4, DATEADD(day, -4, GETDATE()), 130, 40, 1850, 67.5),
+(5, DATEADD(day, -3, GETDATE()), 160, 55, 1950, 69.8);
+
+INSERT INTO daily_statistics (date, total_visits, unique_visitors, new_users, avg_session_duration, page_views, total_users, active_users, new_registrations, premium_users)
+VALUES
+(DATEADD(day, -7, GETDATE()), 450, 320, 15, 420, 1200, 500, 280, 5, 120),
+(DATEADD(day, -6, GETDATE()), 480, 340, 18, 430, 1250, 510, 290, 6, 125),
+(DATEADD(day, -5, GETDATE()), 520, 380, 20, 450, 1350, 520, 310, 7, 130),
+(DATEADD(day, -4, GETDATE()), 500, 360, 17, 440, 1300, 530, 300, 6, 132),
+(DATEADD(day, -3, GETDATE()), 550, 400, 22, 460, 1400, 540, 330, 8, 135),
+(DATEADD(day, -2, GETDATE()), 580, 420, 25, 470, 1450, 550, 350, 9, 140),
+(DATEADD(day, -1, GETDATE()), 600, 450, 28, 480, 1500, 560, 370, 10, 145),
+(GETDATE(), 620, 470, 30, 490, 1550, 570, 390, 12, 150);
+
+INSERT INTO user_sessions (user_id, session_id, ip_address, user_agent, login_time, logout_time, duration, status)
+VALUES
+(1, 'session123456789', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', DATEADD(hour, -2, GETDATE()), DATEADD(hour, -1, GETDATE()), 3600, 1),
+(2, 'session987654321', '192.168.1.101', 'Mozilla/5.0 (Macintosh; Intel Mac OS X)', DATEADD(hour, -3, GETDATE()), DATEADD(hour, -1, GETDATE()), 7200, 1),
+(3, 'session456789123', '192.168.1.102', 'Mozilla/5.0 (iPhone; CPU iPhone OS)', DATEADD(hour, -1, GETDATE()), GETDATE(), 3600, 1),
+(4, 'session789123456', '192.168.1.103', 'Mozilla/5.0 (Android 10; Mobile)', DATEADD(hour, -4, GETDATE()), DATEADD(hour, -2, GETDATE()), 7200, 1),
+(5, 'session321654987', '192.168.1.104', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', DATEADD(minute, -30, GETDATE()), NULL, 1800, 1),
+(1, 'session654987321', '192.168.1.105', 'Mozilla/5.0 (Macintosh; Intel Mac OS X)', DATEADD(hour, -5, GETDATE()), DATEADD(hour, -3, GETDATE()), 7200, 1),
+(2, 'session159753486', '192.168.1.106', 'Mozilla/5.0 (iPhone; CPU iPhone OS)', DATEADD(hour, -2, GETDATE()), NULL, NULL, 1);
+
+INSERT INTO user_reset_tokens (user_id, reset_token, expiry, status)
+VALUES
+(1, 'token123456789', DATEADD(hour, 1, GETDATE()), 1),
+(2, 'token987654321', DATEADD(hour, 1, GETDATE()), 1),
+(3, 'token456789123', DATEADD(hour, 1, GETDATE()), 1);
+
+INSERT INTO audit_log (table_name, record_id, action, old_values, new_values, changed_by, status)
+VALUES
+('courses', 1, 'UPDATE', '{"status":0}', '{"status":1}', 3, 1),
+('products', 2, 'UPDATE', '{"price":120000}', '{"price":125000}', 3, 1),
+('users', 2, 'UPDATE', '{"role_id":1}', '{"role_id":2}', 4, 1),
+('orders', 3, 'UPDATE', '{"status":"pending"}', '{"status":"processing"}', 2, 1),
+('Blogs', 1, 'CREATE', NULL, '{"title":"10 cách chăm sóc mèo đúng cách"}', 3, 1);
+
+INSERT INTO payments (user_id, service_package_id, payment_method, amount, payment_date, status, transaction_id, qr_code_url, bank_account_number, bank_name, is_confirmed)
+VALUES
+(3, 3, 'BANK_QR', 199000, DATEADD(day, -10, GETDATE()), 'completed', 'BANK123456', '/qr_codes/bank123.png', '123456789', 'Vietcombank', 1),
+(4, 2, 'VNPAY', 99000, DATEADD(day, -5, GETDATE()), 'completed', 'VNPAY654321', '/qr_codes/vnpay654.png', NULL, NULL, 1),
+(5, 3, 'MOMO_QR', 199000, DATEADD(day, -3, GETDATE()), 'completed', 'MOMO987654', '/qr_codes/momo987.png', NULL, NULL, 1);
+
+INSERT INTO course_reviews (course_id, user_id, rating, comment, created_at, status)
+VALUES
+(4, 2, 4, N'Khóa học huấn luyện rất bài bản', DATEADD(day, -5, GETDATE()), 1),
+(5, 3, 5, N'Nội dung chi tiết, dễ hiểu', DATEADD(day, -4, GETDATE()), 1),
+(3, 4, 4, N'Kiến thức thực tế, áp dụng được ngay', DATEADD(day, -3, GETDATE()), 1),
+(2, 5, 5, N'Rất hữu ích cho người nuôi mèo', DATEADD(day, -2, GETDATE()), 1),
+(1, 3, 4, N'Giúp tôi chăm sóc chó tốt hơn', DATEADD(day, -1, GETDATE()), 1);
+
+INSERT INTO BlogComments (blog_id, user_id, content, created_at, status)
+VALUES
+(2, 1, N'Cảm ơn bài viết hữu ích!', DATEADD(day, -3, GETDATE()), 1),
+(2, 3, N'Tôi đã thử và thấy hiệu quả', DATEADD(day, -2, GETDATE()), 1),
+(3, 2, N'Thông tin rất chi tiết', DATEADD(day, -1, GETDATE()), 1),
+(1, 4, N'Bài viết tuyệt vời!', GETDATE(), 1),
+(3, 5, N'Tôi sẽ áp dụng ngay', GETDATE(), 1);

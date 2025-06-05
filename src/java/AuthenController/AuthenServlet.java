@@ -43,13 +43,13 @@ public class AuthenServlet extends HttpServlet {
                 }
                 break;
                 case "editprofile":
-                    updateProfile(request, response);
+                    request.getRequestDispatcher("editProfile.jsp").forward(request, response); // ✅ Chỉ hiển thị form
                     break;
                 case "changepassword":
-                    changePassword(request, response);
+                    request.getRequestDispatcher("changePassword.jsp").forward(request, response); // ✅ Sửa tại đây
                     break;
                 case "resetpassword":
-                    resetPassword(request, response);
+                    request.getRequestDispatcher("resetPassword.jsp").forward(request, response); // ✅ Sửa tại đây
                     break;
                 case "verify":
                     verifyEmail(request, response);
@@ -80,8 +80,12 @@ public class AuthenServlet extends HttpServlet {
                     changePassword(request, response);
                     break;
                 case "resetpassword":
-                    resetPassword(request, response);
+                    String nextPage = resetPassword(request, response);
+                    if (nextPage != null) {
+                        request.getRequestDispatcher(nextPage).forward(request, response);
+                    }
                     break;
+
                 default:
                     response.sendRedirect("home");
             }
@@ -143,13 +147,11 @@ public class AuthenServlet extends HttpServlet {
                 redirectUrl = redirectParam;
             } // Nếu không có tham số redirect, kiểm tra role
             else {
-                switch (user.getRoleId()) {
-                    case 2: // admin
-                    case 3: // staff
-                        redirectUrl = "admin";
-                        break;
-                    default: // user
-                        redirectUrl = "home";
+                // Thành:
+                if (user.getRoleId() == 2 || user.getRoleId() == 3) {
+                    redirectUrl = "admin";
+                } else {
+                    redirectUrl = "home";
                 }
             }
 
@@ -190,6 +192,12 @@ public class AuthenServlet extends HttpServlet {
         String phone = request.getParameter("phone");
         String address = request.getParameter("address");
 
+        // Kiểm tra các tham số có null không
+        if (fullname == null || phone == null || address == null) {
+            request.setAttribute("notification", "Thiếu thông tin cần thiết");
+            return "editProfile.jsp"; // <- tên file nên viết thường
+        }
+
         // Kiểm tra số điện thoại hợp lệ
         if (!phone.matches("^(032|033|034|035|036|037|038|039|096|097|098|086|083|084|085|081|082|088|091|094|070|079|077|076|078|090|093|089|056|058|092|059|099)[0-9]{7}$")) {
             request.setAttribute("notification", "Số điện thoại không hợp lệ");
@@ -207,6 +215,8 @@ public class AuthenServlet extends HttpServlet {
         updatedUser.setRoleId(currentUser.getRoleId());
         updatedUser.setStatus(currentUser.isStatus());
 
+        UserDAO userDAO = new UserDAO(); // ✅ Đảm bảo được khởi tạo
+
         try {
             if (userDAO.updateProfile(updatedUser)) {
                 session.setAttribute("user", updatedUser);
@@ -214,11 +224,11 @@ public class AuthenServlet extends HttpServlet {
             } else {
                 request.setAttribute("notification", "Cập nhật thông tin thất bại");
             }
-            return "editProfile.jsp";
         } catch (SQLException ex) {
             request.setAttribute("error", "Lỗi hệ thống: " + ex.getMessage());
-            return "editProfile.jsp";
         }
+
+        return "editProfile.jsp"; // ✅ Viết đúng tên file JSP
     }
 
     private String changePassword(HttpServletRequest request, HttpServletResponse response)
@@ -292,50 +302,82 @@ public class AuthenServlet extends HttpServlet {
 
     private String resetPassword(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession(); // <-- phải khai báo session ở đây
+
         String email = request.getParameter("email");
 
         try {
+            if (!email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+                request.setAttribute("error", "⚠️ Email không hợp lệ");
+                return "resetPassword.jsp";
+            }
             User user = userDAO.getUserByEmail(email);
             if (user == null) {
-                request.setAttribute("notification", "Email không tồn tại");
-                return "resetpassword.jsp";
+                request.setAttribute("error", "❌ Email không tồn tại trong hệ thống");
+                return "resetPassword.jsp";
             }
 
             // Tạo token reset password (hết hạn sau 24h)
-            String resetToken = UUID.randomUUID().toString();
-            userDAO.saveResetToken(email, resetToken);
+            String token = UUID.randomUUID().toString();
+            userDAO.saveResetToken(email, token); // Bạn cần có method này
 
-            // Tạo link reset password
-            String resetLink = request.getRequestURL().toString()
-                    .replace(request.getServletPath(), "")
-                    + "/authen?action=changepassword&token=" + resetToken;
+            String resetLink = request.getScheme() + "://"
+                    + request.getServerName()
+                    + (request.getServerPort() != 80 && request.getServerPort() != 443
+                    ? ":" + request.getServerPort() : "")
+                    + request.getContextPath()
+                    + "/authen?action=changepassword&token=" + token;
 
-            try {
-                String emailBody = "Xin chào " + user.getFullname() + ",<br><br>"
-                        + "<span style='color: green;'>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản PetTech.</span><br><br>"
-                        + "Vui lòng nhấp vào liên kết sau để đặt lại mật khẩu: <a href='" + resetLink + "'>" + resetLink + "</a><br><br>"
-                        + "Liên kết này sẽ hết hạn sau 24 giờ.<br><br>"
-                        + "<span style='color: blue;'>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</span>";
+            String emailBody = "<!DOCTYPE html>"
+                    + "<html lang='vi'>"
+                    + "<head>"
+                    + "<meta charset='UTF-8'>"
+                    + "<style>"
+                    + "body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fffaf4; color: #333; padding: 20px; }"
+                    + ".container { max-width: 600px; margin: auto; background-color: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; }"
+                    + "h2 { color: #ff6600; }"
+                    + ".button { display: inline-block; background-color: #ff9966; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; }"
+                    + ".footer { font-size: 13px; color: #888; margin-top: 30px; line-height: 1.6; }"
+                    + ".footer strong { color: #555; }"
+                    + "</style>"
+                    + "</head>"
+                    + "<body>"
+                    + "<div class='container'>"
+                    + "<h2>🔐 Yêu cầu đặt lại mật khẩu</h2>"
+                    + "<p>Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản PetTech của bạn.</p>"
+                    + "<p>Vui lòng nhấn vào nút dưới đây để tạo mật khẩu mới:</p>"
+                    + "<p><a class='button' href='" + resetLink + "'>Đặt lại mật khẩu</a></p>"
+                    + "<p>Nếu bạn không yêu cầu, hãy bỏ qua email này.</p>"
+                    + "<div class='footer'>"
+                    + "<strong>❤️ PetTech Team</strong><br>"
+                    + "Nếu bạn có bất kỳ câu hỏi nào, đừng ngần ngại liên hệ với chúng tôi nhé! 🧡<br>"
+                    + "📞 Hỗ trợ: <a href='tel:0352138596'>0352 138 596</a><br>"
+                    + "Địa chỉ: Khu Công nghệ cao Hòa Lạc, Thạch Thất, Hà Nội"
+                    + "</div>"
+                    + "</div>"
+                    + "</body>"
+                    + "</html>";
 
-                SendMailOK.send(
-                        "smtp.gmail.com",
-                        email,
-                        "vdc120403@gmail.com", // Thay bằng email của bạn
-                        "ednn nwbo zbyq gahs", // Thay bằng mật khẩu ứng dụng
-                        "Đặt lại mật khẩu PetTech",
-                        emailBody
-                );
+            SendMailOK.send(
+                    "smtp.gmail.com",
+                    email,
+                    "vdc120403@gmail.com",
+                    "ednn nwbo zbyq gahs",
+                    "Đặt lại mật khẩu PetTech",
+                    emailBody
+            );
 
-                request.setAttribute("notification", "Liên kết đặt lại mật khẩu đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.");
-            } catch (Exception e) {
-                e.printStackTrace();
-                request.setAttribute("notification", "Gửi email đặt lại mật khẩu thất bại. Vui lòng thử lại hoặc liên hệ quản trị viên.");
-            }
+            // Thêm thông báo thành công vào session
+            session.setAttribute("success", "✅ Yêu cầu đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra email của bạn.");
+            response.sendRedirect("login.jsp"); // Chuyển hướng về trang login
+            return null;
 
-            return "resetpassword.jsp";
         } catch (SQLException ex) {
-            request.setAttribute("error", "Lỗi hệ thống: " + ex.getMessage());
-            return "resetpassword.jsp";
+            request.setAttribute("error", "🚨 Lỗi hệ thống: " + ex.getMessage());
+            return "resetPassword.jsp";
+        } catch (Exception e) {
+            request.setAttribute("error", "🚨 Gửi email đặt lại mật khẩu thất bại. Vui lòng thử lại.");
+            return "resetPassword.jsp";
         }
     }
 

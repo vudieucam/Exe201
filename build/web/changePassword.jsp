@@ -117,7 +117,7 @@
         <% if (Boolean.TRUE.equals(request.getAttribute("success"))) { %>
         <script>
             setTimeout(function () {
-                window.location.href = 'login.jsp';
+                window.location.href = 'authen?action=login';
             }, 5000);
         </script>
         <% }%>

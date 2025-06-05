@@ -11,7 +11,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import model.Course;
 import model.CourseImage;
 import model.CourseLesson;
@@ -68,16 +70,6 @@ public class CourseDAO extends DBConnect {
             e.printStackTrace();
         }
         return list;
-    }
-
-    public long countAllCourses() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM courses";
-        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                return rs.getLong(1);
-            }
-            return 0;
-        }
     }
 
     public List<Course> getRecentCourses(int limit) throws SQLException {
@@ -559,6 +551,97 @@ public class CourseDAO extends DBConnect {
         }
     }
 
+    // Đếm tổng số khóa học
+    public long countAllCourses() {
+        String sql = "SELECT COUNT(*) FROM courses WHERE status = 1";
+        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return 0;
+    }
+
+    // Đếm số khóa học đang hoạt động
+    public int countActiveCourses() {
+        String sql = "SELECT COUNT(*) FROM courses WHERE status = 1";
+        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return 0;
+    }
+
+    // Lấy top khóa học xem nhiều nhất
+    public List<Map<String, Object>> getMostViewedCourses(int limit) {
+        List<Map<String, Object>> courses = new ArrayList<>();
+        String sql = "SELECT TOP (?) c.id, c.title, cs.views, cs.avg_view_duration "
+                + "FROM courses c "
+                + "JOIN ("
+                + "    SELECT course_id, SUM(views) as views, "
+                + "           AVG(avg_view_duration) as avg_view_duration "
+                + "    FROM course_statistics "
+                + "    GROUP BY course_id"
+                + ") cs ON c.id = cs.course_id "
+                + "WHERE c.status = 1 "
+                + "ORDER BY cs.views DESC";
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, limit);
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> course = new HashMap<>();
+                    course.put("id", rs.getInt("id"));
+                    course.put("title", rs.getString("title"));
+                    course.put("views", rs.getInt("views"));
+                    course.put("avgViewDuration", rs.getInt("avg_view_duration"));
+                    courses.add(course);
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return courses;
+    }
+
+    // Lấy top khóa học đánh giá cao nhất
+    public List<Map<String, Object>> getHighestRatedCourses(int limit) {
+        List<Map<String, Object>> courses = new ArrayList<>();
+        String sql = "SELECT TOP (?) c.id, c.title, "
+                + "AVG(cr.rating) as rating, COUNT(cr.id) as review_count, "
+                + "(SELECT COUNT(*) FROM user_progress up "
+                + " JOIN course_lessons cl ON up.lesson_id = cl.id "
+                + " JOIN course_modules cm ON cl.module_id = cm.id "
+                + " WHERE cm.course_id = c.id) as enrollments "
+                + "FROM courses c "
+                + "LEFT JOIN course_reviews cr ON c.id = cr.course_id "
+                + "WHERE c.status = 1 AND cr.status = 1 "
+                + "GROUP BY c.id, c.title "
+                + "ORDER BY rating DESC, review_count DESC";
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, limit);
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> course = new HashMap<>();
+                    course.put("id", rs.getInt("id"));
+                    course.put("title", rs.getString("title"));
+                    course.put("rating", rs.getDouble("rating"));
+                    course.put("enrollments", rs.getInt("enrollments"));
+                    courses.add(course);
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return courses;
+    }
+
     public boolean checkCourseExists(int courseId) throws SQLException {
         String sql = "SELECT 1 FROM courses WHERE id = ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
@@ -569,58 +652,163 @@ public class CourseDAO extends DBConnect {
         }
     }
 
+//    public static void main(String[] args) {
+//        // Tạo instance của DAO
+//        CourseDAO courseDAO = new CourseDAO();
+//
+//        try {
+//            // Test case 1: ID tồn tại
+//            System.out.println("=== Test case 1: ID tồn tại ===");
+//            int existingCourseId = 1; // Thay bằng ID có thật trong DB của bạn
+//            testGetCourseById(courseDAO, existingCourseId);
+//
+//            // Test case 2: ID không tồn tại
+//            System.out.println("\n=== Test case 2: ID không tồn tại ===");
+//            int nonExistingCourseId = 9999; // ID chắc chắn không tồn tại
+//            testGetCourseById(courseDAO, nonExistingCourseId);
+//
+//            // Test case 3: ID âm
+//            System.out.println("\n=== Test case 3: ID âm ===");
+//            int negativeId = -1;
+//            testGetCourseById(courseDAO, negativeId);
+//
+//            // Test case 4: ID bằng 0
+//            System.out.println("\n=== Test case 4: ID bằng 0 ===");
+//            int zeroId = 0;
+//            testGetCourseById(courseDAO, zeroId);
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+//
+//    private static void testGetCourseById(CourseDAO courseDAO, int courseId) throws SQLException {
+//        System.out.println("Testing with course ID: " + courseId);
+//
+//        long startTime = System.currentTimeMillis();
+//        Course course = courseDAO.getCourseById(courseId);
+//        long endTime = System.currentTimeMillis();
+//
+//        if (course != null) {
+//            System.out.println("✅ Tìm thấy khóa học:");
+//            System.out.println("ID: " + course.getId());
+//            System.out.println("Tiêu đề: " + course.getTitle());
+//            System.out.println("Mô tả: " + (course.getContent() != null
+//                    ? course.getContent().substring(0, Math.min(50, course.getContent().length())) + "..." : "null"));
+//            System.out.println("Số module: " + (course.getModules() != null ? course.getModules().size() : 0));
+//            System.out.println("Số hình ảnh: " + (course.getImages() != null ? course.getImages().size() : 0));
+//            System.out.println("Số đánh giá: " + (course.getReviews() != null ? course.getReviews().size() : 0));
+//        } else {
+//            System.out.println("❌ Không tìm thấy khóa học với ID: " + courseId);
+//        }
+//
+//        System.out.printf("Thời gian thực thi: %d ms\n", (endTime - startTime));
+//    }
+
     public static void main(String[] args) {
-        // Tạo instance của DAO
         CourseDAO courseDAO = new CourseDAO();
 
         try {
-            // Test case 1: ID tồn tại
-            System.out.println("=== Test case 1: ID tồn tại ===");
-            int existingCourseId = 1; // Thay bằng ID có thật trong DB của bạn
-            testGetCourseById(courseDAO, existingCourseId);
+            System.out.println("=== TEST COUNT COURSES ===");
+            testCountCourses(courseDAO);
 
-            // Test case 2: ID không tồn tại
-            System.out.println("\n=== Test case 2: ID không tồn tại ===");
-            int nonExistingCourseId = 9999; // ID chắc chắn không tồn tại
-            testGetCourseById(courseDAO, nonExistingCourseId);
+            System.out.println("\n=== TEST MOST VIEWED COURSES ===");
+            testMostViewedCourses(courseDAO);
 
-            // Test case 3: ID âm
-            System.out.println("\n=== Test case 3: ID âm ===");
-            int negativeId = -1;
-            testGetCourseById(courseDAO, negativeId);
+            System.out.println("\n=== TEST HIGHEST RATED COURSES ===");
+            testHighestRatedCourses(courseDAO);
 
-            // Test case 4: ID bằng 0
-            System.out.println("\n=== Test case 4: ID bằng 0 ===");
-            int zeroId = 0;
-            testGetCourseById(courseDAO, zeroId);
+            System.out.println("\n=== TEST CHECK COURSE EXISTS ===");
+            testCheckCourseExists(courseDAO);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void testGetCourseById(CourseDAO courseDAO, int courseId) throws SQLException {
-        System.out.println("Testing with course ID: " + courseId);
+    private static void testCountCourses(CourseDAO courseDAO) {
+        System.out.println("Testing countAllCourses() and countActiveCourses()");
 
         long startTime = System.currentTimeMillis();
-        Course course = courseDAO.getCourseById(courseId);
+        long totalCourses = courseDAO.countAllCourses();
+        int activeCourses = courseDAO.countActiveCourses();
         long endTime = System.currentTimeMillis();
 
-        if (course != null) {
-            System.out.println("✅ Tìm thấy khóa học:");
-            System.out.println("ID: " + course.getId());
-            System.out.println("Tiêu đề: " + course.getTitle());
-            System.out.println("Mô tả: " + (course.getContent() != null
-                    ? course.getContent().substring(0, Math.min(50, course.getContent().length())) + "..." : "null"));
-            System.out.println("Số module: " + (course.getModules() != null ? course.getModules().size() : 0));
-            System.out.println("Số hình ảnh: " + (course.getImages() != null ? course.getImages().size() : 0));
-            System.out.println("Số đánh giá: " + (course.getReviews() != null ? course.getReviews().size() : 0));
-        } else {
-            System.out.println("❌ Không tìm thấy khóa học với ID: " + courseId);
-        }
-
+        System.out.println("Tổng số khóa học: " + totalCourses);
+        System.out.println("Số khóa học đang hoạt động: " + activeCourses);
         System.out.printf("Thời gian thực thi: %d ms\n", (endTime - startTime));
     }
+
+    private static void testMostViewedCourses(CourseDAO courseDAO) {
+        System.out.println("Testing getMostViewedCourses() with limit 5");
+
+        long startTime = System.currentTimeMillis();
+        List<Map<String, Object>> courses = courseDAO.getMostViewedCourses(5);
+        long endTime = System.currentTimeMillis();
+
+        if (courses.isEmpty()) {
+            System.out.println("Không có khóa học nào");
+        } else {
+            System.out.println("Top 5 khóa học xem nhiều nhất:");
+            for (Map<String, Object> course : courses) {
+                System.out.printf("ID: %d | Tiêu đề: %s | Lượt xem: %d | Thời lượng xem TB: %d\n",
+                        course.get("id"), course.get("title"),
+                        course.get("views"), course.get("avgViewDuration"));
+            }
+        }
+        System.out.printf("Thời gian thực thi: %d ms\n", (endTime - startTime));
+    }
+
+    private static void testHighestRatedCourses(CourseDAO courseDAO) {
+        System.out.println("Testing getHighestRatedCourses() with limit 5");
+
+        long startTime = System.currentTimeMillis();
+        List<Map<String, Object>> courses = courseDAO.getHighestRatedCourses(5);
+        long endTime = System.currentTimeMillis();
+
+        if (courses.isEmpty()) {
+            System.out.println("Không có khóa học nào");
+        } else {
+            System.out.println("Top 5 khóa học đánh giá cao nhất:");
+            for (Map<String, Object> course : courses) {
+                System.out.printf("ID: %d | Tiêu đề: %s | Điểm đánh giá: %.1f | Số lượt đăng ký: %d\n",
+                        course.get("id"), course.get("title"),
+                        course.get("rating"), course.get("enrollments"));
+            }
+        }
+        System.out.printf("Thời gian thực thi: %d ms\n", (endTime - startTime));
+    }
+
+    private static void testCheckCourseExists(CourseDAO courseDAO) throws SQLException {
+        System.out.println("Testing checkCourseExists() with various IDs");
+
+        // Test với ID tồn tại (thay bằng ID có thật trong DB của bạn)
+        int existingId = 1;
+        testSingleCheckCourseExists(courseDAO, existingId);
+
+        // Test với ID không tồn tại
+        int nonExistingId = 9999;
+        testSingleCheckCourseExists(courseDAO, nonExistingId);
+
+        // Test với ID âm
+        int negativeId = -1;
+        testSingleCheckCourseExists(courseDAO, negativeId);
+
+        // Test với ID bằng 0
+        int zeroId = 0;
+        testSingleCheckCourseExists(courseDAO, zeroId);
+    }
+
+    private static void testSingleCheckCourseExists(CourseDAO courseDAO, int courseId) throws SQLException {
+        long startTime = System.currentTimeMillis();
+        boolean exists = courseDAO.checkCourseExists(courseId);
+        long endTime = System.currentTimeMillis();
+
+        System.out.printf("Khóa học với ID %d %s tồn tại\n",
+                courseId, exists ? "CÓ" : "KHÔNG");
+        System.out.printf("Thời gian thực thi: %d ms\n", (endTime - startTime));
+    }
+
 }
 //    public static void main(String[] args) {
 //        CourseDAO courseDAO = new CourseDAO();

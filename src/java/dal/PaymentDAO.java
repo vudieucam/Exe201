@@ -65,18 +65,17 @@ public class PaymentDAO extends DBConnect {
     }
 
     // Tính tổng doanh thu
-    public double getTotalRevenue() {
-        String sql = "SELECT SUM(amount) FROM payments WHERE status = 'completed'";
-        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
-            if (rs.next()) {
-                return rs.getDouble(1);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
+//    public double getTotalRevenue() {
+//        String sql = "SELECT SUM(amount) FROM payments WHERE status = 'completed'";
+//        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+//            if (rs.next()) {
+//                return rs.getDouble(1);
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return 0;
+//    }
     // Lấy danh sách thanh toán gần đây
     public List<Payments> getRecentPayments(int limit) {
         List<Payments> payments = new ArrayList<>();
@@ -96,7 +95,7 @@ public class PaymentDAO extends DBConnect {
                     payment.setPaymentMethod(rs.getString("payment_method"));
                     // If your Payments class doesn't have customerName field,
                     // you'll need to add it or remove this line
-                    payment.setBankName(rs.getString("customer_name"));
+                    payment.setBankAccountNumber(rs.getString("customer_name"));
                     payments.add(payment);
                 }
             }
@@ -104,5 +103,74 @@ public class PaymentDAO extends DBConnect {
             e.printStackTrace();
         }
         return payments;
+    }
+
+    // Tính tổng doanh thu
+    public double getTotalRevenue() {
+        String sql = "SELECT SUM(amount) FROM payments WHERE status = 'completed'";
+        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
+
+    // Tính doanh thu tháng hiện tại
+    public double getMonthlyRevenue() {
+        String sql = "SELECT SUM(amount) FROM payments "
+                + "WHERE status = 'completed' "
+                + "AND payment_date >= DATEADD(month, DATEDIFF(month, 0, GETDATE()), 0) "
+                + "AND payment_date < DATEADD(month, DATEDIFF(month, 0, GETDATE()) + 1, 0)";
+        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return 0.0;
+    }
+    
+    
+
+    public static void main(String[] args) {
+        // Giả sử bạn đã có kết nối database
+        PaymentDAO paymentDAO = new PaymentDAO(); // Giả sử constructor không cần tham số
+
+        // Test getRecentPayments
+        System.out.println("=== Testing getRecentPayments ===");
+        List<Payments> recentPayments = paymentDAO.getRecentPayments(5);
+        printPayments(recentPayments);
+
+        // Test getTotalRevenue
+        System.out.println("\n=== Testing getTotalRevenue ===");
+        double totalRevenue = paymentDAO.getTotalRevenue();
+        System.out.printf("Total Revenue: $%,.2f\n", totalRevenue);
+
+        // Test getMonthlyRevenue
+        System.out.println("\n=== Testing getMonthlyRevenue ===");
+        double monthlyRevenue = paymentDAO.getMonthlyRevenue();
+        System.out.printf("Monthly Revenue: $%,.2f\n", monthlyRevenue);
+    }
+
+    private static void printPayments(List<Payments> payments) {
+        if (payments == null || payments.isEmpty()) {
+            System.out.println("No payments found.");
+            return;
+        }
+
+        System.out.println("ID\tAmount\tDate\t\tStatus\t\tMethod\tCustomer");
+        for (Payments payment : payments) {
+            System.out.printf("%d\t$%,.2f\t%s\t%s\t%s\t%s\n",
+                    payment.getId(),
+                    payment.getAmount(),
+                    payment.getPaymentDate(),
+                    payment.getStatus(),
+                    payment.getPaymentMethod(),
+                    payment.getBankAccountNumber());
+        }
     }
 }

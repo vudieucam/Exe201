@@ -78,7 +78,18 @@
                     padding: 10px;
                 }
             }
+
         </style>
+        <script>
+            document.querySelector("form").addEventListener("submit", function (e) {
+                const emailInput = document.getElementById("email");
+                if (!emailInput.value.includes("@")) {
+                    e.preventDefault();
+                    alert("Vui lòng nhập đúng định dạng email!");
+                }
+            });
+        </script>
+
     </head>
     <body>
         <div class="container my-5 p-4 bg-light bg-opacity-75 rounded-4 shadow-lg">
@@ -126,6 +137,12 @@
                 const section = document.getElementById("password-section");
                 section.style.display = section.style.display === "none" ? "block" : "none";
             }
+            document.querySelector("form").addEventListener("submit", function () {
+                const btn = this.querySelector("button[type='submit']");
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang kiểm tra...';
+            });
+
         </script>
     </body>
 </html>

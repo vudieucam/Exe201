@@ -139,6 +139,14 @@
         </div>
 
         <!-- Thông báo -->
+        <%-- Hiển thị thông báo thành công từ reset password --%>
+        <c:if test="${not empty success}">
+            <div class="alert alert-success" style="width: fit-content; margin: 20px auto; text-align: center;">
+                <span>${not empty success ? success : sessionScope.success}</span>
+            </div>
+            <% session.removeAttribute("success"); %>
+        </c:if>
+
         <c:if test="${not empty notification || not empty sessionScope.notification}">
             <div class="notification-container">
                 <div class="alert alert-info notification">
@@ -178,7 +186,7 @@
                         <input class="form-check-input" type="checkbox" id="remember_me" name="remember_me">
                         <label class="form-check-label" for="remember_me">Nhớ mật khẩu</label>
                     </div>
-                    <a href="resetPassword.jsp" class="small">Quên mật khẩu?</a>
+                    <a href="authen?action=resetpassword" class="small">Quên mật khẩu?</a>
                 </div>
                 <div class="d-grid mb-3">
                     <button class="btn btn-primary" type="submit"><i class="fas fa-sign-in-alt"></i> Đăng nhập</button>
