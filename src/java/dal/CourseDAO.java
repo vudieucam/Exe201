@@ -652,6 +652,52 @@ public class CourseDAO extends DBConnect {
         }
     }
 
+    public List<Map<String, Object>> getAverageLearningTime() {
+        List<Map<String, Object>> data = new ArrayList<>();
+        String sql = "SELECT c.title, AVG(l.duration_minutes) as avg_time "
+                + "FROM courses c "
+                + "JOIN lessons l ON c.id = l.course_id "
+                + "GROUP BY c.id, c.title "
+                + "ORDER BY avg_time DESC "
+                + "LIMIT 5";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Map<String, Object> row = new HashMap<>();
+                row.put("title", rs.getString("title"));
+                row.put("avg_time", rs.getInt("avg_time"));
+                data.add(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return data;
+    }
+
+    public List<Map<String, Object>> getCourseCompletionRates() {
+        List<Map<String, Object>> data = new ArrayList<>();
+        String sql = "SELECT c.title, "
+                + "ROUND(100.0 * SUM(CASE WHEN ce.completion_status = 1 THEN 1 ELSE 0 END) / COUNT(ce.id), 2) as completion_rate "
+                + "FROM courses c "
+                + "JOIN course_enrollments ce ON c.id = ce.course_id "
+                + "GROUP BY c.id, c.title "
+                + "ORDER BY completion_rate DESC "
+                + "LIMIT 5";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Map<String, Object> row = new HashMap<>();
+                row.put("title", rs.getString("title"));
+                row.put("completion_rate", rs.getDouble("completion_rate"));
+                data.add(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return data;
+    }
 //    public static void main(String[] args) {
 //        // Tạo instance của DAO
 //        CourseDAO courseDAO = new CourseDAO();

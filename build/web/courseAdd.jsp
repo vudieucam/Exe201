@@ -443,34 +443,7 @@
                         </li>
                     </ul>
 
-                    <!-- Admin Profile Section -->
-                    <div class="admin-profile">
-                        <div class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                <img src="${not empty sessionScope.user.avatar ? sessionScope.user.avatar : 'https://via.placeholder.com/40'}" 
-                                     alt="Admin Avatar" class="admin-avatar">
-                                <div class="admin-info">
-                                    <div class="admin-name">${sessionScope.user.fullname}</div>
-                                    <div class="admin-role">
-                                        <c:choose>
-                                            <c:when test="${sessionScope.user.roleId == 2}">Quản trị viên</c:when>
-                                            <c:when test="${sessionScope.user.roleId == 3}">Admin</c:when>
-                                            <c:otherwise>Nhân viên</c:otherwise>
-                                        </c:choose>
-                                    </div>
-                                </div>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="editProfile.jsp">
-                                        <i class="bi bi-person me-2"></i>Thông tin cá nhân
-                                    </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item logout" href="authen?action=logout">
-                                        <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
-                                    </a></li>
-                            </ul>
-                        </div>
-                    </div>
+                    
                 </div>
 
                 <!-- Main Content -->

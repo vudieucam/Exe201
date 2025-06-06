@@ -6,8 +6,8 @@
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@page import="model.Course" %>
 <%@page import="model.CourseModule" %>
 <%@page import="model.CourseLesson" %>
@@ -63,17 +63,9 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>PetTech Admin Dashboard</title>
-        <!-- CSS -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"/>
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
-
-        <!-- JS -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <style>
             :root {
@@ -641,30 +633,31 @@
                             </a>
                         </li>
                     </ul>
-                </div>
-
-                <!-- Admin Profile Section -->
-                <div class="admin-profile">
-                    <div class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="https://via.placeholder.com/40" alt="Admin Avatar" class="admin-avatar">
-                            <div class="admin-info">
-                                <div class="admin-name">Admin Name</div>
-                                <div class="admin-role">Quản trị viên</div>
-                            </div>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="editProfile.jsp">
-                                    <i class="bi bi-person me-2"></i>Thông tin cá nhân
-                                </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item logout" href="home">
-                                    <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
-                                </a></li>
-                        </ul>
+                    <!-- Admin Profile Section -->
+                    <div class="admin-profile">
+                        <div class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="https://via.placeholder.com/40" alt="Admin Avatar" class="admin-avatar">
+                                <div class="admin-info">
+                                    <div class="admin-name">Admin Name</div>
+                                    <div class="admin-role">Quản trị viên</div>
+                                </div>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="editProfile.jsp">
+                                        <i class="bi bi-person me-2"></i>Thông tin cá nhân
+                                    </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item logout" href="home">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                                    </a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
+
+
+            
             <!-- Main Content -->
             <div class="col-md-10 p-4">
                 <div class="tab-content">
@@ -966,20 +959,23 @@
     </div>
 
     <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
-        // Function to delete module
-        function deleteModule(moduleId) {
-            if (confirm('Bạn có chắc chắn muốn xóa module này? Tất cả bài học trong module cũng sẽ bị xóa.')) {
-                window.location.href = 'courseadmin?action=deleteModule&id=' + moduleId;
-            }
-        }
+                                                           // Function to delete module
+                                                           function deleteModule(moduleId) {
+                                                               if (confirm('Bạn có chắc chắn muốn xóa module này? Tất cả bài học trong module cũng sẽ bị xóa.')) {
+                                                                   window.location.href = 'courseadmin?action=deleteModule&id=' + moduleId;
+                                                               }
+                                                           }
 
-        // Function to delete lesson
-        function deleteLesson(lessonId) {
-            if (confirm('Bạn có chắc chắn muốn xóa bài học này?')) {
-                window.location.href = 'courseadmin?action=deleteLesson&id=' + lessonId;
-            }
-        }
+                                                           // Function to delete lesson
+                                                           function deleteLesson(lessonId) {
+                                                               if (confirm('Bạn có chắc chắn muốn xóa bài học này?')) {
+                                                                   window.location.href = 'courseadmin?action=deleteLesson&id=' + lessonId;
+                                                               }
+                                                           }
     </script>
 </body>
 </html>

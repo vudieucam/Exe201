@@ -530,157 +530,160 @@ public class UserDAO extends DBConnect {
         }
     }
 
+// Trong UserDAO.java
+    
 
-    public static void main(String[] args) {
-        // Khởi tạo UserDAO (giả sử đã có kết nối database)
-        UserDAO tester = new UserDAO();
+   
 
-        // Test từng phương thức
-        tester.testCountAllUsers();
-        tester.testCountOnlineUsers();
-        tester.testCountActiveUsers();
-        tester.testCalculateUserGrowth();
-        tester.testGetUserDistribution();
-        tester.testGetDailyStats();
-        tester.testSaveSessionInfo();
-    }
-
-    public void testCountAllUsers() {
-        System.out.println("=== Testing countAllUsers() ===");
-        try {
-            long startTime = System.currentTimeMillis();
-            long totalUsers = countAllUsers();
-            long endTime = System.currentTimeMillis();
-
-            System.out.println("Total users: " + totalUsers);
-            System.out.printf("Execution time: %d ms\n", (endTime - startTime));
-        } catch (Exception e) {
-            System.err.println("Error in testCountAllUsers: " + e.getMessage());
-            e.printStackTrace();
-        }
-        System.out.println();
-    }
-
-    public void testCountOnlineUsers() {
-        System.out.println("=== Testing countOnlineUsers() ===");
-        try {
-            long startTime = System.currentTimeMillis();
-            int onlineUsers = countOnlineUsers();
-            long endTime = System.currentTimeMillis();
-
-            System.out.println("Online users: " + onlineUsers);
-            System.out.printf("Execution time: %d ms\n", (endTime - startTime));
-        } catch (Exception e) {
-            System.err.println("Error in testCountOnlineUsers: " + e.getMessage());
-            e.printStackTrace();
-        }
-        System.out.println();
-    }
-
-    public void testCountActiveUsers() {
-        System.out.println("=== Testing countActiveUsers() ===");
-        try {
-            long startTime = System.currentTimeMillis();
-            int activeUsers = countActiveUsers();
-            long endTime = System.currentTimeMillis();
-
-            System.out.println("Active users (last 30 days): " + activeUsers);
-            System.out.printf("Execution time: %d ms\n", (endTime - startTime));
-        } catch (Exception e) {
-            System.err.println("Error in testCountActiveUsers: " + e.getMessage());
-            e.printStackTrace();
-        }
-        System.out.println();
-    }
-
-    public void testCalculateUserGrowth() {
-        System.out.println("=== Testing calculateUserGrowth() ===");
-        try {
-            long startTime = System.currentTimeMillis();
-            double growthRate = calculateUserGrowth();
-            long endTime = System.currentTimeMillis();
-
-            System.out.printf("User growth rate: %.2f%%\n", growthRate);
-            System.out.printf("Execution time: %d ms\n", (endTime - startTime));
-        } catch (Exception e) {
-            System.err.println("Error in testCalculateUserGrowth: " + e.getMessage());
-            e.printStackTrace();
-        }
-        System.out.println();
-    }
-
-    public void testGetUserDistribution() {
-        System.out.println("=== Testing getUserDistribution() ===");
-        try {
-            long startTime = System.currentTimeMillis();
-            Map<String, Integer> distribution = getUserDistribution();
-            long endTime = System.currentTimeMillis();
-
-            System.out.println("User distribution:");
-            System.out.println("Regular users: " + distribution.getOrDefault("regularUsers", 0));
-            System.out.println("Staff users: " + distribution.getOrDefault("staffUsers", 0));
-            System.out.println("Admin users: " + distribution.getOrDefault("adminUsers", 0));
-            System.out.println("Premium users: " + distribution.getOrDefault("premiumUsers", 0));
-            System.out.printf("Execution time: %d ms\n", (endTime - startTime));
-        } catch (Exception e) {
-            System.err.println("Error in testGetUserDistribution: " + e.getMessage());
-            e.printStackTrace();
-        }
-        System.out.println();
-    }
-
-    public void testGetDailyStats() {
-        System.out.println("=== Testing getDailyStats() ===");
-        try {
-            int daysToShow = 7;
-            long startTime = System.currentTimeMillis();
-            List<Map<String, Object>> dailyStats = getDailyStats(daysToShow);
-            long endTime = System.currentTimeMillis();
-
-            System.out.println("Daily stats for last " + daysToShow + " days:");
-            for (Map<String, Object> dayStat : dailyStats) {
-                System.out.println("Date: " + dayStat.get("date"));
-                System.out.println("  Visits: " + dayStat.get("visits"));
-                System.out.println("  Unique visitors: " + dayStat.get("uniqueVisitors"));
-                System.out.println("  New users: " + dayStat.get("newUsers"));
-                System.out.println("  Avg duration: " + dayStat.get("avgDuration") + " seconds");
-                System.out.println("  Page views: " + dayStat.get("pageViews"));
-                System.out.println();
-            }
-            System.out.printf("Execution time: %d ms\n", (endTime - startTime));
-        } catch (Exception e) {
-            System.err.println("Error in testGetDailyStats: " + e.getMessage());
-            e.printStackTrace();
-        }
-        System.out.println();
-    }
-
-    public void testSaveSessionInfo() {
-        System.out.println("=== Testing saveSessionInfo() ===");
-        try {
-            // Tạo dữ liệu test
-            Integer userId = 1; // Thay bằng ID user thực tế
-            String sessionId = "test_session_" + System.currentTimeMillis();
-            String ipAddress = "192.168.1.1";
-            String userAgent = "Mozilla/5.0 (Test)";
-            Timestamp loginTime = new Timestamp(System.currentTimeMillis() - 3600000); // 1 giờ trước
-            Timestamp logoutTime = new Timestamp(System.currentTimeMillis());
-            int duration = 3600; // 1 giờ (tính bằng giây)
-
-            System.out.println("Saving session info...");
-            long startTime = System.currentTimeMillis();
-            saveSessionInfo(userId, sessionId, ipAddress, userAgent, loginTime, logoutTime, duration);
-            long endTime = System.currentTimeMillis();
-
-            System.out.println("Session info saved successfully");
-            System.out.printf("Execution time: %d ms\n", (endTime - startTime));
-        } catch (Exception e) {
-            System.err.println("Error in testSaveSessionInfo: " + e.getMessage());
-            e.printStackTrace();
-        }
-        System.out.println();
-    }
-
+//    public static void main(String[] args) {
+//        // Khởi tạo UserDAO (giả sử đã có kết nối database)
+//        UserDAO tester = new UserDAO();
+//
+//        // Test từng phương thức
+//        tester.testCountAllUsers();
+//        tester.testCountOnlineUsers();
+//        tester.testCountActiveUsers();
+//        tester.testCalculateUserGrowth();
+//        tester.testGetUserDistribution();
+//        tester.testGetDailyStats();
+//        tester.testSaveSessionInfo();
+//    }
+//
+//    public void testCountAllUsers() {
+//        System.out.println("=== Testing countAllUsers() ===");
+//        try {
+//            long startTime = System.currentTimeMillis();
+//            long totalUsers = countAllUsers();
+//            long endTime = System.currentTimeMillis();
+//
+//            System.out.println("Total users: " + totalUsers);
+//            System.out.printf("Execution time: %d ms\n", (endTime - startTime));
+//        } catch (Exception e) {
+//            System.err.println("Error in testCountAllUsers: " + e.getMessage());
+//            e.printStackTrace();
+//        }
+//        System.out.println();
+//    }
+//
+//    public void testCountOnlineUsers() {
+//        System.out.println("=== Testing countOnlineUsers() ===");
+//        try {
+//            long startTime = System.currentTimeMillis();
+//            int onlineUsers = countOnlineUsers();
+//            long endTime = System.currentTimeMillis();
+//
+//            System.out.println("Online users: " + onlineUsers);
+//            System.out.printf("Execution time: %d ms\n", (endTime - startTime));
+//        } catch (Exception e) {
+//            System.err.println("Error in testCountOnlineUsers: " + e.getMessage());
+//            e.printStackTrace();
+//        }
+//        System.out.println();
+//    }
+//
+//    public void testCountActiveUsers() {
+//        System.out.println("=== Testing countActiveUsers() ===");
+//        try {
+//            long startTime = System.currentTimeMillis();
+//            int activeUsers = countActiveUsers();
+//            long endTime = System.currentTimeMillis();
+//
+//            System.out.println("Active users (last 30 days): " + activeUsers);
+//            System.out.printf("Execution time: %d ms\n", (endTime - startTime));
+//        } catch (Exception e) {
+//            System.err.println("Error in testCountActiveUsers: " + e.getMessage());
+//            e.printStackTrace();
+//        }
+//        System.out.println();
+//    }
+//
+//    public void testCalculateUserGrowth() {
+//        System.out.println("=== Testing calculateUserGrowth() ===");
+//        try {
+//            long startTime = System.currentTimeMillis();
+//            double growthRate = calculateUserGrowth();
+//            long endTime = System.currentTimeMillis();
+//
+//            System.out.printf("User growth rate: %.2f%%\n", growthRate);
+//            System.out.printf("Execution time: %d ms\n", (endTime - startTime));
+//        } catch (Exception e) {
+//            System.err.println("Error in testCalculateUserGrowth: " + e.getMessage());
+//            e.printStackTrace();
+//        }
+//        System.out.println();
+//    }
+//
+//    public void testGetUserDistribution() {
+//        System.out.println("=== Testing getUserDistribution() ===");
+//        try {
+//            long startTime = System.currentTimeMillis();
+//            Map<String, Integer> distribution = getUserDistribution();
+//            long endTime = System.currentTimeMillis();
+//
+//            System.out.println("User distribution:");
+//            System.out.println("Regular users: " + distribution.getOrDefault("regularUsers", 0));
+//            System.out.println("Staff users: " + distribution.getOrDefault("staffUsers", 0));
+//            System.out.println("Admin users: " + distribution.getOrDefault("adminUsers", 0));
+//            System.out.println("Premium users: " + distribution.getOrDefault("premiumUsers", 0));
+//            System.out.printf("Execution time: %d ms\n", (endTime - startTime));
+//        } catch (Exception e) {
+//            System.err.println("Error in testGetUserDistribution: " + e.getMessage());
+//            e.printStackTrace();
+//        }
+//        System.out.println();
+//    }
+//
+//    public void testGetDailyStats() {
+//        System.out.println("=== Testing getDailyStats() ===");
+//        try {
+//            int daysToShow = 7;
+//            long startTime = System.currentTimeMillis();
+//            List<Map<String, Object>> dailyStats = getDailyStats(daysToShow);
+//            long endTime = System.currentTimeMillis();
+//
+//            System.out.println("Daily stats for last " + daysToShow + " days:");
+//            for (Map<String, Object> dayStat : dailyStats) {
+//                System.out.println("Date: " + dayStat.get("date"));
+//                System.out.println("  Visits: " + dayStat.get("visits"));
+//                System.out.println("  Unique visitors: " + dayStat.get("uniqueVisitors"));
+//                System.out.println("  New users: " + dayStat.get("newUsers"));
+//                System.out.println("  Avg duration: " + dayStat.get("avgDuration") + " seconds");
+//                System.out.println("  Page views: " + dayStat.get("pageViews"));
+//                System.out.println();
+//            }
+//            System.out.printf("Execution time: %d ms\n", (endTime - startTime));
+//        } catch (Exception e) {
+//            System.err.println("Error in testGetDailyStats: " + e.getMessage());
+//            e.printStackTrace();
+//        }
+//        System.out.println();
+//    }
+//
+//    public void testSaveSessionInfo() {
+//        System.out.println("=== Testing saveSessionInfo() ===");
+//        try {
+//            // Tạo dữ liệu test
+//            Integer userId = 1; // Thay bằng ID user thực tế
+//            String sessionId = "test_session_" + System.currentTimeMillis();
+//            String ipAddress = "192.168.1.1";
+//            String userAgent = "Mozilla/5.0 (Test)";
+//            Timestamp loginTime = new Timestamp(System.currentTimeMillis() - 3600000); // 1 giờ trước
+//            Timestamp logoutTime = new Timestamp(System.currentTimeMillis());
+//            int duration = 3600; // 1 giờ (tính bằng giây)
+//
+//            System.out.println("Saving session info...");
+//            long startTime = System.currentTimeMillis();
+//            saveSessionInfo(userId, sessionId, ipAddress, userAgent, loginTime, logoutTime, duration);
+//            long endTime = System.currentTimeMillis();
+//
+//            System.out.println("Session info saved successfully");
+//            System.out.printf("Execution time: %d ms\n", (endTime - startTime));
+//        } catch (Exception e) {
+//            System.err.println("Error in testSaveSessionInfo: " + e.getMessage());
+//            e.printStackTrace();
+//        }
+//        System.out.println();
+//    }
 }
 //    public static void main(String[] args) {
 //        UserDAO dao = new UserDAO();
