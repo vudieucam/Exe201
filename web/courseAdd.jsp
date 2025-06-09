@@ -387,63 +387,78 @@
                 <!-- Sidebar -->
                 <div class="col-md-2 sidebar p-0">
                     <div class="sidebar-brand">
-                        <img src="images/logo_pettech.jpg" alt="Logo">
+                        <img src="${pageContext.request.contextPath}/images/logo_pettech.jpg" alt="Logo">
                         <h4 class="mb-0">PetTech</h4>
                     </div>
                     <ul class="nav flex-column mt-3">
                         <li class="nav-item">
-                            <a class="nav-link active" href="admin">
+                            <a class="nav-link active" href="${pageContext.request.contextPath}/admin">
                                 <i class="bi bi-speedometer2"></i>Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="userAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/useradmin">
                                 <i class="bi bi-people"></i>Người dùng
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="courseadmin">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/courseadmin">
                                 <i class="bi bi-book"></i>Khóa học
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="productsAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/productsAdmin.jsp">
                                 <i class="bi bi-cart"></i>Sản phẩm
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="ordersAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/ordersAdmin.jsp">
                                 <i class="bi bi-receipt"></i>Đơn hàng
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="paymentsAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/paymentsAdmin.jsp">
                                 <i class="bi bi-credit-card"></i>Thanh toán
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="blogsAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/blogadmin">
                                 <i class="bi bi-newspaper"></i>Blog
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="partnersAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/partnersAdmin.jsp">
                                 <i class="bi bi-building"></i>Đối tác
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="reports.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/reports.jsp">
                                 <i class="bi bi-graph-up"></i>Báo cáo
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="settings.jsp">
-                                <i class="bi bi-gear"></i>Cài đặt
-                            </a>
-                        </li>
                     </ul>
+                    <!-- Admin Profile Section -->
+                    <div class="admin-profile">
+                        <div class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="https://via.placeholder.com/40" alt="Admin Avatar" class="admin-avatar">
+                                <div class="admin-info">
+                                    <div class="admin-name">Admin Name</div>
+                                    <div class="admin-role">Quản trị viên</div>
+                                </div>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="editProfile.jsp">
+                                        <i class="bi bi-person me-2"></i>Thông tin cá nhân
+                                    </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item logout" href="home">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                                    </a></li>
+                            </ul>
+                        </div>
+                    </div>
 
-                    
                 </div>
 
                 <!-- Main Content -->
@@ -454,7 +469,7 @@
                     </div>
 
                     <form action="courseadd" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
-                        
+
                         <div class="card mb-4">
                             <div class="card-header">
                                 <h4>Thông tin cơ bản</h4>

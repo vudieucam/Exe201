@@ -635,7 +635,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="${pageContext.request.contextPath}/userAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/useradmin">
                                 <i class="bi bi-people"></i>Người dùng
                             </a>
                         </li>
@@ -660,7 +660,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="${pageContext.request.contextPath}/blogsAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/blogadmin">
                                 <i class="bi bi-newspaper"></i>Blog
                             </a>
                         </li>
@@ -675,7 +675,27 @@
                             </a>
                         </li>
                     </ul>
-
+                    <!-- Admin Profile Section -->
+                    <div class="admin-profile">
+                        <div class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="https://via.placeholder.com/40" alt="Admin Avatar" class="admin-avatar">
+                                <div class="admin-info">
+                                    <div class="admin-name">Admin Name</div>
+                                    <div class="admin-role">Quản trị viên</div>
+                                </div>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="editProfile.jsp">
+                                        <i class="bi bi-person me-2"></i>Thông tin cá nhân
+                                    </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item logout" href="home">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                                    </a></li>
+                            </ul>
+                        </div>
+                    </div>
                 </div><!-- comment -->
 
                 <!-- Main Content -->

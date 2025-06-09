@@ -17,16 +17,18 @@ public class BlogCategory {
     private String description;
     private Date createdAt;
     private boolean status; // true: active, false: inactive
+    private int blogCount;
 
     public BlogCategory() {
     }
 
-    public BlogCategory(int categoryId, String categoryName, String description, Date createdAt, boolean status) {
+    public BlogCategory(int categoryId, String categoryName, String description, Date createdAt, boolean status, int blogCount) {
         this.categoryId = categoryId;
         this.categoryName = categoryName;
         this.description = description;
         this.createdAt = createdAt;
         this.status = status;
+        this.blogCount = blogCount;
     }
 
     public int getCategoryId() {
@@ -69,17 +71,14 @@ public class BlogCategory {
         this.status = status;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("BlogCategory{");
-        sb.append("categoryId=").append(categoryId);
-        sb.append(", categoryName=").append(categoryName);
-        sb.append(", description=").append(description);
-        sb.append(", createdAt=").append(createdAt);
-        sb.append(", status=").append(status);
-        sb.append('}');
-        return sb.toString();
+    public int getBlogCount() {
+        return blogCount;
     }
+
+    public void setBlogCount(int blogCount) {
+        this.blogCount = blogCount;
+    }
+
+    
 
 }

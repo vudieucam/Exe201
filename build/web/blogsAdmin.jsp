@@ -1,10 +1,10 @@
-<%-- 
-    Document   : blogsAdmin
-    Created on : May 31, 2025, 6:28:44 PM
-    Author     : FPT
---%>
-
+<%@page import="model.Blog"%>
+<%@page import="model.BlogCategory"%>
+<%@page import="java.util.List"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -13,6 +13,7 @@
         <title>Quản Lý Blog - PetShop Admin</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <style>
             :root {
                 --primary-color: #4361ee;
@@ -356,69 +357,93 @@
                     margin-top: 20px;
                 }
             }
+            /* Thêm style cho modal */
+            .modal-content {
+                border-radius: 15px;
+                border: none;
+            }
+            .modal-header {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+            .modal-footer {
+                border-top: none;
+            }
+            .action-btn {
+                width: 30px;
+                height: 30px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 8px;
+                margin: 0 3px;
+                transition: all 0.2s;
+            }
+            .action-btn:hover {
+                transform: scale(1.1);
+            }
+
         </style>
     </head>
     <body>
         <div class="container-fluid">
             <div class="row">
                 <!-- Sidebar -->
+                <!-- Sidebar -->
                 <div class="col-md-2 sidebar p-0">
                     <div class="sidebar-brand">
-                        <img src="images/logo_pettech.jpg" alt="Logo">
+                        <img src="${pageContext.request.contextPath}/images/logo_pettech.jpg" alt="Logo">
                         <h4 class="mb-0">PetTech</h4>
                     </div>
                     <ul class="nav flex-column mt-3">
                         <li class="nav-item">
-                            <a class="nav-link active" href="Admin.jsp">
+                            <a class="nav-link active" href="${pageContext.request.contextPath}/admin">
                                 <i class="bi bi-speedometer2"></i>Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="userAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/useradmin">
                                 <i class="bi bi-people"></i>Người dùng
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="courseadmin">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/courseadmin">
                                 <i class="bi bi-book"></i>Khóa học
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="productsAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/productsAdmin.jsp">
                                 <i class="bi bi-cart"></i>Sản phẩm
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="ordersAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/ordersAdmin.jsp">
                                 <i class="bi bi-receipt"></i>Đơn hàng
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="paymentsAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/paymentsAdmin.jsp">
                                 <i class="bi bi-credit-card"></i>Thanh toán
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="blogsAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/blogadmin">
                                 <i class="bi bi-newspaper"></i>Blog
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="partnersAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/partnersAdmin.jsp">
                                 <i class="bi bi-building"></i>Đối tác
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="reports.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/reports.jsp">
                                 <i class="bi bi-graph-up"></i>Báo cáo
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="settings.jsp">
-                                <i class="bi bi-gear"></i>Cài đặt
-                            </a>
-                        </li>
                     </ul>
+
+
 
                     <!-- Admin Profile Section -->
                     <div class="admin-profile">
@@ -448,212 +473,148 @@
                 <div class="col-md-10 p-4">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h2>Quản Lý Blog</h2>
+                        <div>
+                            <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addBlogModal">
+                                <i class="bi bi-plus-lg"></i> Thêm bài viết
+                            </button>
+                            <a href="blogcategory" class="btn btn-success">
+                                <i class="bi bi-list-ul"></i> Quản lý danh mục
+                            </a>
+                        </div>
                     </div>
 
-                    <!-- Filter Section -->
-                    <div class="filter-section">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <label class="form-label filter-title">Danh mục</label>
-                                <select class="form-select" id="blog-category-filter">
-                                    <option value="all">Tất cả danh mục</option>
-                                    <option value="technology">Công nghệ</option>
-                                    <option value="education">Giáo dục</option>
-                                    <option value="business">Kinh doanh</option>
-                                    <option value="tips">Mẹo hay</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label filter-title">Trạng thái</label>
-                                <select class="form-select" id="blog-status-filter">
-                                    <option value="all">Tất cả trạng thái</option>
-                                    <option value="published">Đã xuất bản</option>
-                                    <option value="draft">Bản nháp</option>
-                                    <option value="archived">Lưu trữ</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label filter-title">Tác giả</label>
-                                <select class="form-select" id="blog-author-filter">
-                                    <option value="all">Tất cả tác giả</option>
-                                    <option value="1">Nguyễn Văn A</option>
-                                    <option value="2">Trần Thị B</option>
-                                    <option value="3">Admin</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label filter-title">Tìm kiếм</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="blog-search" placeholder="Tiêu đề bài viết...">
-                                    <button class="btn btn-primary" type="button" id="blog-search-btn">
-                                        <i class="bi bi-search"></i>
-                                    </button>
+                    <!-- Filter Section (Tương tự trang user) -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <form action="blogadmin" method="get">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label for="search" class="form-label">Tìm kiếm</label>
+                                        <input type="text" class="form-control" id="search" name="search" 
+                                               placeholder="Tìm theo tiêu đề, nội dung..." value="${param.search}">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="statusFilter" class="form-label">Trạng thái</label>
+                                        <select class="form-select" id="statusFilter" name="statusFilter">
+                                            <option value="">Tất cả</option>
+                                            <option value="active" ${param.statusFilter eq 'active' ? 'selected' : ''}>Hiển thị</option>
+                                            <option value="inactive" ${param.statusFilter eq 'inactive' ? 'selected' : ''}>Ẩn</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="featuredFilter" class="form-label">Nổi bật</label>
+                                        <select class="form-select" id="featuredFilter" name="featuredFilter">
+                                            <option value="">Tất cả</option>
+                                            <option value="featured" ${param.featuredFilter eq 'featured' ? 'selected' : ''}>Nổi bật</option>
+                                            <option value="normal" ${param.featuredFilter eq 'normal' ? 'selected' : ''}>Bình thường</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-end">
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="bi bi-funnel"></i> Lọc
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
+                            </form>
                         </div>
                     </div>
 
                     <!-- Blogs Table -->
                     <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <div>
-                                <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addBlogModal">
-                                    <i class="bi bi-plus-circle me-1"></i> Thêm bài viết
-                                </button>
-                                <button class="btn btn-outline-secondary" id="advanced-filter-btn">
-                                    <i class="bi bi-funnel me-1"></i> Lọc nâng cao
-                                </button>
-                            </div>
-                            <div>
-                                <div class="btn-group">
-                                    <button class="btn btn-sm btn-outline-secondary active">Tất cả (76)</button>
-                                    <button class="btn btn-sm btn-outline-secondary">Đã xuất bản (62)</button>
-                                    <button class="btn btn-sm btn-outline-secondary">Bản nháp (8)</button>
-                                    <button class="btn btn-sm btn-outline-secondary">Lưu trữ (6)</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-body">
+                        <div class="card-body p-0">
                             <div class="table-responsive">
-                                <table class="table table-hover" id="blogs-table">
+                                <table class="table table-hover mb-0">
                                     <thead>
                                         <tr>
-                                            <th style="width: 50px">#</th>
+                                            <th>ID</th>
+                                            <th>Hình ảnh</th>
                                             <th>Tiêu đề</th>
                                             <th>Danh mục</th>
                                             <th>Tác giả</th>
                                             <th>Lượt xem</th>
-                                            <th>Ngày đăng</th>
+                                            <th>Nổi bật</th>
                                             <th>Trạng thái</th>
-                                            <th style="width: 120px">Hành động</th>
+                                            <th>Ngày tạo</th>
+                                            <th>Hành động</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>1</td>
-                                            <td>10 xu hướng công nghệ 2023</td>
-                                            <td><span class="badge bg-primary">Công nghệ</span></td>
-                                            <td>Nguyễn Văn A</td>
-                                            <td>1,245</td>
-                                            <td>15/06/2023</td>
-                                            <td><span class="status-badge status-active">Đã xuất bản</span></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary action-btn">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-success action-btn">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-danger action-btn">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>2</td>
-                                            <td>Học Python trong 30 ngày</td>
-                                            <td><span class="badge bg-info">Giáo dục</span></td>
-                                            <td>Trần Thị B</td>
-                                            <td>876</td>
-                                            <td>14/06/2023</td>
-                                            <td><span class="status-badge status-active">Đã xuất bản</span></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary action-btn">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-success action-btn">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-danger action-btn">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>3</td>
-                                            <td>Chiến lược marketing 2023</td>
-                                            <td><span class="badge bg-success">Kinh doanh</span></td>
-                                            <td>Admin</td>
-                                            <td>1,024</td>
-                                            <td>13/06/2023</td>
-                                            <td><span class="status-badge status-active">Đã xuất bản</span></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary action-btn">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-success action-btn">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-danger action-btn">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>4</td>
-                                            <td>Mẹo học lập trình hiệu quả</td>
-                                            <td><span class="badge bg-warning">Mẹo hay</span></td>
-                                            <td>Nguyễn Văn A</td>
-                                            <td>2,156</td>
-                                            <td>12/06/2023</td>
-                                            <td><span class="status-badge status-active">Đã xuất bản</span></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary action-btn">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-success action-btn">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-danger action-btn">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>5</td>
-                                            <td>Cách chăm sóc thú cưng mùa hè</td>
-                                            <td><span class="badge bg-warning">Mẹo hay</span></td>
-                                            <td>Trần Thị B</td>
-                                            <td>3,542</td>
-                                            <td>10/06/2023</td>
-                                            <td><span class="status-badge status-active">Đã xuất bản</span></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary action-btn">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-success action-btn">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-danger action-btn">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
+                                        <c:forEach var="blog" items="${blogs}">
+                                            <tr>
+                                                <td>${blog.blogId}</td>
+                                                <td>
+                                                    <c:if test="${not empty blog.imageUrl}">
+                                                        <img src="${blog.imageUrl}" class="blog-image" alt="Blog Image">
+                                                    </c:if>
+                                                </td>
+                                                <td>${blog.title}</td>
+                                                <td>${blog.categoryName}</td>
+                                                <td>${blog.authorName}</td>
+                                                <td>${blog.viewCount}</td>
+                                                <td>
+                                                    <span class="badge ${blog.isFeatured ? 'bg-success' : 'bg-secondary'}">
+                                                        ${blog.isFeatured ? 'Có' : 'Không'}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge ${blog.status ? 'bg-success' : 'bg-secondary'}">
+                                                        ${blog.status ? 'Hiển thị' : 'Ẩn'}
+                                                    </span>
+                                                </td>
+                                                <td><fmt:formatDate value="${blog.createdAt}" pattern="dd/MM/yyyy"/></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary action-btn edit-btn"
+                                                            data-bs-toggle="modal" data-bs-target="#editBlogModal"
+                                                            data-id="${blog.blogId}"
+                                                            data-title="${blog.title}"
+                                                            data-shortdescription="${blog.shortDescription}"
+                                                            data-content="${blog.content}"
+                                                            data-categoryid="${blog.categoryId}"
+                                                            data-authorname="${blog.authorName}"
+                                                            data-imageurl="${blog.imageUrl}"
+                                                            data-isfeatured="${blog.isFeatured}"
+                                                            data-status="${blog.status}">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-warning action-btn" 
+                                                            onclick="toggleBlogStatus(${blog.blogId})">
+                                                        <i class="bi ${blog.status ? 'bi-eye-slash' : 'bi-eye'}"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger action-btn" 
+                                                            onclick="confirmDelete(${blog.blogId})">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
                                     </tbody>
                                 </table>
                             </div>
-
-                            <!-- Pagination -->
-                            <nav aria-label="Page navigation" class="mt-3">
-                                <ul class="pagination justify-content-center">
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
-                                            <i class="bi bi-chevron-left"></i>
-                                        </a>
-                                    </li>
-                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">4</a></li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="#">
-                                            <i class="bi bi-chevron-right"></i>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </nav>
                         </div>
                     </div>
+
+                    <!-- Pagination -->
+                    <nav class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <c:if test="${currentPage > 1}">
+                                <li class="page-item">
+                                    <a class="page-link" href="blogadmin?page=${currentPage-1}&search=${param.search}&statusFilter=${param.statusFilter}&featuredFilter=${param.featuredFilter}">Trước</a>
+                                </li>
+                            </c:if>
+
+                            <c:forEach begin="1" end="${totalPages}" var="i">
+                                <li class="page-item ${currentPage eq i ? 'active' : ''}">
+                                    <a class="page-link" href="blogadmin?page=${i}&search=${param.search}&statusFilter=${param.statusFilter}&featuredFilter=${param.featuredFilter}">${i}</a>
+                                </li>
+                            </c:forEach>
+
+                            <c:if test="${currentPage < totalPages}">
+                                <li class="page-item">
+                                    <a class="page-link" href="blogadmin?page=${currentPage+1}&search=${param.search}&statusFilter=${param.statusFilter}&featuredFilter=${param.featuredFilter}">Tiếp</a>
+                                </li>
+                            </c:if>
+                        </ul>
+                    </nav>
                 </div>
             </div>
         </div>
@@ -666,114 +627,172 @@
                         <h5 class="modal-title" id="addBlogModalLabel">Thêm bài viết mới</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
-                        <form>
-                            <div class="row mb-3">
-                                <div class="col-md-8">
-                                    <label for="blog-title" class="form-label">Tiêu đề bài viết</label>
-                                    <input type="text" class="form-control" id="blog-title" placeholder="Nhập tiêu đề bài viết">
+                    <form action="blogadmin" method="POST">
+                        <input type="hidden" name="action" value="insert">
+                        <div class="modal-body">
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <label for="title" class="form-label">Tiêu đề</label>
+                                    <input type="text" class="form-control" id="title" name="title" required>
                                 </div>
-                                <div class="col-md-4">
-                                    <label for="blog-category" class="form-label">Danh mục</label>
-                                    <select class="form-select" id="blog-category">
-                                        <option value="technology">Công nghệ</option>
-                                        <option value="education">Giáo dục</option>
-                                        <option value="business">Kinh doanh</option>
-                                        <option value="tips">Mẹo hay</option>
-                                    </select>
+                                <div class="col-md-12">
+                                    <label for="shortDescription" class="form-label">Mô tả ngắn</label>
+                                    <textarea class="form-control" id="shortDescription" name="shortDescription" rows="2" required></textarea>
                                 </div>
-                            </div>
-
-                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <label for="content" class="form-label">Nội dung</label>
+                                    <textarea class="form-control" id="content" name="content" rows="5" required></textarea>
+                                </div>
                                 <div class="col-md-6">
-                                    <label for="blog-author" class="form-label">Tác giả</label>
-                                    <select class="form-select" id="blog-author">
-                                        <option value="1">Nguyễn Văn A</option>
-                                        <option value="2">Trần Thị B</option>
-                                        <option value="3">Admin</option>
+                                    <label for="categoryId" class="form-label">Danh mục</label>
+                                    <select class="form-select" id="categoryId" name="categoryId" required>
+                                        <c:forEach var="category" items="${categories}">
+                                            <option value="${category.categoryId}">${category.categoryName}</option>
+                                        </c:forEach>
                                     </select>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="blog-status" class="form-label">Trạng thái</label>
-                                    <select class="form-select" id="blog-status">
-                                        <option value="published">Đã xuất bản</option>
-                                        <option value="draft">Bản nháp</option>
-                                        <option value="archived">Lưu trữ</option>
+                                    <label for="authorName" class="form-label">Tác giả</label>
+                                    <input type="text" class="form-control" id="authorName" name="authorName" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="imageUrl" class="form-label">URL hình ảnh</label>
+                                    <input type="text" class="form-control" id="imageUrl" name="imageUrl">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="isFeatured" class="form-label">Nổi bật</label>
+                                    <select class="form-select" id="isFeatured" name="isFeatured" required>
+                                        <option value="false">Không</option>
+                                        <option value="true">Có</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="status" class="form-label">Trạng thái</label>
+                                    <select class="form-select" id="status" name="status" required>
+                                        <option value="true">Hiển thị</option>
+                                        <option value="false">Ẩn</option>
                                     </select>
                                 </div>
                             </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-primary">Lưu bài viết</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
 
-                            <div class="mb-3">
-                                <label for="blog-image" class="form-label">Ảnh đại diện</label>
-                                <input class="form-control" type="file" id="blog-image">
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="blog-content" class="form-label">Nội dung bài viết</label>
-                                <textarea class="form-control" id="blog-content" rows="10" placeholder="Nhập nội dung bài viết..."></textarea>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="blog-tags" class="form-label">Tags</label>
-                                <input type="text" class="form-control" id="blog-tags" placeholder="Nhập tags, cách nhau bằng dấu phẩy">
-                            </div>
-                        </form>
+        <!-- Edit Blog Modal -->
+        <div class="modal fade" id="editBlogModal" tabindex="-1" aria-labelledby="editBlogModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editBlogModalLabel">Chỉnh sửa bài viết</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button type="button" class="btn btn-primary">Lưu nháp</button>
-                        <button type="button" class="btn btn-success">Xuất bản</button>
-                    </div>
+                    <form id="editBlogForm" action="blogadmin" method="POST">
+                        <input type="hidden" name="action" value="update">
+                        <input type="hidden" id="editBlogId" name="id">
+                        <div class="modal-body">
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <label for="editTitle" class="form-label">Tiêu đề</label>
+                                    <input type="text" class="form-control" id="editTitle" name="title" required>
+                                </div>
+                                <div class="col-md-12">
+                                    <label for="editShortDescription" class="form-label">Mô tả ngắn</label>
+                                    <textarea class="form-control" id="editShortDescription" name="shortDescription" rows="2" required></textarea>
+                                </div>
+                                <div class="col-md-12">
+                                    <label for="editContent" class="form-label">Nội dung</label>
+                                    <textarea class="form-control" id="editContent" name="content" rows="5" required></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="editCategoryId" class="form-label">Danh mục</label>
+                                    <select class="form-select" id="editCategoryId" name="categoryId" required>
+                                        <c:forEach var="category" items="${categories}">
+                                            <option value="${category.categoryId}">${category.categoryName}</option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="editAuthorName" class="form-label">Tác giả</label>
+                                    <input type="text" class="form-control" id="editAuthorName" name="authorName" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="editImageUrl" class="form-label">URL hình ảnh</label>
+                                    <input type="text" class="form-control" id="editImageUrl" name="imageUrl">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="editIsFeatured" class="form-label">Nổi bật</label>
+                                    <select class="form-select" id="editIsFeatured" name="isFeatured" required>
+                                        <option value="false">Không</option>
+                                        <option value="true">Có</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="editStatus" class="form-label">Trạng thái</label>
+                                    <select class="form-select" id="editStatus" name="status" required>
+                                        <option value="true">Hiển thị</option>
+                                        <option value="false">Ẩn</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-primary">Cập nhật</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-            // Filter functionality
-            document.getElementById('blog-search-btn').addEventListener('click', function () {
-                const searchText = document.getElementById('blog-search').value.toLowerCase();
-                const categoryFilter = document.getElementById('blog-category-filter').value;
-                const statusFilter = document.getElementById('blog-status-filter').value;
-                const authorFilter = document.getElementById('blog-author-filter').value;
+                                                                // JavaScript tương tự trang user
+                                                                document.addEventListener('DOMContentLoaded', function () {
+                                                                    // Xử lý modal chỉnh sửa
+                                                                    const editButtons = document.querySelectorAll('.edit-btn');
+                                                                    editButtons.forEach(button => {
+                                                                        button.addEventListener('click', () => {
+                                                                            document.getElementById('editBlogId').value = button.getAttribute('data-id');
+                                                                            document.getElementById('editTitle').value = button.getAttribute('data-title');
+                                                                            document.getElementById('editShortDescription').value = button.getAttribute('data-shortdescription');
+                                                                            document.getElementById('editContent').value = button.getAttribute('data-content');
+                                                                            document.getElementById('editCategoryId').value = button.getAttribute('data-categoryid');
+                                                                            document.getElementById('editAuthorName').value = button.getAttribute('data-authorname');
+                                                                            document.getElementById('editImageUrl').value = button.getAttribute('data-imageurl');
+                                                                            document.getElementById('editIsFeatured').value = button.getAttribute('data-isfeatured') === 'true' ? 'true' : 'false';
+                                                                            document.getElementById('editStatus').value = button.getAttribute('data-status') === 'true' ? 'true' : 'false';
+                                                                        });
+                                                                    });
+                                                                });
 
-                const rows = document.querySelectorAll('#blogs-table tbody tr');
+                                                                function toggleBlogStatus(blogId) {
+                                                                    if (confirm('Bạn có chắc muốn thay đổi trạng thái bài viết này?')) {
+                                                                        window.location.href = 'blogadmin?action=toggle&id=' + blogId;
+                                                                    }
+                                                                }
 
-                rows.forEach(row => {
-                    const title = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-                    const category = row.querySelector('td:nth-child(3) span').textContent;
-                    const author = row.querySelector('td:nth-child(4)').textContent;
-                    const status = row.querySelector('td:nth-child(7) span').textContent;
-
-                    const matchSearch = title.includes(searchText);
-                    const matchCategory = categoryFilter === 'all' ||
-                            (categoryFilter === 'technology' && category === 'Công nghệ') ||
-                            (categoryFilter === 'education' && category === 'Giáo dục') ||
-                            (categoryFilter === 'business' && category === 'Kinh doanh') ||
-                            (categoryFilter === 'tips' && category === 'Mẹo hay');
-
-                    const matchStatus = statusFilter === 'all' ||
-                            (statusFilter === 'published' && status === 'Đã xuất bản') ||
-                            (statusFilter === 'draft' && status === 'Bản nháp') ||
-                            (statusFilter === 'archived' && status === 'Lưu trữ');
-
-                    const matchAuthor = authorFilter === 'all' ||
-                            (authorFilter === '1' && author === 'Nguyễn Văn A') ||
-                            (authorFilter === '2' && author === 'Trần Thị B') ||
-                            (authorFilter === '3' && author === 'Admin');
-
-                    if (matchSearch && matchCategory && matchStatus && matchAuthor) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
-            });
-
-            // Advanced filter button
-            document.getElementById('advanced-filter-btn').addEventListener('click', function () {
-                alert('Chức năng lọc nâng cao sẽ được mở rộng trong phiên bản sau');
-            });
+                                                                function confirmDelete(blogId) {
+                                                                    Swal.fire({
+                                                                        title: 'Bạn có chắc chắn?',
+                                                                        text: "Bạn sẽ không thể hoàn tác hành động này!",
+                                                                        icon: 'warning',
+                                                                        showCancelButton: true,
+                                                                        confirmButtonColor: '#d33',
+                                                                        cancelButtonColor: '#3085d6',
+                                                                        confirmButtonText: 'Xóa',
+                                                                        cancelButtonText: 'Hủy'
+                                                                    }).then((result) => {
+                                                                        if (result.isConfirmed) {
+                                                                            window.location.href = 'blogadmin?action=delete&id=' + blogId;
+                                                                        }
+                                                                    });
+                                                                }
         </script>
     </body>
 </html>

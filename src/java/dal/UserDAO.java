@@ -531,176 +531,112 @@ public class UserDAO extends DBConnect {
     }
 
 // Trong UserDAO.java
-    
+    // Get all users
+    public List<User> getAllUsers() throws SQLException {
+        List<User> users = new ArrayList<>();
+        String sql = "SELECT * FROM users";
 
-   
+        try (PreparedStatement statement = connection.prepareStatement(sql); ResultSet resultSet = statement.executeQuery()) {
 
-//    public static void main(String[] args) {
-//        // Khởi tạo UserDAO (giả sử đã có kết nối database)
-//        UserDAO tester = new UserDAO();
-//
-//        // Test từng phương thức
-//        tester.testCountAllUsers();
-//        tester.testCountOnlineUsers();
-//        tester.testCountActiveUsers();
-//        tester.testCalculateUserGrowth();
-//        tester.testGetUserDistribution();
-//        tester.testGetDailyStats();
-//        tester.testSaveSessionInfo();
-//    }
-//
-//    public void testCountAllUsers() {
-//        System.out.println("=== Testing countAllUsers() ===");
-//        try {
-//            long startTime = System.currentTimeMillis();
-//            long totalUsers = countAllUsers();
-//            long endTime = System.currentTimeMillis();
-//
-//            System.out.println("Total users: " + totalUsers);
-//            System.out.printf("Execution time: %d ms\n", (endTime - startTime));
-//        } catch (Exception e) {
-//            System.err.println("Error in testCountAllUsers: " + e.getMessage());
-//            e.printStackTrace();
-//        }
-//        System.out.println();
-//    }
-//
-//    public void testCountOnlineUsers() {
-//        System.out.println("=== Testing countOnlineUsers() ===");
-//        try {
-//            long startTime = System.currentTimeMillis();
-//            int onlineUsers = countOnlineUsers();
-//            long endTime = System.currentTimeMillis();
-//
-//            System.out.println("Online users: " + onlineUsers);
-//            System.out.printf("Execution time: %d ms\n", (endTime - startTime));
-//        } catch (Exception e) {
-//            System.err.println("Error in testCountOnlineUsers: " + e.getMessage());
-//            e.printStackTrace();
-//        }
-//        System.out.println();
-//    }
-//
-//    public void testCountActiveUsers() {
-//        System.out.println("=== Testing countActiveUsers() ===");
-//        try {
-//            long startTime = System.currentTimeMillis();
-//            int activeUsers = countActiveUsers();
-//            long endTime = System.currentTimeMillis();
-//
-//            System.out.println("Active users (last 30 days): " + activeUsers);
-//            System.out.printf("Execution time: %d ms\n", (endTime - startTime));
-//        } catch (Exception e) {
-//            System.err.println("Error in testCountActiveUsers: " + e.getMessage());
-//            e.printStackTrace();
-//        }
-//        System.out.println();
-//    }
-//
-//    public void testCalculateUserGrowth() {
-//        System.out.println("=== Testing calculateUserGrowth() ===");
-//        try {
-//            long startTime = System.currentTimeMillis();
-//            double growthRate = calculateUserGrowth();
-//            long endTime = System.currentTimeMillis();
-//
-//            System.out.printf("User growth rate: %.2f%%\n", growthRate);
-//            System.out.printf("Execution time: %d ms\n", (endTime - startTime));
-//        } catch (Exception e) {
-//            System.err.println("Error in testCalculateUserGrowth: " + e.getMessage());
-//            e.printStackTrace();
-//        }
-//        System.out.println();
-//    }
-//
-//    public void testGetUserDistribution() {
-//        System.out.println("=== Testing getUserDistribution() ===");
-//        try {
-//            long startTime = System.currentTimeMillis();
-//            Map<String, Integer> distribution = getUserDistribution();
-//            long endTime = System.currentTimeMillis();
-//
-//            System.out.println("User distribution:");
-//            System.out.println("Regular users: " + distribution.getOrDefault("regularUsers", 0));
-//            System.out.println("Staff users: " + distribution.getOrDefault("staffUsers", 0));
-//            System.out.println("Admin users: " + distribution.getOrDefault("adminUsers", 0));
-//            System.out.println("Premium users: " + distribution.getOrDefault("premiumUsers", 0));
-//            System.out.printf("Execution time: %d ms\n", (endTime - startTime));
-//        } catch (Exception e) {
-//            System.err.println("Error in testGetUserDistribution: " + e.getMessage());
-//            e.printStackTrace();
-//        }
-//        System.out.println();
-//    }
-//
-//    public void testGetDailyStats() {
-//        System.out.println("=== Testing getDailyStats() ===");
-//        try {
-//            int daysToShow = 7;
-//            long startTime = System.currentTimeMillis();
-//            List<Map<String, Object>> dailyStats = getDailyStats(daysToShow);
-//            long endTime = System.currentTimeMillis();
-//
-//            System.out.println("Daily stats for last " + daysToShow + " days:");
-//            for (Map<String, Object> dayStat : dailyStats) {
-//                System.out.println("Date: " + dayStat.get("date"));
-//                System.out.println("  Visits: " + dayStat.get("visits"));
-//                System.out.println("  Unique visitors: " + dayStat.get("uniqueVisitors"));
-//                System.out.println("  New users: " + dayStat.get("newUsers"));
-//                System.out.println("  Avg duration: " + dayStat.get("avgDuration") + " seconds");
-//                System.out.println("  Page views: " + dayStat.get("pageViews"));
-//                System.out.println();
-//            }
-//            System.out.printf("Execution time: %d ms\n", (endTime - startTime));
-//        } catch (Exception e) {
-//            System.err.println("Error in testGetDailyStats: " + e.getMessage());
-//            e.printStackTrace();
-//        }
-//        System.out.println();
-//    }
-//
-//    public void testSaveSessionInfo() {
-//        System.out.println("=== Testing saveSessionInfo() ===");
-//        try {
-//            // Tạo dữ liệu test
-//            Integer userId = 1; // Thay bằng ID user thực tế
-//            String sessionId = "test_session_" + System.currentTimeMillis();
-//            String ipAddress = "192.168.1.1";
-//            String userAgent = "Mozilla/5.0 (Test)";
-//            Timestamp loginTime = new Timestamp(System.currentTimeMillis() - 3600000); // 1 giờ trước
-//            Timestamp logoutTime = new Timestamp(System.currentTimeMillis());
-//            int duration = 3600; // 1 giờ (tính bằng giây)
-//
-//            System.out.println("Saving session info...");
-//            long startTime = System.currentTimeMillis();
-//            saveSessionInfo(userId, sessionId, ipAddress, userAgent, loginTime, logoutTime, duration);
-//            long endTime = System.currentTimeMillis();
-//
-//            System.out.println("Session info saved successfully");
-//            System.out.printf("Execution time: %d ms\n", (endTime - startTime));
-//        } catch (Exception e) {
-//            System.err.println("Error in testSaveSessionInfo: " + e.getMessage());
-//            e.printStackTrace();
-//        }
-//        System.out.println();
-//    }
+            while (resultSet.next()) {
+                User user = mapResultSetToUser(resultSet);
+                users.add(user);
+            }
+        }
+        return users;
+    }
+
+    // Helper method to map ResultSet to User object
+    private User mapResultSetToUser(ResultSet resultSet) throws SQLException {
+        User user = new User();
+        user.setId(resultSet.getInt("id"));
+        user.setEmail(resultSet.getString("email"));
+        user.setPassword(resultSet.getString("password"));
+        user.setFullname(resultSet.getString("fullname"));
+        user.setPhone(resultSet.getString("phone"));
+        user.setAddress(resultSet.getString("address"));
+        user.setRoleId(resultSet.getInt("role_id"));
+        user.setStatus(resultSet.getBoolean("status"));
+        user.setCreatedAt(resultSet.getDate("created_at"));
+        user.setVerificationToken(resultSet.getString("verification_token"));
+        user.setServicePackageId(resultSet.getInt("service_package_id"));
+        user.setIsActive(resultSet.getBoolean("is_active"));
+        user.setActivationToken(resultSet.getString("activation_token"));
+        user.setTokenExpiry(resultSet.getDate("token_expiry"));
+        return user;
+    }
+
+    public boolean addUser(User user) throws SQLException {
+        String sql = "INSERT INTO users (email, password, fullname, phone, address, role_id, status, service_package_id) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            statement.setString(1, user.getEmail());
+            statement.setString(2, user.getPassword());
+            statement.setString(3, user.getFullname());
+            statement.setString(4, user.getPhone());
+            statement.setString(5, user.getAddress());
+            statement.setInt(6, user.getRoleId());
+            statement.setBoolean(7, user.isStatus());
+
+            if (user.getServicePackageId() > 0) {
+                statement.setInt(8, user.getServicePackageId());
+            } else {
+                statement.setNull(8, Types.INTEGER);
+            }
+
+            int affectedRows = statement.executeUpdate();
+
+            if (affectedRows > 0) {
+                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        user.setId(generatedKeys.getInt(1));
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+
+    public boolean updateUser(User user) throws SQLException {
+        String sql = "UPDATE users SET email = ?, fullname = ?, phone = ?, address = ?, "
+                + "role_id = ?, status = ?, service_package_id = ? "
+                + "WHERE id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, user.getEmail());
+            statement.setString(2, user.getFullname());
+            statement.setString(3, user.getPhone());
+            statement.setString(4, user.getAddress());
+            statement.setInt(5, user.getRoleId());
+            statement.setBoolean(6, user.isStatus());
+
+            if (user.getServicePackageId() > 0) {
+                statement.setInt(7, user.getServicePackageId());
+            } else {
+                statement.setNull(7, Types.INTEGER);
+            }
+
+            statement.setInt(8, user.getId());
+
+            return statement.executeUpdate() > 0;
+        }
+    }
+
+    public boolean deactivateUser(int userId) throws SQLException {
+        String sql = "UPDATE users SET status = CASE WHEN status = 1 THEN 0 ELSE 1 END WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, userId);
+            return statement.executeUpdate() > 0;
+        }
+    }
+
+    public boolean deleteUser(int userId) throws SQLException {
+        String sql = "DELETE FROM users WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, userId);
+            return statement.executeUpdate() > 0;
+        }
+    }
 }
-//    public static void main(String[] args) {
-//        UserDAO dao = new UserDAO();
-//        String email = "user5@example.com"; // Thay bằng email user role=1
-//        String password = "123456Aa"; // Thay bằng password đúng
-//
-//        try {
-//            User user = dao.login(email, password);
-//            System.out.println("Test login:");
-//            System.out.println("User: " + (user != null ? user.toString() : "null"));
-//            if (user != null) {
-//                System.out.println("Role: " + user.getRoleId());
-//                System.out.println("Status: " + user.isStatus());
-//                System.out.println("Active: " + user.isIsActive());
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//    }
-

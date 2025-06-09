@@ -5,6 +5,9 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -351,7 +354,7 @@
                 .navbar-toggler {
                     display: block;
                 }
-                
+
                 .admin-profile {
                     margin-top: 20px;
                 }
@@ -364,62 +367,57 @@
                 <!-- Sidebar -->
                 <div class="col-md-2 sidebar p-0">
                     <div class="sidebar-brand">
-                        <img src="images/logo_pettech.jpg" alt="Logo">
+                        <img src="${pageContext.request.contextPath}/images/logo_pettech.jpg" alt="Logo">
                         <h4 class="mb-0">PetTech</h4>
                     </div>
                     <ul class="nav flex-column mt-3">
                         <li class="nav-item">
-                            <a class="nav-link active" href="Admin.jsp">
+                            <a class="nav-link active" href="${pageContext.request.contextPath}/admin">
                                 <i class="bi bi-speedometer2"></i>Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="userAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/useradmin">
                                 <i class="bi bi-people"></i>Người dùng
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="courseAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/courseadmin">
                                 <i class="bi bi-book"></i>Khóa học
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="productsAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/productsAdmin.jsp">
                                 <i class="bi bi-cart"></i>Sản phẩm
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="ordersAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/ordersAdmin.jsp">
                                 <i class="bi bi-receipt"></i>Đơn hàng
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="paymentsAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/paymentsAdmin.jsp">
                                 <i class="bi bi-credit-card"></i>Thanh toán
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="blogsAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/blogadmin">
                                 <i class="bi bi-newspaper"></i>Blog
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="partnersAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/partnersAdmin.jsp">
                                 <i class="bi bi-building"></i>Đối tác
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="reports.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/reports.jsp">
                                 <i class="bi bi-graph-up"></i>Báo cáo
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="settings.jsp">
-                                <i class="bi bi-gear"></i>Cài đặt
-                            </a>
-                        </li>
                     </ul>
-                    
+
                     <!-- Admin Profile Section -->
                     <div class="admin-profile">
                         <div class="dropdown">
@@ -432,17 +430,20 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="editProfile.jsp">
-                                    <i class="bi bi-person me-2"></i>Thông tin cá nhân
-                                </a></li>
+                                        <i class="bi bi-person me-2"></i>Thông tin cá nhân
+                                    </a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item logout" href="home">
-                                    <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
-                                </a></li>
+                                        <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                                    </a></li>
                             </ul>
                         </div>
                     </div>
                 </div>
 
+                <c:if test="${param.message == 'added'}">
+                    <div class="alert alert-success">Người dùng đã được thêm thành công!</div>
+                </c:if>
 
                 <!-- Main Content -->
                 <div class="col-md-10 p-4">
@@ -451,6 +452,7 @@
                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
                             <i class="bi bi-plus-lg"></i> Thêm người dùng
                         </button>
+
                     </div>
 
                     <!-- Filter Section -->
@@ -502,78 +504,68 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>1</td>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <img src="https://ui-avatars.com/api/?name=Nguyễn+Văn+A&background=random" class="user-avatar">
-                                                    <div>
-                                                        <h6 class="mb-0">Nguyễn Văn A</h6>
-                                                        <small class="text-muted">nguyenvana@gmail.com</small>
+                                        <c:forEach var="user" items="${users}">
+                                            <tr>
+                                                <td>${user.id}</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <img src="https://ui-avatars.com/api/?name=${user.fullname}&background=random" class="user-avatar">
+                                                        <div>
+                                                            <h6 class="mb-0">${user.fullname}</h6>
+                                                            <small class="text-muted">${user.email}</small>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td><span class="badge bg-primary">Khách hàng</span></td>
-                                            <td>Hà Nội</td>
-                                            <td><span class="status-badge status-active">Hoạt động</span></td>
-                                            <td>15/05/2023</td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#editUserModal">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-danger action-btn">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>2</td>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <img src="https://ui-avatars.com/api/?name=Trần+Thị+B&background=random" class="user-avatar">
-                                                    <div>
-                                                        <h6 class="mb-0">Trần Thị B</h6>
-                                                        <small class="text-muted">tranthib@gmail.com</small>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td><span class="badge bg-warning text-dark">Nhân viên</span></td>
-                                            <td>Đà Nẵng</td>
-                                            <td><span class="status-badge status-active">Hoạt động</span></td>
-                                            <td>20/06/2023</td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#editUserModal">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-danger action-btn">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>3</td>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <img src="https://ui-avatars.com/api/?name=Lê+Văn+C&background=random" class="user-avatar">
-                                                    <div>
-                                                        <h6 class="mb-0">Lê Văn C</h6>
-                                                        <small class="text-muted">levanc@gmail.com</small>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td><span class="badge bg-danger">Admin</span></td>
-                                            <td>TP.HCM</td>
-                                            <td><span class="status-badge status-inactive">Không hoạt động</span></td>
-                                            <td>10/04/2023</td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#editUserModal">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-danger action-btn">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
+                                                </td>
+                                                <td>
+                                                    <c:choose>
+                                                        <c:when test="${user.roleId == 1}">
+                                                            <span class="badge bg-primary">Khách hàng</span>
+                                                        </c:when>
+                                                        <c:when test="${user.roleId == 2}">
+                                                            <span class="badge bg-warning text-dark">Nhân viên</span>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span class="badge bg-danger">Admin</span>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </td>
+                                                <td>${user.address}</td>
+                                                <td>
+                                                    <c:choose>
+                                                        <c:when test="${user.status}">
+                                                            <span class="status-badge status-active">Hoạt động</span>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span class="status-badge status-inactive">Không hoạt động</span>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </td>
+                                                <td>${user.createdAt}</td>
+                                                <td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary action-btn edit-btn"
+                                                            data-bs-toggle="modal" data-bs-target="#editUserModal"
+                                                            data-id="${user.id}"
+                                                            data-fullname="${user.fullname}"
+                                                            data-email="${user.email}"
+                                                            data-phone="${user.phone}"
+                                                            data-address="${user.address}"
+                                                            data-role="${user.roleId}"
+                                                            data-status="${user.status}"
+                                                            data-service="${user.servicePackageId}">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                    <a href="useradmin?action=deactivate&id=${user.id}" class="btn btn-sm btn-outline-warning action-btn" 
+                                                       onclick="return confirm('Bạn có chắc chắn muốn ${user.status ? 'vô hiệu hóa' : 'kích hoạt'} người dùng này?')">
+                                                        <i class="bi ${user.status ? 'bi-eye-slash' : 'bi-eye'}"></i>
+                                                    </a>
+                                                    <a href="useradmin?action=delete&id=${user.id}" class="btn btn-sm btn-outline-danger action-btn" 
+                                                       onclick="return confirm('Bạn có chắc chắn muốn xóa vĩnh viễn người dùng này?')">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
                                     </tbody>
                                 </table>
                             </div>
@@ -607,27 +599,29 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form>
+                        <form action="useradmin" method="post">
+                            <input type="hidden" name="action" value="insert">
+
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label for="fullname" class="form-label">Họ và tên</label>
-                                    <input type="text" class="form-control" id="fullname" required>
+                                    <input type="text" class="form-control" id="fullname" name="fullname" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="email" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="email" required>
+                                    <input type="email" class="form-control" id="email" name="email" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="phone" class="form-label">Số điện thoại</label>
-                                    <input type="tel" class="form-control" id="phone">
+                                    <input type="tel" class="form-control" id="phone" name="phone">
                                 </div>
                                 <div class="col-md-6">
                                     <label for="password" class="form-label">Mật khẩu</label>
-                                    <input type="password" class="form-control" id="password" required>
+                                    <input type="password" class="form-control" id="password" name="password" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="role" class="form-label">Vai trò</label>
-                                    <select class="form-select" id="role" required>
+                                    <select class="form-select" id="role" name="role_id" required>
                                         <option value="1">Khách hàng</option>
                                         <option value="2">Nhân viên</option>
                                         <option value="3">Quản trị viên</option>
@@ -635,21 +629,27 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label for="status" class="form-label">Trạng thái</label>
-                                    <select class="form-select" id="status" required>
-                                        <option value="active">Hoạt động</option>
-                                        <option value="inactive">Không hoạt động</option>
+                                    <select class="form-select" id="status" name="status" required>
+                                        <option value="true">Hoạt động</option>
+                                        <option value="false">Không hoạt động</option>
                                     </select>
                                 </div>
                                 <div class="col-12">
                                     <label for="address" class="form-label">Địa chỉ</label>
-                                    <textarea class="form-control" id="address" rows="2"></textarea>
+                                    <textarea class="form-control" id="address" name="address" rows="2"></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="service_package_id" class="form-label">Gói dịch vụ (nếu có)</label>
+                                    <input type="number" class="form-control" id="service_package_id" name="service_package_id">
                                 </div>
                             </div>
+
+                            <div class="modal-footer mt-4">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                <button type="submit" class="btn btn-primary">Lưu thông tin</button>
+                            </div>
                         </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                        <button type="button" class="btn btn-primary">Lưu thông tin</button>
+
                     </div>
                 </div>
             </div>
@@ -664,86 +664,109 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form>
+                        <form action="useradmin" method="post">
+                            <input type="hidden" name="action" value="update">
+                            <input type="hidden" name="id" id="editId">
+
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label for="editFullname" class="form-label">Họ và tên</label>
-                                    <input type="text" class="form-control" id="editFullname" value="Nguyễn Văn A" required>
+                                    <label class="form-label">Họ và tên</label>
+                                    <input type="text" class="form-control" id="editFullname" name="fullname" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="editEmail" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="editEmail" value="nguyenvana@gmail.com" required>
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="editEmail" name="email" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="editPhone" class="form-label">Số điện thoại</label>
-                                    <input type="tel" class="form-control" id="editPhone" value="0987654321">
+                                    <label class="form-label">Số điện thoại</label>
+                                    <input type="tel" class="form-control" id="editPhone" name="phone">
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="editPassword" class="form-label">Mật khẩu (để trống nếu không đổi)</label>
-                                    <input type="password" class="form-control" id="editPassword">
+                                    <label class="form-label">Mật khẩu (để trống nếu không đổi)</label>
+                                    <input type="password" class="form-control" name="password">
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="editRole" class="form-label">Vai trò</label>
-                                    <select class="form-select" id="editRole" required>
+                                    <label class="form-label">Vai trò</label>
+                                    <select class="form-select" id="editRole" name="role_id" required>
                                         <option value="1">Khách hàng</option>
-                                        <option value="2" selected>Nhân viên</option>
+                                        <option value="2">Nhân viên</option>
                                         <option value="3">Quản trị viên</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="editStatus" class="form-label">Trạng thái</label>
-                                    <select class="form-select" id="editStatus" required>
-                                        <option value="active" selected>Hoạt động</option>
-                                        <option value="inactive">Không hoạt động</option>
+                                    <label class="form-label">Trạng thái</label>
+                                    <select class="form-select" id="editStatus" name="status" required>
+                                        <option value="true">Hoạt động</option>
+                                        <option value="false">Không hoạt động</option>
                                     </select>
                                 </div>
                                 <div class="col-12">
-                                    <label for="editAddress" class="form-label">Địa chỉ</label>
-                                    <textarea class="form-control" id="editAddress" rows="2">123 Đường ABC, Quận 1, TP.HCM</textarea>
+                                    <label class="form-label">Địa chỉ</label>
+                                    <textarea class="form-control" id="editAddress" name="address" rows="2"></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Gói dịch vụ</label>
+                                    <input type="number" class="form-control" id="editServicePackageId" name="service_package_id">
                                 </div>
                             </div>
+
+                            <div class="modal-footer mt-4">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                <button type="submit" class="btn btn-primary">Cập nhật</button>
+                            </div>
                         </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                        <button type="button" class="btn btn-primary">Cập nhật</button>
+
                     </div>
                 </div>
             </div>
-        </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
-            // Simple filter functionality
-            document.getElementById('filterBtn').addEventListener('click', function() {
-                const searchText = document.getElementById('searchInput').value.toLowerCase();
-                const roleFilter = document.getElementById('roleFilter').value;
-                const statusFilter = document.getElementById('statusFilter').value;
-                
-                const rows = document.querySelectorAll('tbody tr');
-                
-                rows.forEach(row => {
-                    const name = row.querySelector('h6').textContent.toLowerCase();
-                    const email = row.querySelector('small').textContent.toLowerCase();
-                    const role = row.querySelector('td:nth-child(3) span').textContent;
-                    const status = row.querySelector('td:nth-child(5) span').textContent;
-                    
-                    const matchSearch = name.includes(searchText) || email.includes(searchText);
-                    const matchRole = roleFilter === '' || 
-                        (roleFilter === '1' && role === 'Khách hàng') ||
-                        (roleFilter === '2' && role === 'Nhân viên') ||
-                        (roleFilter === '3' && role === 'Admin');
-                    const matchStatus = statusFilter === '' || 
-                        (statusFilter === 'active' && status === 'Hoạt động') ||
-                        (statusFilter === 'inactive' && status === 'Không hoạt động');
-                    
-                    if (matchSearch && matchRole && matchStatus) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
-            });
-        </script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            <script>
+                                                           // Simple filter functionality
+                                                           document.getElementById('filterBtn').addEventListener('click', function () {
+                                                               const searchText = document.getElementById('searchInput').value.toLowerCase();
+                                                               const roleFilter = document.getElementById('roleFilter').value;
+                                                               const statusFilter = document.getElementById('statusFilter').value;
+                                                               const rows = document.querySelectorAll('tbody tr');
+                                                               rows.forEach(row => {
+                                                                   const name = row.querySelector('h6').textContent.toLowerCase();
+                                                                   const email = row.querySelector('small').textContent.toLowerCase();
+                                                                   const role = row.querySelector('td:nth-child(3) span').textContent;
+                                                                   const status = row.querySelector('td:nth-child(5) span').textContent;
+                                                                   const matchSearch = name.includes(searchText) || email.includes(searchText);
+                                                                   const matchRole = roleFilter === '' ||
+                                                                           (roleFilter === '1' && role === 'Khách hàng') ||
+                                                                           (roleFilter === '2' && role === 'Nhân viên') ||
+                                                                           (roleFilter === '3' && role === 'Admin');
+                                                                   const matchStatus = statusFilter === '' ||
+                                                                           (statusFilter === 'active' && status === 'Hoạt động') ||
+                                                                           (statusFilter === 'inactive' && status === 'Không hoạt động');
+                                                                   if (matchSearch && matchRole && matchStatus) {
+                                                                       row.style.display = '';
+                                                                   } else {
+                                                                       row.style.display = 'none';
+                                                                   }
+                                                               });
+                                                           });
+
+                                                           document.addEventListener('DOMContentLoaded', function () {
+                                                               const editButtons = document.querySelectorAll('.edit-btn');
+                                                               const editModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+                                                               editButtons.forEach(button => {
+                                                                   button.addEventListener('click', () => {
+                                                                       document.getElementById('editId').value = button.getAttribute('data-id');
+                                                                       document.getElementById('editFullname').value = button.getAttribute('data-fullname');
+                                                                       document.getElementById('editEmail').value = button.getAttribute('data-email');
+                                                                       document.getElementById('editPhone').value = button.getAttribute('data-phone');
+                                                                       document.getElementById('editAddress').value = button.getAttribute('data-address');
+                                                                       document.getElementById('editRole').value = button.getAttribute('data-role');
+                                                                       document.getElementById('editStatus').value = button.getAttribute('data-status') === 'true' ? 'true' : 'false';
+                                                                       document.getElementById('editServicePackageId').value = button.getAttribute('data-service') || '';
+                                                                   });
+                                                               });
+                                                           });
+
+
+            </script>
     </body>
 </html>

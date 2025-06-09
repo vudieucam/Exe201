@@ -1,19 +1,24 @@
 <%-- 
-    Document   : userAdmin
-    Created on : May 31, 2025, 6:28:44 PM
+    Document   : blogCategories
+    Created on : Jun 10, 2025, 4:00:30 AM
     Author     : FPT
 --%>
 
+
+<%@page import="model.Blog"%>
+<%@page import="model.BlogCategory"%>
+<%@page import="java.util.List"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
 <!DOCTYPE html>
 <html lang="vi">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Quản Lý Người Dùng - PetShop Admin</title>
+        <title>Quản Lý Danh Sách Blog - PetShop Admin</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
         <style>
@@ -359,6 +364,31 @@
                     margin-top: 20px;
                 }
             }
+            /* Thêm style cho modal */
+            .modal-content {
+                border-radius: 15px;
+                border: none;
+            }
+            .modal-header {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+            .modal-footer {
+                border-top: none;
+            }
+            .action-btn {
+                width: 30px;
+                height: 30px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 8px;
+                margin: 0 3px;
+                transition: all 0.2s;
+            }
+            .action-btn:hover {
+                transform: scale(1.1);
+            }
         </style>
     </head>
     <body>
@@ -440,54 +470,68 @@
                         </div>
                     </div>
                 </div>
-
-                <c:if test="${param.message == 'added'}">
-                    <div class="alert alert-success">Người dùng đã được thêm thành công!</div>
+                <c:if test="${not empty sessionScope.success}">
+                    <div class="alert alert-success">${sessionScope.success}</div>
+                    <c:remove var="success" scope="session"/>
                 </c:if>
+                <c:if test="${not empty sessionScope.error}">
+                    <div class="alert alert-danger">${sessionScope.error}</div>
+                    <c:remove var="error" scope="session"/>
+                </c:if>
+
 
                 <!-- Main Content -->
                 <div class="col-md-10 p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2>Quản Lý Người Dùng</h2>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
-                            <i class="bi bi-plus-lg"></i> Thêm người dùng
-                        </button>
+                    <c:if test="${not empty sessionScope.success}">
+                        <div class="alert alert-success">${sessionScope.success}</div>
+                        <c:remove var="success" scope="session"/>
+                    </c:if>
+                    <c:if test="${not empty sessionScope.error}">
+                        <div class="alert alert-danger">${sessionScope.error}</div>
+                        <c:remove var="error" scope="session"/>
+                    </c:if>
 
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Quản Lý Danh Mục Blog</h2>
+                        <div>
+                            <a href="blogadmin" class="btn btn-outline-secondary me-2">
+                                <i class="bi bi-arrow-left"></i> Quay lại
+                            </a>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                                <i class="bi bi-plus-lg"></i> Thêm danh mục
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Filter Section -->
                     <div class="card mb-4">
                         <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <label for="searchInput" class="form-label">Tìm kiếm</label>
-                                    <input type="text" class="form-control" id="searchInput" placeholder="Tên, email...">
+                            <form action="blogcategory" method="get">
+                                <div class="row g-3">
+                                    <div class="col-md-8">
+                                        <label for="search" class="form-label">Tìm kiếm</label>
+                                        <input type="text" class="form-control" id="search" name="search" 
+                                               placeholder="Tìm theo tên, mô tả..." value="${param.search}">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="statusFilter" class="form-label">Trạng thái</label>
+                                        <select class="form-select" id="statusFilter" name="statusFilter">
+                                            <option value="">Tất cả</option>
+                                            <option value="active" ${param.statusFilter eq 'active' ? 'selected' : ''}>Hiển thị</option>
+                                            <option value="inactive" ${param.statusFilter eq 'inactive' ? 'selected' : ''}>Ẩn</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-end">
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="bi bi-funnel"></i> Lọc
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="col-md-3">
-                                    <label for="roleFilter" class="form-label">Vai trò</label>
-                                    <select class="form-select" id="roleFilter">
-                                        <option value="">Tất cả</option>
-                                        <option value="1">Khách hàng</option>
-                                        <option value="2">Nhân viên</option>
-                                        <option value="3">Quản trị viên</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label for="statusFilter" class="form-label">Trạng thái</label>
-                                    <select class="form-select" id="statusFilter">
-                                        <option value="">Tất cả</option>
-                                        <option value="active">Hoạt động</option>
-                                        <option value="inactive">Không hoạt động</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2 d-flex align-items-end">
-                                    <button class="btn btn-primary w-100" id="filterBtn">Lọc</button>
-                                </div>
-                            </div>
+                            </form>
                         </div>
                     </div>
 
-                    <!-- Users Table -->
+                    <!-- Categories Table -->
                     <div class="card">
                         <div class="card-body p-0">
                             <div class="table-responsive">
@@ -495,72 +539,40 @@
                                     <thead>
                                         <tr>
                                             <th>ID</th>
-                                            <th>Thông tin</th>
-                                            <th>Vai trò</th>
-                                            <th>Địa chỉ</th>
+                                            <th>Tên danh mục</th>
+                                            <th>Mô tả</th>
                                             <th>Trạng thái</th>
                                             <th>Ngày tạo</th>
                                             <th>Hành động</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <c:forEach var="user" items="${users}">
+                                        <c:forEach var="category" items="${categories}">
                                             <tr>
-                                                <td>${user.id}</td>
+                                                <td>${category.categoryId}</td>
+                                                <td>${category.categoryName}</td>
+                                                <td>${fn:substring(category.description, 0, 50)}${fn:length(category.description) > 50 ? '...' : ''}</td>
                                                 <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <img src="https://ui-avatars.com/api/?name=${user.fullname}&background=random" class="user-avatar">
-                                                        <div>
-                                                            <h6 class="mb-0">${user.fullname}</h6>
-                                                            <small class="text-muted">${user.email}</small>
-                                                        </div>
-                                                    </div>
+                                                    <span class="status-badge ${category.status ? 'status-active' : 'status-inactive'}">
+                                                        ${category.status ? 'Hiển thị' : 'Ẩn'}
+                                                    </span>
                                                 </td>
+                                                <td><fmt:formatDate value="${category.createdAt}" pattern="dd/MM/yyyy"/></td>
                                                 <td>
-                                                    <c:choose>
-                                                        <c:when test="${user.roleId == 1}">
-                                                            <span class="badge bg-primary">Khách hàng</span>
-                                                        </c:when>
-                                                        <c:when test="${user.roleId == 2}">
-                                                            <span class="badge bg-warning text-dark">Nhân viên</span>
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <span class="badge bg-danger">Admin</span>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </td>
-                                                <td>${user.address}</td>
-                                                <td>
-                                                    <c:choose>
-                                                        <c:when test="${user.status}">
-                                                            <span class="status-badge status-active">Hoạt động</span>
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <span class="status-badge status-inactive">Không hoạt động</span>
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                </td>
-                                                <td>${user.createdAt}</td>
-                                                <td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-primary action-btn edit-btn"
-                                                            data-bs-toggle="modal" data-bs-target="#editUserModal"
-                                                            data-id="${user.id}"
-                                                            data-fullname="${user.fullname}"
-                                                            data-email="${user.email}"
-                                                            data-phone="${user.phone}"
-                                                            data-address="${user.address}"
-                                                            data-role="${user.roleId}"
-                                                            data-status="${user.status}"
-                                                            data-service="${user.servicePackageId}">
+                                                    <button class="btn btn-sm btn-outline-primary action-btn edit-btn" 
+                                                            data-bs-toggle="modal" data-bs-target="#editCategoryModal"
+                                                            data-id="${category.categoryId}"
+                                                            data-name="${category.categoryName}"
+                                                            data-description="${category.description}"
+                                                            data-status="${category.status}">
                                                         <i class="bi bi-pencil"></i>
                                                     </button>
-                                                    <a href="useradmin?action=deactivate&id=${user.id}" class="btn btn-sm btn-outline-warning action-btn" 
-                                                       onclick="return confirm('Bạn có chắc chắn muốn ${user.status ? 'vô hiệu hóa' : 'kích hoạt'} người dùng này?')">
-                                                        <i class="bi ${user.status ? 'bi-eye-slash' : 'bi-eye'}"></i>
+                                                    <a href="blogcategory?action=toggle&id=${category.categoryId}" class="btn btn-sm btn-outline-warning action-btn" 
+                                                       onclick="return confirm('Bạn có chắc muốn ${category.status ? 'ẩn' : 'hiển thị'} danh mục này?')">
+                                                        <i class="bi ${category.status ? 'bi-eye-slash' : 'bi-eye'}"></i>
                                                     </a>
-                                                    <a href="useradmin?action=delete&id=${user.id}" class="btn btn-sm btn-outline-danger action-btn" 
-                                                       onclick="return confirm('Bạn có chắc chắn muốn xóa vĩnh viễn người dùng này?')">
+                                                    <a href="blogcategory?action=delete&id=${category.categoryId}" class="btn btn-sm btn-outline-danger action-btn" 
+                                                       onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?')">
                                                         <i class="bi bi-trash"></i>
                                                     </a>
                                                 </td>
@@ -575,198 +587,122 @@
                     <!-- Pagination -->
                     <nav class="mt-4">
                         <ul class="pagination justify-content-center">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" tabindex="-1">Trước</a>
-                            </li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">Tiếp</a>
-                            </li>
+                            <c:if test="${currentPage > 1}">
+                                <li class="page-item">
+                                    <a class="page-link" href="blogcategory?page=${currentPage-1}&search=${param.search}&statusFilter=${param.statusFilter}">Trước</a>
+                                </li>
+                            </c:if>
+
+                            <c:forEach begin="1" end="${totalPages}" var="i">
+                                <li class="page-item ${currentPage eq i ? 'active' : ''}">
+                                    <a class="page-link" href="blogcategory?page=${i}&search=${param.search}&statusFilter=${param.statusFilter}">${i}</a>
+                                </li>
+                            </c:forEach>
+
+                            <c:if test="${currentPage < totalPages}">
+                                <li class="page-item">
+                                    <a class="page-link" href="blogcategory?page=${currentPage+1}&search=${param.search}&statusFilter=${param.statusFilter}">Tiếp</a>
+                                </li>
+                            </c:if>
                         </ul>
                     </nav>
                 </div>
             </div>
         </div>
 
-        <!-- Add User Modal -->
-        <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
+        <!-- Add Category Modal -->
+        <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="addUserModalLabel">Thêm người dùng mới</h5>
+                        <h5 class="modal-title" id="addCategoryModalLabel">Thêm danh mục mới</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
-                        <form action="useradmin" method="post">
-                            <input type="hidden" name="action" value="insert">
-
+                    <form action="blogcategory" method="POST">
+                        <input type="hidden" name="action" value="insert">
+                        <div class="modal-body">
                             <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label for="fullname" class="form-label">Họ và tên</label>
-                                    <input type="text" class="form-control" id="fullname" name="fullname" required>
+                                <div class="col-md-12">
+                                    <label for="categoryName" class="form-label">Tên danh mục</label>
+                                    <input type="text" class="form-control" id="categoryName" name="categoryName" required>
                                 </div>
-                                <div class="col-md-6">
-                                    <label for="email" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="email" name="email" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="phone" class="form-label">Số điện thoại</label>
-                                    <input type="tel" class="form-control" id="phone" name="phone">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="password" class="form-label">Mật khẩu</label>
-                                    <input type="password" class="form-control" id="password" name="password" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="role" class="form-label">Vai trò</label>
-                                    <select class="form-select" id="role" name="role_id" required>
-                                        <option value="1">Khách hàng</option>
-                                        <option value="2">Nhân viên</option>
-                                        <option value="3">Quản trị viên</option>
-                                    </select>
+                                <div class="col-md-12">
+                                    <label for="description" class="form-label">Mô tả</label>
+                                    <textarea class="form-control" id="description" name="description" rows="3"></textarea>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="status" class="form-label">Trạng thái</label>
                                     <select class="form-select" id="status" name="status" required>
-                                        <option value="true">Hoạt động</option>
-                                        <option value="false">Không hoạt động</option>
+                                        <option value="true">Hiển thị</option>
+                                        <option value="false">Ẩn</option>
                                     </select>
                                 </div>
-                                <div class="col-12">
-                                    <label for="address" class="form-label">Địa chỉ</label>
-                                    <textarea class="form-control" id="address" name="address" rows="2"></textarea>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="service_package_id" class="form-label">Gói dịch vụ (nếu có)</label>
-                                    <input type="number" class="form-control" id="service_package_id" name="service_package_id">
-                                </div>
                             </div>
-
-                            <div class="modal-footer mt-4">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                                <button type="submit" class="btn btn-primary">Lưu thông tin</button>
-                            </div>
-                        </form>
-
-                    </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-primary">Lưu danh mục</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
 
-        <!-- Edit User Modal -->
-        <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
+        <!-- Edit Category Modal -->
+        <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="editUserModalLabel">Chỉnh sửa thông tin người dùng</h5>
+                        <h5 class="modal-title" id="editCategoryModalLabel">Chỉnh sửa danh mục</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
-                        <form action="useradmin" method="post">
-                            <input type="hidden" name="action" value="update">
-                            <input type="hidden" name="id" id="editId">
-
+                    <form action="blogcategory" method="POST">
+                        <input type="hidden" name="action" value="update">
+                        <input type="hidden" id="editCategoryId" name="id">
+                        <div class="modal-body">
                             <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Họ và tên</label>
-                                    <input type="text" class="form-control" id="editFullname" name="fullname" required>
+                                <div class="col-md-12">
+                                    <label for="editCategoryName" class="form-label">Tên danh mục</label>
+                                    <input type="text" class="form-control" id="editCategoryName" name="categoryName" required>
+                                </div>
+                                <div class="col-md-12">
+                                    <label for="editDescription" class="form-label">Mô tả</label>
+                                    <textarea class="form-control" id="editDescription" name="description" rows="3"></textarea>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="editEmail" name="email" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Số điện thoại</label>
-                                    <input type="tel" class="form-control" id="editPhone" name="phone">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Mật khẩu (để trống nếu không đổi)</label>
-                                    <input type="password" class="form-control" name="password">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Vai trò</label>
-                                    <select class="form-select" id="editRole" name="role_id" required>
-                                        <option value="1">Khách hàng</option>
-                                        <option value="2">Nhân viên</option>
-                                        <option value="3">Quản trị viên</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Trạng thái</label>
+                                    <label for="editStatus" class="form-label">Trạng thái</label>
                                     <select class="form-select" id="editStatus" name="status" required>
-                                        <option value="true">Hoạt động</option>
-                                        <option value="false">Không hoạt động</option>
+                                        <option value="true">Hiển thị</option>
+                                        <option value="false">Ẩn</option>
                                     </select>
                                 </div>
-                                <div class="col-12">
-                                    <label class="form-label">Địa chỉ</label>
-                                    <textarea class="form-control" id="editAddress" name="address" rows="2"></textarea>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Gói dịch vụ</label>
-                                    <input type="number" class="form-control" id="editServicePackageId" name="service_package_id">
-                                </div>
                             </div>
-
-                            <div class="modal-footer mt-4">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                                <button type="submit" class="btn btn-primary">Cập nhật</button>
-                            </div>
-                        </form>
-
-                    </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-primary">Cập nhật</button>
+                        </div>
+                    </form>
                 </div>
             </div>
+        </div>
 
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-            <script>
-                                                           // Simple filter functionality
-                                                           document.getElementById('filterBtn').addEventListener('click', function () {
-                                                               const searchText = document.getElementById('searchInput').value.toLowerCase();
-                                                               const roleFilter = document.getElementById('roleFilter').value;
-                                                               const statusFilter = document.getElementById('statusFilter').value;
-                                                               const rows = document.querySelectorAll('tbody tr');
-                                                               rows.forEach(row => {
-                                                                   const name = row.querySelector('h6').textContent.toLowerCase();
-                                                                   const email = row.querySelector('small').textContent.toLowerCase();
-                                                                   const role = row.querySelector('td:nth-child(3) span').textContent;
-                                                                   const status = row.querySelector('td:nth-child(5) span').textContent;
-                                                                   const matchSearch = name.includes(searchText) || email.includes(searchText);
-                                                                   const matchRole = roleFilter === '' ||
-                                                                           (roleFilter === '1' && role === 'Khách hàng') ||
-                                                                           (roleFilter === '2' && role === 'Nhân viên') ||
-                                                                           (roleFilter === '3' && role === 'Admin');
-                                                                   const matchStatus = statusFilter === '' ||
-                                                                           (statusFilter === 'active' && status === 'Hoạt động') ||
-                                                                           (statusFilter === 'inactive' && status === 'Không hoạt động');
-                                                                   if (matchSearch && matchRole && matchStatus) {
-                                                                       row.style.display = '';
-                                                                   } else {
-                                                                       row.style.display = 'none';
-                                                                   }
-                                                               });
-                                                           });
-
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
                                                            document.addEventListener('DOMContentLoaded', function () {
+                                                               // Xử lý modal chỉnh sửa
                                                                const editButtons = document.querySelectorAll('.edit-btn');
-                                                               const editModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+                                                               const editModal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
+
                                                                editButtons.forEach(button => {
                                                                    button.addEventListener('click', () => {
-                                                                       document.getElementById('editId').value = button.getAttribute('data-id');
-                                                                       document.getElementById('editFullname').value = button.getAttribute('data-fullname');
-                                                                       document.getElementById('editEmail').value = button.getAttribute('data-email');
-                                                                       document.getElementById('editPhone').value = button.getAttribute('data-phone');
-                                                                       document.getElementById('editAddress').value = button.getAttribute('data-address');
-                                                                       document.getElementById('editRole').value = button.getAttribute('data-role');
+                                                                       document.getElementById('editCategoryId').value = button.getAttribute('data-id');
+                                                                       document.getElementById('editCategoryName').value = button.getAttribute('data-name');
+                                                                       document.getElementById('editDescription').value = button.getAttribute('data-description');
                                                                        document.getElementById('editStatus').value = button.getAttribute('data-status') === 'true' ? 'true' : 'false';
-                                                                       document.getElementById('editServicePackageId').value = button.getAttribute('data-service') || '';
                                                                    });
                                                                });
                                                            });
-
-
-            </script>
+        </script>
     </body>
 </html>
