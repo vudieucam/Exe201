@@ -3,13 +3,23 @@ package controller.Blog;
 import dal.BlogCategoryDAO;
 import dal.BlogDAO;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 import model.Blog;
 import model.BlogCategory;
+
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024, // 1MB
+        maxFileSize = 5 * 1024 * 1024, // 5MB
+        maxRequestSize = 10 * 1024 * 1024 // 10MB
+)
 
 public class BlogAdminServlet extends HttpServlet {
 
@@ -25,6 +35,7 @@ public class BlogAdminServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
         String action = request.getParameter("action");
 
         try {
@@ -52,6 +63,7 @@ public class BlogAdminServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
         String action = request.getParameter("action");
 
         try {
@@ -120,14 +132,14 @@ public class BlogAdminServlet extends HttpServlet {
 
     private void insertBlog(HttpServletRequest request, HttpServletResponse response)
             throws Exception {
-        Blog blog = extractBlogFromRequest(request);
-        int newId = blogDAO.addBlog(blog);
+        Blog blog = extractBlogFromRequest(request, false);
+        blogDAO.addBlog(blog);
         response.sendRedirect("blogadmin");
     }
 
     private void updateBlog(HttpServletRequest request, HttpServletResponse response)
             throws Exception {
-        Blog blog = extractBlogFromRequest(request);
+        Blog blog = extractBlogFromRequest(request, true);
         blog.setBlogId(Integer.parseInt(request.getParameter("id")));
         blogDAO.updateBlog(blog);
         response.sendRedirect("blogadmin");
@@ -147,16 +159,40 @@ public class BlogAdminServlet extends HttpServlet {
         response.sendRedirect("blogadmin");
     }
 
-    private Blog extractBlogFromRequest(HttpServletRequest request) {
+    private Blog extractBlogFromRequest(HttpServletRequest request, boolean isEdit)
+            throws IOException, ServletException {
         Blog blog = new Blog();
+
         blog.setTitle(request.getParameter("title"));
         blog.setContent(request.getParameter("content"));
         blog.setShortDescription(request.getParameter("shortDescription"));
-        blog.setImageUrl(request.getParameter("imageUrl"));
         blog.setCategoryId(Integer.parseInt(request.getParameter("categoryId")));
         blog.setAuthorName(request.getParameter("authorName"));
         blog.setIsFeatured(Boolean.parseBoolean(request.getParameter("isFeatured")));
         blog.setStatus(Boolean.parseBoolean(request.getParameter("status")) ? 1 : 0);
+
+        // Xử lý ảnh
+        Part imagePart = request.getPart("imageFile");
+        if (imagePart != null && imagePart.getSize() > 0) {
+            String fileName = Paths.get(imagePart.getSubmittedFileName()).getFileName().toString();
+            String uploadDir = request.getServletContext().getRealPath("/uploads/blogs");
+            File uploadFolder = new File(uploadDir);
+            if (!uploadFolder.exists()) {
+                uploadFolder.mkdirs();
+            }
+
+            String savePath = uploadDir + File.separator + fileName;
+            imagePart.write(savePath);
+
+            blog.setImageUrl("/images/Blog/" + fileName);
+        } else if (isEdit) {
+            // Nếu không chọn ảnh mới khi chỉnh sửa, giữ nguyên ảnh cũ
+            blog.setImageUrl(request.getParameter("existingImageUrl"));
+        } else {
+            blog.setImageUrl(""); // Trường hợp thêm mới mà không có ảnh
+        }
+
         return blog;
     }
+
 }

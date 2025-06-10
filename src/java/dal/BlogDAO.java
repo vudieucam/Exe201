@@ -4,6 +4,7 @@
  */
 package dal;
 
+import java.sql.Statement;
 import model.BlogCategory;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -524,7 +525,7 @@ public class BlogDAO extends DBConnect {
                 + "author_name, is_featured, status) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, blog.getTitle());
             ps.setString(2, blog.getContent());
             ps.setString(3, blog.getShortDescription());
@@ -539,7 +540,7 @@ public class BlogDAO extends DBConnect {
             if (affectedRows > 0) {
                 try (ResultSet rs = ps.getGeneratedKeys()) {
                     if (rs.next()) {
-                        return rs.getInt(1);
+                        return rs.getInt(1); // trả về blog_id mới
                     }
                 }
             }
@@ -584,7 +585,7 @@ public class BlogDAO extends DBConnect {
         }
         return null;
     }
-    
+
     // Thêm phương thức getBlogs với tham số search
     public List<Blog> getBlogs(int page, int recordsPerPage, String statusFilter, String featuredFilter, String search) {
         List<Blog> list = new ArrayList<>();
@@ -607,14 +608,14 @@ public class BlogDAO extends DBConnect {
 
         try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
             int paramIndex = 1;
-            
+
             if (search != null && !search.isEmpty()) {
                 String searchPattern = "%" + search + "%";
                 ps.setString(paramIndex++, searchPattern);
                 ps.setString(paramIndex++, searchPattern);
                 ps.setString(paramIndex++, searchPattern);
             }
-            
+
             int offset = (page - 1) * recordsPerPage;
             ps.setInt(paramIndex++, offset);
             ps.setInt(paramIndex++, recordsPerPage);
@@ -648,7 +649,7 @@ public class BlogDAO extends DBConnect {
 
         try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
             int paramIndex = 1;
-            
+
             if (search != null && !search.isEmpty()) {
                 String searchPattern = "%" + search + "%";
                 ps.setString(paramIndex++, searchPattern);

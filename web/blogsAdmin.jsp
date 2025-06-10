@@ -382,7 +382,23 @@
             .action-btn:hover {
                 transform: scale(1.1);
             }
+            .blog-image {
+                width: 80px;
+                height: 60px;
+                object-fit: cover;
+                border-radius: 5px;
+            }
 
+            .table th, .table td {
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                max-width: 200px;
+            }
+
+            .table td {
+                padding: 12px 15px;
+            }
         </style>
     </head>
     <body>
@@ -544,8 +560,9 @@
                                                 <td>${blog.blogId}</td>
                                                 <td>
                                                     <c:if test="${not empty blog.imageUrl}">
-                                                        <img src="${blog.imageUrl}" class="blog-image" alt="Blog Image">
+                                                        <img src="${pageContext.request.contextPath}/${blog.imageUrl}" class="blog-image" alt="Blog Image">
                                                     </c:if>
+
                                                 </td>
                                                 <td>${blog.title}</td>
                                                 <td>${blog.categoryName}</td>
@@ -555,11 +572,13 @@
                                                     <span class="badge ${blog.isFeatured ? 'bg-success' : 'bg-secondary'}">
                                                         ${blog.isFeatured ? 'Có' : 'Không'}
                                                     </span>
+
                                                 </td>
                                                 <td>
-                                                    <span class="badge ${blog.status ? 'bg-success' : 'bg-secondary'}">
-                                                        ${blog.status ? 'Hiển thị' : 'Ẩn'}
+                                                    <span class="badge ${blog.status == 1 ? 'bg-success' : 'bg-secondary'}">
+                                                        ${blog.status == 1 ? 'Hiển thị' : 'Ẩn'}
                                                     </span>
+
                                                 </td>
                                                 <td><fmt:formatDate value="${blog.createdAt}" pattern="dd/MM/yyyy"/></td>
                                                 <td>
@@ -578,7 +597,7 @@
                                                     </button>
                                                     <button class="btn btn-sm btn-outline-warning action-btn" 
                                                             onclick="toggleBlogStatus(${blog.blogId})">
-                                                        <i class="bi ${blog.status ? 'bi-eye-slash' : 'bi-eye'}"></i>
+                                                        <i class="bi ${blog.status == 1 ? 'bi-eye-slash' : 'bi-eye'}"></i>
                                                     </button>
                                                     <button class="btn btn-sm btn-outline-danger action-btn" 
                                                             onclick="confirmDelete(${blog.blogId})">
@@ -627,7 +646,8 @@
                         <h5 class="modal-title" id="addBlogModalLabel">Thêm bài viết mới</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form action="blogadmin" method="POST">
+                    <form action="blogadmin" method="POST" enctype="multipart/form-data">
+
                         <input type="hidden" name="action" value="insert">
                         <div class="modal-body">
                             <div class="row g-3">
@@ -641,7 +661,7 @@
                                 </div>
                                 <div class="col-md-12">
                                     <label for="content" class="form-label">Nội dung</label>
-                                    <textarea class="form-control" id="content" name="content" rows="5" required></textarea>
+                                    <textarea class="form-control" id="content" name="content" rows="15" required style="min-height: 300px;"></textarea>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="categoryId" class="form-label">Danh mục</label>
@@ -656,8 +676,9 @@
                                     <input type="text" class="form-control" id="authorName" name="authorName" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="imageUrl" class="form-label">URL hình ảnh</label>
-                                    <input type="text" class="form-control" id="imageUrl" name="imageUrl">
+                                    <label for="imageFile" class="form-label">Tải ảnh</label>
+                                    <input type="file" class="form-control" id="imageFile" name="imageFile" accept="image/*">
+
                                 </div>
                                 <div class="col-md-6">
                                     <label for="isFeatured" class="form-label">Nổi bật</label>
@@ -692,7 +713,7 @@
                         <h5 class="modal-title" id="editBlogModalLabel">Chỉnh sửa bài viết</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form id="editBlogForm" action="blogadmin" method="POST">
+                    <form action="blogadmin" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="action" value="update">
                         <input type="hidden" id="editBlogId" name="id">
                         <div class="modal-body">
@@ -707,7 +728,7 @@
                                 </div>
                                 <div class="col-md-12">
                                     <label for="editContent" class="form-label">Nội dung</label>
-                                    <textarea class="form-control" id="editContent" name="content" rows="5" required></textarea>
+                                    <textarea class="form-control" id="content" name="content" rows="15" required style="min-height: 300px;"></textarea>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="editCategoryId" class="form-label">Danh mục</label>
@@ -722,9 +743,11 @@
                                     <input type="text" class="form-control" id="editAuthorName" name="authorName" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="editImageUrl" class="form-label">URL hình ảnh</label>
-                                    <input type="text" class="form-control" id="editImageUrl" name="imageUrl">
+                                    <label for="editImageFile" class="form-label">Tải ảnh từ máy</label>
+                                    <input type="file" class="form-control" id="editImageFile" name="imageFile" accept="image/*">
+                                    <input type="hidden" id="editExistingImageUrl" name="existingImageUrl" value="">
                                 </div>
+
                                 <div class="col-md-6">
                                     <label for="editIsFeatured" class="form-label">Nổi bật</label>
                                     <select class="form-select" id="editIsFeatured" name="isFeatured" required>
@@ -764,7 +787,7 @@
                                                                             document.getElementById('editContent').value = button.getAttribute('data-content');
                                                                             document.getElementById('editCategoryId').value = button.getAttribute('data-categoryid');
                                                                             document.getElementById('editAuthorName').value = button.getAttribute('data-authorname');
-                                                                            document.getElementById('editImageUrl').value = button.getAttribute('data-imageurl');
+                                                                            document.getElementById('editExistingImageUrl').value = button.getAttribute('data-imageurl');
                                                                             document.getElementById('editIsFeatured').value = button.getAttribute('data-isfeatured') === 'true' ? 'true' : 'false';
                                                                             document.getElementById('editStatus').value = button.getAttribute('data-status') === 'true' ? 'true' : 'false';
                                                                         });
