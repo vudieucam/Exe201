@@ -175,7 +175,7 @@ public class BlogAdminServlet extends HttpServlet {
         Part imagePart = request.getPart("imageFile");
         if (imagePart != null && imagePart.getSize() > 0) {
             String fileName = Paths.get(imagePart.getSubmittedFileName()).getFileName().toString();
-            String uploadDir = request.getServletContext().getRealPath("/uploads/blogs");
+            String uploadDir = request.getServletContext().getRealPath("images/Blog");
             File uploadFolder = new File(uploadDir);
             if (!uploadFolder.exists()) {
                 uploadFolder.mkdirs();
@@ -184,7 +184,7 @@ public class BlogAdminServlet extends HttpServlet {
             String savePath = uploadDir + File.separator + fileName;
             imagePart.write(savePath);
 
-            blog.setImageUrl("/images/Blog/" + fileName);
+            blog.setImageUrl("images/Blog/" + fileName);
         } else if (isEdit) {
             // Nếu không chọn ảnh mới khi chỉnh sửa, giữ nguyên ảnh cũ
             blog.setImageUrl(request.getParameter("existingImageUrl"));

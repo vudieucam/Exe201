@@ -562,7 +562,6 @@
                                                     <c:if test="${not empty blog.imageUrl}">
                                                         <img src="${pageContext.request.contextPath}/${blog.imageUrl}" class="blog-image" alt="Blog Image">
                                                     </c:if>
-
                                                 </td>
                                                 <td>${blog.title}</td>
                                                 <td>${blog.categoryName}</td>
@@ -572,41 +571,45 @@
                                                     <span class="badge ${blog.isFeatured ? 'bg-success' : 'bg-secondary'}">
                                                         ${blog.isFeatured ? 'Có' : 'Không'}
                                                     </span>
-
                                                 </td>
                                                 <td>
                                                     <span class="badge ${blog.status == 1 ? 'bg-success' : 'bg-secondary'}">
                                                         ${blog.status == 1 ? 'Hiển thị' : 'Ẩn'}
                                                     </span>
-
                                                 </td>
                                                 <td><fmt:formatDate value="${blog.createdAt}" pattern="dd/MM/yyyy"/></td>
                                                 <td>
                                                     <button class="btn btn-sm btn-outline-primary action-btn edit-btn"
-                                                            data-bs-toggle="modal" data-bs-target="#editBlogModal"
-                                                            data-id="${blog.blogId}"
-                                                            data-title="${blog.title}"
-                                                            data-shortdescription="${blog.shortDescription}"
-                                                            data-content="${blog.content}"
-                                                            data-categoryid="${blog.categoryId}"
-                                                            data-authorname="${blog.authorName}"
-                                                            data-imageurl="${blog.imageUrl}"
-                                                            data-isfeatured="${blog.isFeatured}"
-                                                            data-status="${blog.status}">
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#editBlogModal"
+                                                            data-id="${blog.blogId}">
                                                         <i class="bi bi-pencil"></i>
                                                     </button>
+
                                                     <button class="btn btn-sm btn-outline-warning action-btn" 
                                                             onclick="toggleBlogStatus(${blog.blogId})">
                                                         <i class="bi ${blog.status == 1 ? 'bi-eye-slash' : 'bi-eye'}"></i>
                                                     </button>
+
                                                     <button class="btn btn-sm btn-outline-danger action-btn" 
                                                             onclick="confirmDelete(${blog.blogId})">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
                                                 </td>
                                             </tr>
-                                        </c:forEach>
+
+                                            <!-- Các hidden input để đổ dữ liệu vào modal Edit -->
+                                        <input type="hidden" id="title-${blog.blogId}" value="${fn:escapeXml(blog.title)}"/>
+                                        <input type="hidden" id="shortDescription-${blog.blogId}" value="${fn:escapeXml(blog.shortDescription)}"/>
+                                        <input type="hidden" id="content-${blog.blogId}" value="${fn:escapeXml(blog.content)}"/>
+                                        <input type="hidden" id="authorName-${blog.blogId}" value="${fn:escapeXml(blog.authorName)}"/>
+                                        <input type="hidden" id="imageUrl-${blog.blogId}" value="${fn:escapeXml(blog.imageUrl)}"/>
+                                        <input type="hidden" id="categoryId-${blog.blogId}" value="${blog.categoryId}"/>
+                                        <input type="hidden" id="isFeatured-${blog.blogId}" value="${blog.isFeatured}"/>
+                                        <input type="hidden" id="status-${blog.blogId}" value="${blog.status}"/>
+                                    </c:forEach>
                                     </tbody>
+
                                 </table>
                             </div>
                         </div>
@@ -721,6 +724,7 @@
                                 <div class="col-md-12">
                                     <label for="editTitle" class="form-label">Tiêu đề</label>
                                     <input type="text" class="form-control" id="editTitle" name="title" required>
+
                                 </div>
                                 <div class="col-md-12">
                                     <label for="editShortDescription" class="form-label">Mô tả ngắn</label>
@@ -728,7 +732,7 @@
                                 </div>
                                 <div class="col-md-12">
                                     <label for="editContent" class="form-label">Nội dung</label>
-                                    <textarea class="form-control" id="content" name="content" rows="15" required style="min-height: 300px;"></textarea>
+                                    <textarea class="form-control" id="editContent" name="content" rows="15" required style="min-height: 300px;"></textarea>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="editCategoryId" class="form-label">Danh mục</label>
@@ -746,7 +750,14 @@
                                     <label for="editImageFile" class="form-label">Tải ảnh từ máy</label>
                                     <input type="file" class="form-control" id="editImageFile" name="imageFile" accept="image/*">
                                     <input type="hidden" id="editExistingImageUrl" name="existingImageUrl" value="">
+
+                                    <!-- Thêm đoạn này để hiện ảnh đang dùng -->
+                                    <div class="mt-2" id="editImagePreviewContainer" style="display: none;">
+                                        <label class="form-label">Ảnh hiện tại:</label><br>
+                                        <img id="editImagePreview" src="" alt="Ảnh hiện tại" class="img-thumbnail" style="max-height: 150px;">
+                                    </div>
                                 </div>
+
 
                                 <div class="col-md-6">
                                     <label for="editIsFeatured" class="form-label">Nổi bật</label>
@@ -775,31 +786,53 @@
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-                                                                // JavaScript tương tự trang user
-                                                                document.addEventListener('DOMContentLoaded', function () {
-                                                                    // Xử lý modal chỉnh sửa
-                                                                    const editButtons = document.querySelectorAll('.edit-btn');
-                                                                    editButtons.forEach(button => {
-                                                                        button.addEventListener('click', () => {
-                                                                            document.getElementById('editBlogId').value = button.getAttribute('data-id');
-                                                                            document.getElementById('editTitle').value = button.getAttribute('data-title');
-                                                                            document.getElementById('editShortDescription').value = button.getAttribute('data-shortdescription');
-                                                                            document.getElementById('editContent').value = button.getAttribute('data-content');
-                                                                            document.getElementById('editCategoryId').value = button.getAttribute('data-categoryid');
-                                                                            document.getElementById('editAuthorName').value = button.getAttribute('data-authorname');
-                                                                            document.getElementById('editExistingImageUrl').value = button.getAttribute('data-imageurl');
-                                                                            document.getElementById('editIsFeatured').value = button.getAttribute('data-isfeatured') === 'true' ? 'true' : 'false';
-                                                                            document.getElementById('editStatus').value = button.getAttribute('data-status') === 'true' ? 'true' : 'false';
+                                                                const pageContextPath = '${pageContext.request.contextPath}';
+
+                                                                document.addEventListener("DOMContentLoaded", function () {
+                                                                    document.querySelectorAll(".edit-btn").forEach(button => {
+                                                                        button.addEventListener("click", function () {
+                                                                            const id = this.dataset.id;
+
+                                                                            // Gán dữ liệu vào modal edit
+                                                                            document.getElementById("editBlogId").value = id;
+                                                                            document.getElementById("editTitle").value = document.getElementById("title-" + id).value;
+                                                                            document.getElementById("editShortDescription").value = document.getElementById("shortDescription-" + id).value;
+                                                                            document.getElementById("editContent").value = document.getElementById("content-" + id).value;
+                                                                            document.getElementById("editCategoryId").value = document.getElementById("categoryId-" + id).value;
+                                                                            document.getElementById("editAuthorName").value = document.getElementById("authorName-" + id).value;
+                                                                            document.getElementById("editExistingImageUrl").value = document.getElementById("imageUrl-" + id).value;
+
+                                                                            // Xử lý trạng thái nổi bật và trạng thái hiển thị
+                                                                            const isFeatured = document.getElementById("isFeatured-" + id).value === 'true' ? 'true' : 'false';
+                                                                            const status = document.getElementById("status-" + id).value === '1' || document.getElementById("status-" + id).value === 'true' ? 'true' : 'false';
+                                                                            document.getElementById("editIsFeatured").value = isFeatured;
+                                                                            document.getElementById("editStatus").value = status;
+
+                                                                            // Hiển thị ảnh hiện tại (nếu có)
+                                                                            const imageUrl = document.getElementById("imageUrl-" + id).value;
+                                                                            const preview = document.getElementById("editImagePreview");
+                                                                            const previewContainer = document.getElementById("editImagePreviewContainer");
+
+                                                                            if (imageUrl && imageUrl.trim() !== "") {
+                                                                                let fullUrl = pageContextPath + "/" + imageUrl;
+                                                                                preview.src = fullUrl.replace(/([^:]\/)\/+/g, "$1"); // loại bỏ dấu // dư
+                                                                                previewContainer.style.display = "block";
+                                                                            } else {
+                                                                                preview.src = "";
+                                                                                previewContainer.style.display = "none";
+                                                                            }
                                                                         });
                                                                     });
                                                                 });
 
+                                                                // Toggle trạng thái hiển thị blog
                                                                 function toggleBlogStatus(blogId) {
                                                                     if (confirm('Bạn có chắc muốn thay đổi trạng thái bài viết này?')) {
                                                                         window.location.href = 'blogadmin?action=toggle&id=' + blogId;
                                                                     }
                                                                 }
 
+                                                                // Xác nhận xóa blog
                                                                 function confirmDelete(blogId) {
                                                                     Swal.fire({
                                                                         title: 'Bạn có chắc chắn?',
@@ -817,5 +850,6 @@
                                                                     });
                                                                 }
         </script>
+
     </body>
 </html>
