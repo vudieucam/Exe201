@@ -785,37 +785,47 @@
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+        <!-- Thêm thư viện CKEditor -->
+        <script src="https://cdn.ckeditor.com/4.25.1-lts/standard/ckeditor.js"></script>
+
         <script>
                                                                 const pageContextPath = '${pageContext.request.contextPath}';
+
+                                                                // Khởi tạo CKEditor cho modal Thêm và modal Sửa
+                                                                CKEDITOR.replace('content');       // modal thêm
+                                                                CKEDITOR.replace('editContent');   // modal sửa
 
                                                                 document.addEventListener("DOMContentLoaded", function () {
                                                                     document.querySelectorAll(".edit-btn").forEach(button => {
                                                                         button.addEventListener("click", function () {
                                                                             const id = this.dataset.id;
 
-                                                                            // Gán dữ liệu vào modal edit
+                                                                            // Gán dữ liệu vào modal Sửa
                                                                             document.getElementById("editBlogId").value = id;
                                                                             document.getElementById("editTitle").value = document.getElementById("title-" + id).value;
                                                                             document.getElementById("editShortDescription").value = document.getElementById("shortDescription-" + id).value;
-                                                                            document.getElementById("editContent").value = document.getElementById("content-" + id).value;
                                                                             document.getElementById("editCategoryId").value = document.getElementById("categoryId-" + id).value;
                                                                             document.getElementById("editAuthorName").value = document.getElementById("authorName-" + id).value;
                                                                             document.getElementById("editExistingImageUrl").value = document.getElementById("imageUrl-" + id).value;
 
-                                                                            // Xử lý trạng thái nổi bật và trạng thái hiển thị
+                                                                            // Gán nội dung vào CKEditor (không dùng .value!)
+                                                                            const content = document.getElementById("content-" + id).value;
+                                                                            CKEDITOR.instances['editContent'].setData(content);
+
                                                                             const isFeatured = document.getElementById("isFeatured-" + id).value === 'true' ? 'true' : 'false';
                                                                             const status = document.getElementById("status-" + id).value === '1' || document.getElementById("status-" + id).value === 'true' ? 'true' : 'false';
                                                                             document.getElementById("editIsFeatured").value = isFeatured;
                                                                             document.getElementById("editStatus").value = status;
 
-                                                                            // Hiển thị ảnh hiện tại (nếu có)
+                                                                            // Hiển thị ảnh preview
                                                                             const imageUrl = document.getElementById("imageUrl-" + id).value;
                                                                             const preview = document.getElementById("editImagePreview");
                                                                             const previewContainer = document.getElementById("editImagePreviewContainer");
 
                                                                             if (imageUrl && imageUrl.trim() !== "") {
                                                                                 let fullUrl = pageContextPath + "/" + imageUrl;
-                                                                                preview.src = fullUrl.replace(/([^:]\/)\/+/g, "$1"); // loại bỏ dấu // dư
+                                                                                preview.src = fullUrl.replace(/([^:]\/)\/+/g, "$1");
                                                                                 previewContainer.style.display = "block";
                                                                             } else {
                                                                                 preview.src = "";
