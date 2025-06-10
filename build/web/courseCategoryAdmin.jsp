@@ -1,19 +1,21 @@
-<%@page import="model.Blog"%>
-<%@page import="model.BlogCategory"%>
-<%@page import="java.util.List"%>
+<%-- 
+    Document   : courseCategoryAdmin
+    Created on : Jun 10, 2025, 12:56:29 PM
+    Author     : FPT
+--%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
 <!DOCTYPE html>
 <html lang="vi">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Quản Lý Blog - PetShop Admin</title>
+        <title>Quản Lý Danh Sách danh mục khóa học - PetShop Admin</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <style>
             :root {
                 --primary-color: #4361ee;
@@ -382,29 +384,11 @@
             .action-btn:hover {
                 transform: scale(1.1);
             }
-            .blog-image {
-                width: 80px;
-                height: 60px;
-                object-fit: cover;
-                border-radius: 5px;
-            }
-
-            .table th, .table td {
-                white-space: nowrap;
-                text-overflow: ellipsis;
-                overflow: hidden;
-                max-width: 200px;
-            }
-
-            .table td {
-                padding: 12px 15px;
-            }
         </style>
     </head>
     <body>
         <div class="container-fluid">
             <div class="row">
-                <!-- Sidebar -->
                 <!-- Sidebar -->
                 <div class="col-md-2 sidebar p-0">
                     <div class="sidebar-brand">
@@ -459,8 +443,6 @@
                         </li>
                     </ul>
 
-
-
                     <!-- Admin Profile Section -->
                     <div class="admin-profile">
                         <div class="dropdown">
@@ -483,46 +465,55 @@
                         </div>
                     </div>
                 </div>
+                <c:if test="${not empty sessionScope.success}">
+                    <div class="alert alert-success">${sessionScope.success}</div>
+                    <c:remove var="success" scope="session"/>
+                </c:if>
+                <c:if test="${not empty sessionScope.error}">
+                    <div class="alert alert-danger">${sessionScope.error}</div>
+                    <c:remove var="error" scope="session"/>
+                </c:if>
 
 
                 <!-- Main Content -->
                 <div class="col-md-10 p-4">
+                    <c:if test="${not empty sessionScope.success}">
+                        <div class="alert alert-success">${sessionScope.success}</div>
+                        <c:remove var="success" scope="session"/>
+                    </c:if>
+                    <c:if test="${not empty sessionScope.error}">
+                        <div class="alert alert-danger">${sessionScope.error}</div>
+                        <c:remove var="error" scope="session"/>
+                    </c:if>
+
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2>Quản Lý Blog</h2>
+                        <h2>Quản Lý Danh Mục Blog</h2>
                         <div>
-                            <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addBlogModal">
-                                <i class="bi bi-plus-lg"></i> Thêm bài viết
-                            </button>
-                            <a href="blogcategory" class="btn btn-success">
-                                <i class="bi bi-list-ul"></i> Quản lý danh mục
+                            <a href="blogadmin" class="btn btn-outline-secondary me-2">
+                                <i class="bi bi-arrow-left"></i> Quay lại
                             </a>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                                <i class="bi bi-plus-lg"></i> Thêm danh mục
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Filter Section (Tương tự trang user) -->
+                    <!-- Filter Section -->
                     <div class="card mb-4">
                         <div class="card-body">
-                            <form action="blogadmin" method="get">
+                            <form action="blogcategory" method="get">
                                 <div class="row g-3">
-                                    <div class="col-md-4">
+                                    <div class="col-md-8">
                                         <label for="search" class="form-label">Tìm kiếm</label>
                                         <input type="text" class="form-control" id="search" name="search" 
-                                               placeholder="Tìm theo tiêu đề, nội dung..." value="${param.search}">
+                                               placeholder="Tìm theo tên, mô tả..." value="${param.search}">
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <label for="statusFilter" class="form-label">Trạng thái</label>
                                         <select class="form-select" id="statusFilter" name="statusFilter">
                                             <option value="">Tất cả</option>
                                             <option value="active" ${param.statusFilter eq 'active' ? 'selected' : ''}>Hiển thị</option>
                                             <option value="inactive" ${param.statusFilter eq 'inactive' ? 'selected' : ''}>Ẩn</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label for="featuredFilter" class="form-label">Nổi bật</label>
-                                        <select class="form-select" id="featuredFilter" name="featuredFilter">
-                                            <option value="">Tất cả</option>
-                                            <option value="featured" ${param.featuredFilter eq 'featured' ? 'selected' : ''}>Nổi bật</option>
-                                            <option value="normal" ${param.featuredFilter eq 'normal' ? 'selected' : ''}>Bình thường</option>
                                         </select>
                                     </div>
                                     <div class="col-md-2 d-flex align-items-end">
@@ -535,7 +526,7 @@
                         </div>
                     </div>
 
-                    <!-- Blogs Table -->
+                    <!-- Categories Table -->
                     <div class="card">
                         <div class="card-body p-0">
                             <div class="table-responsive">
@@ -543,75 +534,46 @@
                                     <thead>
                                         <tr>
                                             <th>ID</th>
-                                            <th>Hình ảnh</th>
-                                            <th>Tiêu đề</th>
-                                            <th>Danh mục</th>
-                                            <th>Tác giả</th>
-                                            <th>Lượt xem</th>
-                                            <th>Nổi bật</th>
+                                            <th>Tên danh mục</th>
+                                            <th>Mô tả</th>
                                             <th>Trạng thái</th>
                                             <th>Ngày tạo</th>
                                             <th>Hành động</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <c:forEach var="blog" items="${blogs}">
+                                        <c:forEach var="category" items="${categories}">
                                             <tr>
-                                                <td>${blog.blogId}</td>
+                                                <td>${category.categoryId}</td>
+                                                <td>${category.categoryName}</td>
+                                                <td>${fn:substring(category.description, 0, 50)}${fn:length(category.description) > 50 ? '...' : ''}</td>
                                                 <td>
-                                                    <c:if test="${not empty blog.imageUrl}">
-                                                        <img src="${pageContext.request.contextPath}/${blog.imageUrl}" class="blog-image" alt="Blog Image">
-                                                    </c:if>
-                                                </td>
-                                                <td>${blog.title}</td>
-                                                <td>${blog.categoryName}</td>
-                                                <td>${blog.authorName}</td>
-                                                <td>${blog.viewCount}</td>
-                                                <td>
-                                                    <span class="badge ${blog.isFeatured ? 'bg-success' : 'bg-secondary'}">
-                                                        ${blog.isFeatured ? 'Có' : 'Không'}
+                                                    <span class="status-badge ${category.status ? 'status-active' : 'status-inactive'}">
+                                                        ${category.status ? 'Hiển thị' : 'Ẩn'}
                                                     </span>
                                                 </td>
+                                                <td><fmt:formatDate value="${category.createdAt}" pattern="dd/MM/yyyy"/></td>
                                                 <td>
-                                                    <span class="badge ${blog.status == 1 ? 'bg-success' : 'bg-secondary'}">
-                                                        ${blog.status == 1 ? 'Hiển thị' : 'Ẩn'}
-                                                    </span>
-                                                </td>
-                                                <td><fmt:formatDate value="${blog.createdAt}" pattern="dd/MM/yyyy"/></td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-primary action-btn edit-btn"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#editBlogModal"
-                                                            data-id="${blog.blogId}"
-                                                            data-title="${fn:escapeXml(blog.title)}"
-                                                            data-short-description="${fn:escapeXml(blog.shortDescription)}"
-                                                            data-content="${fn:escapeXml(blog.content)}"
-                                                            data-author="${fn:escapeXml(blog.authorName)}"
-                                                            data-image="${fn:escapeXml(blog.imageUrl)}"
-                                                            data-category="${blog.categoryId}"
-                                                            data-featured="${blog.isFeatured}"
-                                                            data-status="${blog.status}">
+                                                    <button class="btn btn-sm btn-outline-primary action-btn edit-btn" 
+                                                            data-bs-toggle="modal" data-bs-target="#editCategoryModal"
+                                                            data-id="${category.categoryId}"
+                                                            data-name="${category.categoryName}"
+                                                            data-description="${category.description}"
+                                                            data-status="${category.status}">
                                                         <i class="bi bi-pencil"></i>
                                                     </button>
-
-
-                                                    <button class="btn btn-sm btn-outline-warning action-btn" 
-                                                            onclick="toggleBlogStatus(${blog.blogId})">
-                                                        <i class="bi ${blog.status == 1 ? 'bi-eye-slash' : 'bi-eye'}"></i>
-                                                    </button>
-
-                                                    <button class="btn btn-sm btn-outline-danger action-btn" 
-                                                            onclick="confirmDelete(${blog.blogId})">
+                                                    <a href="blogcategory?action=toggle&id=${category.categoryId}" class="btn btn-sm btn-outline-warning action-btn" 
+                                                       onclick="return confirm('Bạn có chắc muốn ${category.status ? 'ẩn' : 'hiển thị'} danh mục này?')">
+                                                        <i class="bi ${category.status ? 'bi-eye-slash' : 'bi-eye'}"></i>
+                                                    </a>
+                                                    <a href="blogcategory?action=delete&id=${category.categoryId}" class="btn btn-sm btn-outline-danger action-btn" 
+                                                       onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?')">
                                                         <i class="bi bi-trash"></i>
-                                                    </button>
+                                                    </a>
                                                 </td>
                                             </tr>
-
-                                            <!-- Các hidden input để đổ dữ liệu vào modal Edit -->
-
                                         </c:forEach>
                                     </tbody>
-
                                 </table>
                             </div>
                         </div>
@@ -622,19 +584,19 @@
                         <ul class="pagination justify-content-center">
                             <c:if test="${currentPage > 1}">
                                 <li class="page-item">
-                                    <a class="page-link" href="blogadmin?page=${currentPage-1}&search=${param.search}&statusFilter=${param.statusFilter}&featuredFilter=${param.featuredFilter}">Trước</a>
+                                    <a class="page-link" href="blogcategory?page=${currentPage-1}&search=${param.search}&statusFilter=${param.statusFilter}">Trước</a>
                                 </li>
                             </c:if>
 
                             <c:forEach begin="1" end="${totalPages}" var="i">
                                 <li class="page-item ${currentPage eq i ? 'active' : ''}">
-                                    <a class="page-link" href="blogadmin?page=${i}&search=${param.search}&statusFilter=${param.statusFilter}&featuredFilter=${param.featuredFilter}">${i}</a>
+                                    <a class="page-link" href="blogcategory?page=${i}&search=${param.search}&statusFilter=${param.statusFilter}">${i}</a>
                                 </li>
                             </c:forEach>
 
                             <c:if test="${currentPage < totalPages}">
                                 <li class="page-item">
-                                    <a class="page-link" href="blogadmin?page=${currentPage+1}&search=${param.search}&statusFilter=${param.statusFilter}&featuredFilter=${param.featuredFilter}">Tiếp</a>
+                                    <a class="page-link" href="blogcategory?page=${currentPage+1}&search=${param.search}&statusFilter=${param.statusFilter}">Tiếp</a>
                                 </li>
                             </c:if>
                         </ul>
@@ -643,54 +605,25 @@
             </div>
         </div>
 
-        <!-- Add Blog Modal -->
-        <div class="modal fade" id="addBlogModal" tabindex="-1" aria-labelledby="addBlogModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
+        <!-- Add Category Modal -->
+        <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="addBlogModalLabel">Thêm bài viết mới</h5>
+                        <h5 class="modal-title" id="addCategoryModalLabel">Thêm danh mục mới</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form action="blogadmin" method="POST" enctype="multipart/form-data" onsubmit="return handleAddEditorSubmit();">
-
+                    <form action="blogcategory" method="POST">
                         <input type="hidden" name="action" value="insert">
                         <div class="modal-body">
                             <div class="row g-3">
                                 <div class="col-md-12">
-                                    <label for="title" class="form-label">Tiêu đề</label>
-                                    <input type="text" class="form-control" id="title" name="title" required>
+                                    <label for="categoryName" class="form-label">Tên danh mục</label>
+                                    <input type="text" class="form-control" id="categoryName" name="categoryName" required>
                                 </div>
                                 <div class="col-md-12">
-                                    <label for="shortDescription" class="form-label">Mô tả ngắn</label>
-                                    <textarea class="form-control" id="shortDescription" name="shortDescription" rows="2" required></textarea>
-                                </div>
-                                <div class="col-md-12">
-                                    <label for="content" class="form-label">Nội dung</label>
-                                    <textarea class="form-control" id="content" name="content" rows="15" required style="min-height: 300px;"></textarea>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="categoryId" class="form-label">Danh mục</label>
-                                    <select class="form-select" id="categoryId" name="categoryId" required>
-                                        <c:forEach var="category" items="${categories}">
-                                            <option value="${category.categoryId}">${category.categoryName}</option>
-                                        </c:forEach>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="authorName" class="form-label">Tác giả</label>
-                                    <input type="text" class="form-control" id="authorName" name="authorName" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="imageFile" class="form-label">Tải ảnh</label>
-                                    <input type="file" class="form-control" id="imageFile" name="imageFile" accept="image/*">
-
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="isFeatured" class="form-label">Nổi bật</label>
-                                    <select class="form-select" id="isFeatured" name="isFeatured" required>
-                                        <option value="false">Không</option>
-                                        <option value="true">Có</option>
-                                    </select>
+                                    <label for="description" class="form-label">Mô tả</label>
+                                    <textarea class="form-control" id="description" name="description" rows="3"></textarea>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="status" class="form-label">Trạng thái</label>
@@ -703,72 +636,33 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                            <button type="submit" class="btn btn-primary">Lưu bài viết</button>
+                            <button type="submit" class="btn btn-primary">Lưu danh mục</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
 
-        <!-- Edit Blog Modal -->
-        <div class="modal fade" id="editBlogModal" tabindex="-1" aria-labelledby="editBlogModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
+        <!-- Edit Category Modal -->
+        <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="editBlogModalLabel">Chỉnh sửa bài viết</h5>
+                        <h5 class="modal-title" id="editCategoryModalLabel">Chỉnh sửa danh mục</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form action="blogadmin" method="POST" enctype="multipart/form-data"
-                          onsubmit="return handleEditorSubmit();">
-
+                    <form action="blogcategory" method="POST">
                         <input type="hidden" name="action" value="update">
-                        <input type="hidden" id="editBlogId" name="id">
+                        <input type="hidden" id="editCategoryId" name="id">
                         <div class="modal-body">
                             <div class="row g-3">
                                 <div class="col-md-12">
-                                    <label for="editTitle" class="form-label">Tiêu đề</label>
-                                    <input type="text" class="form-control" id="editTitle" name="title" required>
-
+                                    <label for="editCategoryName" class="form-label">Tên danh mục</label>
+                                    <input type="text" class="form-control" id="editCategoryName" name="categoryName" required>
                                 </div>
                                 <div class="col-md-12">
-                                    <label for="editShortDescription" class="form-label">Mô tả ngắn</label>
-                                    <textarea class="form-control" id="editShortDescription" name="shortDescription" rows="2" required></textarea>
-                                </div>
-                                <div class="col-md-12">
-                                    <label for="editContent" class="form-label">Nội dung</label>
-                                    <textarea class="form-control" id="editContent" name="content" rows="15" required style="min-height: 300px;"></textarea>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="editCategoryId" class="form-label">Danh mục</label>
-                                    <select class="form-select" id="editCategoryId" name="categoryId" required>
-                                        <c:forEach var="category" items="${categories}">
-                                            <option value="${category.categoryId}">${category.categoryName}</option>
-                                        </c:forEach>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="editAuthorName" class="form-label">Tác giả</label>
-                                    <input type="text" class="form-control" id="editAuthorName" name="authorName" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="editImageFile" class="form-label">Tải ảnh từ máy</label>
-                                    <input type="file" class="form-control" id="editImageFile" name="imageFile" accept="image/*">
-                                    <input type="hidden" id="editExistingImageUrl" name="existingImageUrl" value="">
-
-                                    <!-- Thêm đoạn này để hiện ảnh đang dùng -->
-                                    <div class="mt-2" id="editImagePreviewContainer" style="display: none;">
-                                        <label class="form-label">Ảnh hiện tại:</label><br>
-                                        <img id="editImagePreview" src="" alt="Ảnh hiện tại" class="img-thumbnail" style="max-height: 150px;">
-                                    </div>
-                                </div>
-
-
-                                <div class="col-md-6">
-                                    <label for="editIsFeatured" class="form-label">Nổi bật</label>
-                                    <select class="form-select" id="editIsFeatured" name="isFeatured" required>
-                                        <option value="false">Không</option>
-                                        <option value="true">Có</option>
-                                    </select>
+                                    <label for="editDescription" class="form-label">Mô tả</label>
+                                    <textarea class="form-control" id="editDescription" name="description" rows="3"></textarea>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="editStatus" class="form-label">Trạng thái</label>
@@ -789,101 +683,21 @@
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-        <!-- Thêm thư viện CKEditor -->
-        <script src="https://cdn.ckeditor.com/4.25.1-lts/standard/ckeditor.js"></script>
-
         <script>
-                              const pageContextPath = '${pageContext.request.contextPath}';
+                                                           document.addEventListener('DOMContentLoaded', function () {
+                                                               // Xử lý modal chỉnh sửa
+                                                               const editButtons = document.querySelectorAll('.edit-btn');
+                                                               const editModal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
 
-                              // Khởi tạo CKEditor cho modal Thêm và modal Sửa
-                              CKEDITOR.replace('content');       // modal thêm
-                              CKEDITOR.replace('editContent');   // modal sửa
-
-                              document.querySelectorAll(".edit-btn").forEach(button => {
-                                  button.addEventListener("click", function () {
-                                      const id = this.dataset.id;
-                                      document.getElementById("editBlogId").value = id;
-                                      document.getElementById("editTitle").value = this.dataset.title;
-                                      document.getElementById("editShortDescription").value = this.dataset.shortDescription;
-                                      document.getElementById("editCategoryId").value = this.dataset.category;
-                                      document.getElementById("editAuthorName").value = this.dataset.author;
-                                      document.getElementById("editExistingImageUrl").value = this.dataset.image;
-
-                                      // Gán nội dung HTML vào CKEditor
-                                      if (CKEDITOR.instances['editContent']) {
-                                          CKEDITOR.instances['editContent'].setData(this.dataset.content);
-                                      }
-
-                                      // Trạng thái nổi bật
-                                      const isFeatured = (this.dataset.featured === 'true' || this.dataset.featured === '1') ? 'true' : 'false';
-                                      document.getElementById("editIsFeatured").value = isFeatured;
-
-                                      // Trạng thái hiển thị
-                                      const status = (this.dataset.status === 'true' || this.dataset.status === '1') ? 'true' : 'false';
-                                      document.getElementById("editStatus").value = status;
-
-                                      // Hiển thị ảnh preview
-                                      const imageUrl = this.dataset.image;
-                                      const preview = document.getElementById("editImagePreview");
-                                      const previewContainer = document.getElementById("editImagePreviewContainer");
-
-                                      if (imageUrl && imageUrl.trim() !== "") {
-                                          let fullUrl = pageContextPath + "/" + imageUrl;
-                                          preview.src = fullUrl.replace(/([^:]\/)\/+/g, "$1");
-                                          previewContainer.style.display = "block";
-                                      } else {
-                                          preview.src = "";
-                                          previewContainer.style.display = "none";
-                                      }
-                                  });
-                              });
-
-
-
-                              // Toggle trạng thái hiển thị blog
-                              function toggleBlogStatus(blogId) {
-                                  if (confirm('Bạn có chắc muốn thay đổi trạng thái bài viết này?')) {
-                                      window.location.href = 'blogadmin?action=toggle&id=' + blogId;
-                                  }
-                              }
-
-                              // Xác nhận xóa blog
-                              function confirmDelete(blogId) {
-                                  Swal.fire({
-                                      title: 'Bạn có chắc chắn?',
-                                      text: "Bạn sẽ không thể hoàn tác hành động này!",
-                                      icon: 'warning',
-                                      showCancelButton: true,
-                                      confirmButtonColor: '#d33',
-                                      cancelButtonColor: '#3085d6',
-                                      confirmButtonText: 'Xóa',
-                                      cancelButtonText: 'Hủy'
-                                  }).then((result) => {
-                                      if (result.isConfirmed) {
-                                          window.location.href = 'blogadmin?action=delete&id=' + blogId;
-                                      }
-                                  });
-                              }
+                                                               editButtons.forEach(button => {
+                                                                   button.addEventListener('click', () => {
+                                                                       document.getElementById('editCategoryId').value = button.getAttribute('data-id');
+                                                                       document.getElementById('editCategoryName').value = button.getAttribute('data-name');
+                                                                       document.getElementById('editDescription').value = button.getAttribute('data-description');
+                                                                       document.getElementById('editStatus').value = button.getAttribute('data-status') === 'true' ? 'true' : 'false';
+                                                                   });
+                                                               });
+                                                           });
         </script>
-        <script>
-            function handleEditorSubmit() {
-                if (CKEDITOR.instances['editContent']) {
-                    CKEDITOR.instances['editContent'].updateElement(); // Cập nhật nội dung vào textarea
-                }
-                return true; // Cho phép submit tiếp
-            }
-
-            function handleAddEditorSubmit() {
-                if (CKEDITOR.instances['content']) {
-                    CKEDITOR.instances['content'].updateElement(); // Đồng bộ nội dung vào textarea
-                }
-                return true;
-            }
-
-
-
-        </script>
-
     </body>
 </html>

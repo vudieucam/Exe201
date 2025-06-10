@@ -18,6 +18,17 @@ import model.CourseModule;
  */
 public class CourseModuleDAO extends DBConnect {
 
+    private CourseLessonDAO courseLessonDAO; // Thêm dòng này
+    // Thêm constructor để khởi tạo các DAO
+
+    public CourseModuleDAO() {
+        try {
+            this.courseLessonDAO = new CourseLessonDAO(); // Khởi tạo courseCategoryDAO
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public boolean addModule(CourseModule module) {
         String sql = "INSERT INTO course_modules (course_id, title, description, order_index, status) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement st = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -40,19 +51,6 @@ public class CourseModuleDAO extends DBConnect {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
-        }
-    }
-
-    public int getNextModuleOrder(int courseId) {
-        String sql = "SELECT COALESCE(MAX(order_index), 0) + 1 FROM course_modules WHERE course_id = ?";
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
-            st.setInt(1, courseId);
-            try (ResultSet rs = st.executeQuery()) {
-                return rs.next() ? rs.getInt(1) : 1;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return 1;
         }
     }
 
@@ -152,6 +150,8 @@ public class CourseModuleDAO extends DBConnect {
         return modules;
     }
 
+    
+
     public int getCourseIdByModuleId(int moduleId) {
         String sql = "SELECT course_id FROM course_modules WHERE id = ? AND status = 1";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
@@ -178,4 +178,33 @@ public class CourseModuleDAO extends DBConnect {
             return false;
         }
     }
+
+    // Trong CourseModuleDAO.java
+    public boolean updateModuleOrder(int moduleId, int orderIndex) {
+        String sql = "UPDATE course_modules SET order_index = ? WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, orderIndex);
+            stmt.setInt(2, moduleId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating module order: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public int getNextModuleOrder(int courseId) {
+        String sql = "SELECT COALESCE(MAX(order_index), 0) + 1 FROM course_modules WHERE course_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, courseId);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : 1;
+        } catch (SQLException e) {
+            System.err.println("Error getting next module order: " + e.getMessage());
+            return 1;
+        }
+    }
+    
+   
+
+
 }

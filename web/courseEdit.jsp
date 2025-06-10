@@ -762,3 +762,5 @@
                 modal.show();
             }
         </script>  
+    </body>
+</html>

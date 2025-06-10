@@ -277,4 +277,15 @@ public class CourseCategoryDAO extends DBConnect {
         }
     }
 
+    public boolean toggleStatus(int categoryId) {
+        String sql = "UPDATE course_categories SET status = NOT status WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, categoryId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }

@@ -582,9 +582,18 @@
                                                     <button class="btn btn-sm btn-outline-primary action-btn edit-btn"
                                                             data-bs-toggle="modal"
                                                             data-bs-target="#editBlogModal"
-                                                            data-id="${blog.blogId}">
+                                                            data-id="${blog.blogId}"
+                                                            data-title="${fn:escapeXml(blog.title)}"
+                                                            data-short-description="${fn:escapeXml(blog.shortDescription)}"
+                                                            data-content="${fn:escapeXml(blog.content)}"
+                                                            data-author="${fn:escapeXml(blog.authorName)}"
+                                                            data-image="${fn:escapeXml(blog.imageUrl)}"
+                                                            data-category="${blog.categoryId}"
+                                                            data-featured="${blog.isFeatured}"
+                                                            data-status="${blog.status}">
                                                         <i class="bi bi-pencil"></i>
                                                     </button>
+
 
                                                     <button class="btn btn-sm btn-outline-warning action-btn" 
                                                             onclick="toggleBlogStatus(${blog.blogId})">
@@ -599,15 +608,8 @@
                                             </tr>
 
                                             <!-- Các hidden input để đổ dữ liệu vào modal Edit -->
-                                        <input type="hidden" id="title-${blog.blogId}" value="${fn:escapeXml(blog.title)}"/>
-                                        <input type="hidden" id="shortDescription-${blog.blogId}" value="${fn:escapeXml(blog.shortDescription)}"/>
-                                        <input type="hidden" id="content-${blog.blogId}" value="${fn:escapeXml(blog.content)}"/>
-                                        <input type="hidden" id="authorName-${blog.blogId}" value="${fn:escapeXml(blog.authorName)}"/>
-                                        <input type="hidden" id="imageUrl-${blog.blogId}" value="${fn:escapeXml(blog.imageUrl)}"/>
-                                        <input type="hidden" id="categoryId-${blog.blogId}" value="${blog.categoryId}"/>
-                                        <input type="hidden" id="isFeatured-${blog.blogId}" value="${blog.isFeatured}"/>
-                                        <input type="hidden" id="status-${blog.blogId}" value="${blog.status}"/>
-                                    </c:forEach>
+
+                                        </c:forEach>
                                     </tbody>
 
                                 </table>
@@ -649,7 +651,7 @@
                         <h5 class="modal-title" id="addBlogModalLabel">Thêm bài viết mới</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form action="blogadmin" method="POST" enctype="multipart/form-data">
+                    <form action="blogadmin" method="POST" enctype="multipart/form-data" onsubmit="return handleAddEditorSubmit();">
 
                         <input type="hidden" name="action" value="insert">
                         <div class="modal-body">
@@ -716,7 +718,9 @@
                         <h5 class="modal-title" id="editBlogModalLabel">Chỉnh sửa bài viết</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form action="blogadmin" method="POST" enctype="multipart/form-data">
+                    <form action="blogadmin" method="POST" enctype="multipart/form-data"
+                          onsubmit="return handleEditorSubmit();">
+
                         <input type="hidden" name="action" value="update">
                         <input type="hidden" id="editBlogId" name="id">
                         <div class="modal-body">
@@ -790,75 +794,95 @@
         <script src="https://cdn.ckeditor.com/4.25.1-lts/standard/ckeditor.js"></script>
 
         <script>
-                                                                const pageContextPath = '${pageContext.request.contextPath}';
+                              const pageContextPath = '${pageContext.request.contextPath}';
 
-                                                                // Khởi tạo CKEditor cho modal Thêm và modal Sửa
-                                                                CKEDITOR.replace('content');       // modal thêm
-                                                                CKEDITOR.replace('editContent');   // modal sửa
+                              // Khởi tạo CKEditor cho modal Thêm và modal Sửa
+                              CKEDITOR.replace('content');       // modal thêm
+                              CKEDITOR.replace('editContent');   // modal sửa
 
-                                                                document.addEventListener("DOMContentLoaded", function () {
-                                                                    document.querySelectorAll(".edit-btn").forEach(button => {
-                                                                        button.addEventListener("click", function () {
-                                                                            const id = this.dataset.id;
+                              document.querySelectorAll(".edit-btn").forEach(button => {
+                                  button.addEventListener("click", function () {
+                                      const id = this.dataset.id;
+                                      document.getElementById("editBlogId").value = id;
+                                      document.getElementById("editTitle").value = this.dataset.title;
+                                      document.getElementById("editShortDescription").value = this.dataset.shortDescription;
+                                      document.getElementById("editCategoryId").value = this.dataset.category;
+                                      document.getElementById("editAuthorName").value = this.dataset.author;
+                                      document.getElementById("editExistingImageUrl").value = this.dataset.image;
 
-                                                                            // Gán dữ liệu vào modal Sửa
-                                                                            document.getElementById("editBlogId").value = id;
-                                                                            document.getElementById("editTitle").value = document.getElementById("title-" + id).value;
-                                                                            document.getElementById("editShortDescription").value = document.getElementById("shortDescription-" + id).value;
-                                                                            document.getElementById("editCategoryId").value = document.getElementById("categoryId-" + id).value;
-                                                                            document.getElementById("editAuthorName").value = document.getElementById("authorName-" + id).value;
-                                                                            document.getElementById("editExistingImageUrl").value = document.getElementById("imageUrl-" + id).value;
+                                      // Gán nội dung HTML vào CKEditor
+                                      if (CKEDITOR.instances['editContent']) {
+                                          CKEDITOR.instances['editContent'].setData(this.dataset.content);
+                                      }
 
-                                                                            // Gán nội dung vào CKEditor (không dùng .value!)
-                                                                            const content = document.getElementById("content-" + id).value;
-                                                                            CKEDITOR.instances['editContent'].setData(content);
+                                      // Trạng thái nổi bật
+                                      const isFeatured = (this.dataset.featured === 'true' || this.dataset.featured === '1') ? 'true' : 'false';
+                                      document.getElementById("editIsFeatured").value = isFeatured;
 
-                                                                            const isFeatured = document.getElementById("isFeatured-" + id).value === 'true' ? 'true' : 'false';
-                                                                            const status = document.getElementById("status-" + id).value === '1' || document.getElementById("status-" + id).value === 'true' ? 'true' : 'false';
-                                                                            document.getElementById("editIsFeatured").value = isFeatured;
-                                                                            document.getElementById("editStatus").value = status;
+                                      // Trạng thái hiển thị
+                                      const status = (this.dataset.status === 'true' || this.dataset.status === '1') ? 'true' : 'false';
+                                      document.getElementById("editStatus").value = status;
 
-                                                                            // Hiển thị ảnh preview
-                                                                            const imageUrl = document.getElementById("imageUrl-" + id).value;
-                                                                            const preview = document.getElementById("editImagePreview");
-                                                                            const previewContainer = document.getElementById("editImagePreviewContainer");
+                                      // Hiển thị ảnh preview
+                                      const imageUrl = this.dataset.image;
+                                      const preview = document.getElementById("editImagePreview");
+                                      const previewContainer = document.getElementById("editImagePreviewContainer");
 
-                                                                            if (imageUrl && imageUrl.trim() !== "") {
-                                                                                let fullUrl = pageContextPath + "/" + imageUrl;
-                                                                                preview.src = fullUrl.replace(/([^:]\/)\/+/g, "$1");
-                                                                                previewContainer.style.display = "block";
-                                                                            } else {
-                                                                                preview.src = "";
-                                                                                previewContainer.style.display = "none";
-                                                                            }
-                                                                        });
-                                                                    });
-                                                                });
+                                      if (imageUrl && imageUrl.trim() !== "") {
+                                          let fullUrl = pageContextPath + "/" + imageUrl;
+                                          preview.src = fullUrl.replace(/([^:]\/)\/+/g, "$1");
+                                          previewContainer.style.display = "block";
+                                      } else {
+                                          preview.src = "";
+                                          previewContainer.style.display = "none";
+                                      }
+                                  });
+                              });
 
-                                                                // Toggle trạng thái hiển thị blog
-                                                                function toggleBlogStatus(blogId) {
-                                                                    if (confirm('Bạn có chắc muốn thay đổi trạng thái bài viết này?')) {
-                                                                        window.location.href = 'blogadmin?action=toggle&id=' + blogId;
-                                                                    }
-                                                                }
 
-                                                                // Xác nhận xóa blog
-                                                                function confirmDelete(blogId) {
-                                                                    Swal.fire({
-                                                                        title: 'Bạn có chắc chắn?',
-                                                                        text: "Bạn sẽ không thể hoàn tác hành động này!",
-                                                                        icon: 'warning',
-                                                                        showCancelButton: true,
-                                                                        confirmButtonColor: '#d33',
-                                                                        cancelButtonColor: '#3085d6',
-                                                                        confirmButtonText: 'Xóa',
-                                                                        cancelButtonText: 'Hủy'
-                                                                    }).then((result) => {
-                                                                        if (result.isConfirmed) {
-                                                                            window.location.href = 'blogadmin?action=delete&id=' + blogId;
-                                                                        }
-                                                                    });
-                                                                }
+
+                              // Toggle trạng thái hiển thị blog
+                              function toggleBlogStatus(blogId) {
+                                  if (confirm('Bạn có chắc muốn thay đổi trạng thái bài viết này?')) {
+                                      window.location.href = 'blogadmin?action=toggle&id=' + blogId;
+                                  }
+                              }
+
+                              // Xác nhận xóa blog
+                              function confirmDelete(blogId) {
+                                  Swal.fire({
+                                      title: 'Bạn có chắc chắn?',
+                                      text: "Bạn sẽ không thể hoàn tác hành động này!",
+                                      icon: 'warning',
+                                      showCancelButton: true,
+                                      confirmButtonColor: '#d33',
+                                      cancelButtonColor: '#3085d6',
+                                      confirmButtonText: 'Xóa',
+                                      cancelButtonText: 'Hủy'
+                                  }).then((result) => {
+                                      if (result.isConfirmed) {
+                                          window.location.href = 'blogadmin?action=delete&id=' + blogId;
+                                      }
+                                  });
+                              }
+        </script>
+        <script>
+            function handleEditorSubmit() {
+                if (CKEDITOR.instances['editContent']) {
+                    CKEDITOR.instances['editContent'].updateElement(); // Cập nhật nội dung vào textarea
+                }
+                return true; // Cho phép submit tiếp
+            }
+
+            function handleAddEditorSubmit() {
+                if (CKEDITOR.instances['content']) {
+                    CKEDITOR.instances['content'].updateElement(); // Đồng bộ nội dung vào textarea
+                }
+                return true;
+            }
+
+
+
         </script>
 
     </body>

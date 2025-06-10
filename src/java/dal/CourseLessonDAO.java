@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import model.CourseModule;
 import model.LessonAttachment;
 
 /**
@@ -129,6 +130,32 @@ public class CourseLessonDAO extends DBConnect {
         return list;
     }
 
+    public static void main(String[] args) {
+        int courseIdToTest = 1; // 👈 Nhớ thay bằng ID thật trong DB của bạn
+
+        CourseModuleDAO moduleDAO = new CourseModuleDAO();
+        List<CourseModule> modules = moduleDAO.getCourseModules(courseIdToTest);
+
+        System.out.println("== MODULE LIST FOR COURSE ID: " + courseIdToTest + " ==");
+
+        if (modules.isEmpty()) {
+            System.out.println("❌ Không tìm thấy module nào.");
+        } else {
+            for (CourseModule module : modules) {
+                System.out.println("📘 Module: " + module.getTitle() + " (ID: " + module.getId() + ")");
+                List<CourseLesson> lessons = module.getLessons();
+                if (lessons == null || lessons.isEmpty()) {
+                    System.out.println("   ⚠️ Không có bài học.");
+                } else {
+                    System.out.println("   📝 Tổng bài học: " + lessons.size());
+                    for (CourseLesson lesson : lessons) {
+                        System.out.println("     • " + lesson.getTitle() + " (ID: " + lesson.getId() + ")");
+                    }
+                }
+            }
+        }
+    }
+
     public List<LessonAttachment> getAttachmentsByLessonId(int lessonId) {
         List<LessonAttachment> list = new ArrayList<>();
         String sql = "SELECT * FROM lesson_attachments WHERE lesson_id = ? AND status = 1";
@@ -178,5 +205,18 @@ public class CourseLessonDAO extends DBConnect {
             e.printStackTrace();
         }
         return null;
+    }
+    // Trong CourseLessonDAO.java
+
+    public boolean updateLessonOrder(int lessonId, int orderIndex) {
+        String sql = "UPDATE course_lessons SET order_index = ? WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, orderIndex);
+            stmt.setInt(2, lessonId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating lesson order: " + e.getMessage());
+            return false;
+        }
     }
 }

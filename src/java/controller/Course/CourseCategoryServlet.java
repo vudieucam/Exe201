@@ -4,7 +4,6 @@
  */
 package controller.Course;
 
-
 import dal.CourseCategoryDAO;
 import dal.CourseDAO;
 import dal.CourseModuleDAO;
@@ -45,7 +44,10 @@ public class CourseCategoryServlet extends HttpServlet {
             listCategories(request, response);
         } else if (action.equals("delete")) {
             deleteCategory(request, response);
+        } else if (action.equals("toggleStatus")) {
+            toggleCategoryStatus(request, response);
         }
+
     }
 
     @Override
@@ -57,7 +59,8 @@ public class CourseCategoryServlet extends HttpServlet {
             addCategory(request, response);
         } else if (action.equals("update")) {
             updateCategory(request, response);
-        }
+        } 
+
     }
 
     private void listCategories(HttpServletRequest request, HttpServletResponse response)
@@ -183,6 +186,23 @@ public class CourseCategoryServlet extends HttpServlet {
             request.setAttribute("error", "Lỗi khi xóa danh mục: " + e.getMessage());
             listCategories(request, response);
         }
+    }
+
+    private void toggleCategoryStatus(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            boolean success = courseCategoryDAO.toggleStatus(id);
+
+            if (success) {
+                request.setAttribute("success", "Đã cập nhật trạng thái danh mục");
+            } else {
+                request.setAttribute("error", "Cập nhật trạng thái thất bại");
+            }
+        } catch (Exception e) {
+            request.setAttribute("error", "Lỗi khi cập nhật trạng thái: " + e.getMessage());
+        }
+        listCategories(request, response);
     }
 
 }

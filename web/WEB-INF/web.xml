@@ -12,6 +12,10 @@
         <servlet-name>BlogAdminServlet</servlet-name>
         <servlet-class>controller.Blog.BlogAdminServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>CourseListServlet</servlet-name>
+        <servlet-class>controller.Course.CourseListServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginGoogleServlet</servlet-name>
         <url-pattern>/logingoogle</url-pattern>
@@ -35,6 +39,10 @@
     <servlet-mapping>
         <servlet-name>BlogAdminServlet</servlet-name>
         <url-pattern>/blogadmin</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CourseListServlet</servlet-name>
+        <url-pattern>/courselist</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>home</welcome-file>
