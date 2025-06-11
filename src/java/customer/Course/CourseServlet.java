@@ -46,6 +46,9 @@ public class CourseServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         try {
             String action = request.getParameter("action");
 
@@ -69,6 +72,9 @@ public class CourseServlet extends HttpServlet {
 
     private void handleCourseDetail(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, SQLException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String id = request.getParameter("id");
         if (id == null || id.isEmpty()) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu tham số ID");
@@ -91,6 +97,9 @@ public class CourseServlet extends HttpServlet {
 
     private void handleCourseList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         // Lấy danh sách tất cả danh mục khóa học
         List<CourseCategory> courseCategories = CustomercourseDAO.getAllCategories();
         request.setAttribute("courseCategories", courseCategories);
@@ -137,6 +146,9 @@ public class CourseServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         processRequest(request, response);
     }
 

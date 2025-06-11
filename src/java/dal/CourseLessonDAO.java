@@ -130,31 +130,7 @@ public class CourseLessonDAO extends DBConnect {
         return list;
     }
 
-    public static void main(String[] args) {
-        int courseIdToTest = 1; // 👈 Nhớ thay bằng ID thật trong DB của bạn
-
-        CourseModuleDAO moduleDAO = new CourseModuleDAO();
-        List<CourseModule> modules = moduleDAO.getCourseModules(courseIdToTest);
-
-        System.out.println("== MODULE LIST FOR COURSE ID: " + courseIdToTest + " ==");
-
-        if (modules.isEmpty()) {
-            System.out.println("❌ Không tìm thấy module nào.");
-        } else {
-            for (CourseModule module : modules) {
-                System.out.println("📘 Module: " + module.getTitle() + " (ID: " + module.getId() + ")");
-                List<CourseLesson> lessons = module.getLessons();
-                if (lessons == null || lessons.isEmpty()) {
-                    System.out.println("   ⚠️ Không có bài học.");
-                } else {
-                    System.out.println("   📝 Tổng bài học: " + lessons.size());
-                    for (CourseLesson lesson : lessons) {
-                        System.out.println("     • " + lesson.getTitle() + " (ID: " + lesson.getId() + ")");
-                    }
-                }
-            }
-        }
-    }
+    
 
     public List<LessonAttachment> getAttachmentsByLessonId(int lessonId) {
         List<LessonAttachment> list = new ArrayList<>();

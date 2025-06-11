@@ -16,7 +16,7 @@ import model.CourseModule;
 @WebServlet("/moduleadmin")
 public class ModuleServlet extends HttpServlet {
 
-     private CourseDAO courseDAO;
+    private CourseDAO courseDAO;
 
     private CourseCategoryDAO courseCategoryDAO;
 
@@ -32,9 +32,13 @@ public class ModuleServlet extends HttpServlet {
         courseModuleDAO = new CourseModuleDAO();
         courseLessonDAO = new CourseLessonDAO();
     }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String action = request.getParameter("action");
 
         try {
@@ -66,6 +70,9 @@ public class ModuleServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String action = request.getParameter("action");
 
         try {
@@ -91,6 +98,9 @@ public class ModuleServlet extends HttpServlet {
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, SQLException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         try {
             int moduleId = Integer.parseInt(request.getParameter("id"));
             CourseModule module = courseModuleDAO.getModuleById(moduleId);
@@ -116,24 +126,21 @@ public class ModuleServlet extends HttpServlet {
         }
     }
 
-    // Cải thiện phương thức addModule
     private void addModule(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         try {
             int courseId = Integer.parseInt(request.getParameter("courseId"));
             String title = request.getParameter("title").trim();
-            String description = request.getParameter("description").trim();
+            String description = request.getParameter("description") != null
+                    ? request.getParameter("description").trim() : "";
 
             // Validate input
             if (title.isEmpty()) {
                 request.getSession().setAttribute("error", "Tên module không được để trống");
                 response.sendRedirect(request.getContextPath() + "/courseadmin?id=" + courseId);
-                return;
-            }
-
-            if (!courseDAO.courseExists(courseId)) {
-                request.getSession().setAttribute("error", "Khóa học không tồn tại");
-                response.sendRedirect(request.getContextPath() + "/courseadmin");
                 return;
             }
 
@@ -165,6 +172,9 @@ public class ModuleServlet extends HttpServlet {
 // Thêm phương thức xử lý sắp xếp lesson
     private void reorderLessons(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         try {
             int moduleId = Integer.parseInt(request.getParameter("moduleId"));
             String[] lessonIds = request.getParameterValues("lessonOrder");
@@ -187,6 +197,9 @@ public class ModuleServlet extends HttpServlet {
 
     private void updateModule(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         try {
             int moduleId = Integer.parseInt(request.getParameter("moduleId"));
             String title = request.getParameter("title");
@@ -210,6 +223,9 @@ public class ModuleServlet extends HttpServlet {
 
     private void deleteModule(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         try {
             int moduleId = Integer.parseInt(request.getParameter("id"));
             int courseId = courseModuleDAO.getCourseIdByModuleId(moduleId);
@@ -222,6 +238,9 @@ public class ModuleServlet extends HttpServlet {
 
     private void toggleModuleStatus(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         try {
             int moduleId = Integer.parseInt(request.getParameter("id"));
             int courseId = Integer.parseInt(request.getParameter("courseId"));
@@ -238,7 +257,9 @@ public class ModuleServlet extends HttpServlet {
         }
     }
 
-    private void logError(String lỗi_khi_sắp_xếp_lessons, Exception e) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private void logError(String message, Exception e) {
+        System.err.println("[CourseAdminServlet] " + message);
+        e.printStackTrace();
     }
+
 }

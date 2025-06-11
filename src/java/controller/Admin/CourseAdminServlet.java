@@ -9,11 +9,12 @@ import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.sql.SQLException;
 import java.util.List;
 import model.Course;
 import model.CourseCategory;
 import dal.CourseModuleDAO;
+import java.util.HashMap;
+import java.util.Map;
 import model.CourseLesson;
 import model.CourseModule;
 
@@ -25,18 +26,15 @@ import model.CourseModule;
 public class CourseAdminServlet extends HttpServlet {
 
     private CourseDAO courseDAO;
-
     private CourseCategoryDAO courseCategoryDAO;
-
     private CourseModuleDAO courseModuleDAO;
-
     private CourseLessonDAO courseLessonDAO;
 
     @Override
     public void init() throws ServletException {
         super.init();
         courseDAO = new CourseDAO();
-        courseCategoryDAO = new CourseCategoryDAO(); // Thêm dòng này
+        courseCategoryDAO = new CourseCategoryDAO();
         courseModuleDAO = new CourseModuleDAO();
         courseLessonDAO = new CourseLessonDAO();
     }
@@ -44,116 +42,183 @@ public class CourseAdminServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String action = request.getParameter("action");
 
-        System.out.println("=== DEBUG: doGet called with action = " + action + " ===");
+        // Đặt hành động mặc định là "list" nếu không có hoặc rỗng
+        if (action == null || action.isEmpty()) {
+            action = "list";
+        }
+        request.setAttribute("currentAction", action); // Truyền hành động hiện tại đến JSP
 
         try {
-            if (action == null) {
-                listCourses(request, response);
-            } else {
-                switch (action) {
-                    case "delete":
-                        deleteCourse(request, response);
-                        break;
-                    case "toggleStatus":
-                        toggleCourseStatus(request, response);
-                        break;
-                    case "deleteLesson":
-                        deleteLesson(request, response);
-                        break;
-                    default:
-                        listCourses(request, response);
-                        break;
-                }
+            switch (action) {
+                case "list":
+                    listCourses(request, response); // Gọi phương thức xử lý danh sách khóa học
+                    break;
+                case "detail":
+                    viewCourseDetails(request, response); // Gọi phương thức xử lý xem chi tiết khóa học
+                    break;
+                // Các case khác cho các chức năng 'add', 'edit', 'delete' form, v.v.
+                // Nếu các chức năng này cũng sử dụng cùng một JSP, hãy đảm bảo chúng
+                // cũng thiết lập 'currentAction' và các thuộc tính cần thiết.
+                case "deleteCourse": // Action này có thể gọi từ doGet hoặc doPost tùy cách bạn thiết kế link/form
+                    deleteCourse(request, response);
+                    return; // Quan trọng: return sau khi redirect
+                case "toggleCourseStatus":
+                    toggleCourseStatus(request, response);
+                    return; // Quan trọng: return sau khi redirect
+                case "deleteLesson":
+                    deleteLesson(request, response);
+                    return; // Quan trọng: return sau khi redirect
+                // Các case khác nếu có
+                default:
+                    listCourses(request, response); // Mặc định hiển thị danh sách nếu hành động không xác định
+                    break;
             }
-        } catch (Exception ex) {
-            System.err.println("=== CRITICAL ERROR IN doGet ===");
-            ex.printStackTrace();
-            // Send error to client
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "An error occurred: " + ex.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace(); // In lỗi ra console để debug
+            request.setAttribute("errorMessage", "Đã xảy ra lỗi hệ thống: " + e.getMessage());
+            // Luôn fallback về trang danh sách khi có lỗi
+            request.setAttribute("currentAction", "list");
+            try {
+                request.setAttribute("courses", courseDAO.getAllCourses());
+                request.setAttribute("categories", courseCategoryDAO.getAllCategories());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                request.setAttribute("errorMessage", "Lỗi khi tải lại danh sách khóa học: " + ex.getMessage());
+            }
         }
+
+        // Luôn forward đến cùng một file CourseAdmin.jsp
+        request.getRequestDispatcher("courseAdmin.jsp").forward(request, response);
     }
 
-    private void listCourses(HttpServletRequest request, HttpServletResponse response)
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println("=== START listCourses DEBUG ===");
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
+        String action = request.getParameter("action");
+
+        if (action == null || action.isEmpty()) {
+            action = "list"; // Mặc định nếu không có hành động POST cụ thể
+        }
 
         try {
-            // 1. Load toàn bộ danh sách khóa học và danh mục
-            List<Course> courses = courseDAO.getAllCourses();
-            List<CourseCategory> categories = courseCategoryDAO.getAllCategories();
-
-            request.setAttribute("courses", courses);
-            request.setAttribute("categories", categories);
-
-            System.out.println("Total courses: " + courses.size());
-            System.out.println("Total categories: " + categories.size());
-
-            // 2. Lấy courseId từ URL nếu có
-            String courseIdParam = request.getParameter("id");
-            if (courseIdParam != null && !courseIdParam.isEmpty()) {
-                try {
-                    int courseId = Integer.parseInt(courseIdParam);
-                    System.out.println("Parsed courseId: " + courseId);
-
-                    // 3. Lấy thông tin khóa học
-                    Course currentCourse = courseDAO.getCourseDetail(courseId);
-                    if (currentCourse == null) {
-                        request.setAttribute("error", "Không tìm thấy khóa học với ID: " + courseId);
-                        System.out.println("ERROR: Course not found.");
-                    } else {
-                        request.setAttribute("currentCourse", currentCourse);
-                        System.out.println("Loaded course: " + currentCourse.getTitle());
-
-                        // 4. Lấy danh sách module + lesson tương ứng
-                        List<CourseModule> modules = courseModuleDAO.getCourseModules(courseId);
-                        System.out.println("Total modules found: " + modules.size());
-
-                        // DEBUG từng module và bài học bên trong
-                        for (CourseModule module : modules) {
-                            System.out.println(" - Module: " + module.getTitle() + " (ID: " + module.getId() + ")");
-                            List<CourseLesson> lessons = module.getLessons();
-                            if (lessons != null) {
-                                System.out.println("   Lessons: " + lessons.size());
-                                for (CourseLesson lesson : lessons) {
-                                    System.out.println("     • " + lesson.getTitle());
-                                }
-                            } else {
-                                System.out.println("   No lessons.");
-                            }
-                        }
-
-                        request.setAttribute("modules", modules);
-                    }
-
-                } catch (NumberFormatException e) {
-                    request.setAttribute("error", "ID khóa học không hợp lệ: " + courseIdParam);
-                    System.out.println("ERROR: Invalid course ID format");
-                } catch (Exception e) {
-                    request.setAttribute("error", "Lỗi khi tải khóa học: " + e.getMessage());
-                    e.printStackTrace();
-                }
-            } else {
-                System.out.println("No course ID selected.");
+            switch (action) {
+                case "add":
+                    // Logic xử lý thêm khóa học mới
+                    // Sau khi thêm, redirect để tránh gửi lại form
+                    response.sendRedirect("CourseAdminServlet?action=list");
+                    return;
+                case "edit":
+                    // Logic xử lý cập nhật khóa học
+                    // Sau khi sửa, redirect
+                    response.sendRedirect("CourseAdminServlet?action=list");
+                    return;
+                case "reorderModules":
+                    reorderModules(request, response);
+                    return;
+                // Các case khác cho các hành động POST (ví dụ: upload file, v.v.)
+                default:
+                    // Nếu không phải hành động POST cụ thể, có thể chuyển về doGet để hiển thị danh sách
+                    doGet(request, response);
+                    break;
             }
-
-            // 5. Forward đến JSP
-            request.getRequestDispatcher("/courseAdmin.jsp").forward(request, response);
-
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "Lỗi hệ thống khi tải danh sách khóa học.");
-            request.getRequestDispatcher("/courseAdmin.jsp").forward(request, response);
+            request.setAttribute("errorMessage", "Lỗi trong quá trình xử lý POST: " + e.getMessage());
+            request.setAttribute("currentAction", "list"); // Fallback về danh sách
+            try {
+                request.setAttribute("courses", courseDAO.getAllCourses());
+                request.setAttribute("categories", courseCategoryDAO.getAllCategories());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                request.setAttribute("errorMessage", "Lỗi khi tải lại danh sách khóa học sau POST: " + ex.getMessage());
+            }
+            request.getRequestDispatcher("courseAdmin.jsp").forward(request, response);
         }
-
-        System.out.println("=== END listCourses DEBUG ===");
     }
 
-// Thêm phương thức xử lý sắp xếp module
+    // Phương thức chỉ để lấy danh sách các khóa học và danh mục
+    private void listCourses(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
+        try {
+            List<Course> courses = courseDAO.getAllCourses();
+            List<CourseCategory> categories = courseCategoryDAO.getAllCategories(); // Giả sử hàm này tồn tại
+            request.setAttribute("courses", courses);
+            request.setAttribute("categories", categories);
+        } catch (Exception e) {
+            // Log lỗi và re-throw để được xử lý bởi khối try-catch lớn hơn trong doGet/doPost
+            throw new ServletException("Error loading courses for list view", e);
+        }
+    }
+
+    // **** PHƯƠNG THỨC MỚI ĐỂ XỬ LÝ XEM CHI TIẾT KHÓA HỌC ****
+    private void viewCourseDetails(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
+        int courseId = 0;
+        try {
+            courseId = Integer.parseInt(request.getParameter("courseId")); // Lấy ID khóa học từ request
+        } catch (NumberFormatException e) {
+            request.setAttribute("errorMessage", "ID khóa học không hợp lệ.");
+            request.setAttribute("currentAction", "list"); // Chuyển về chế độ danh sách
+            listCourses(request, response); // Tải dữ liệu cho danh sách
+            return;
+        }
+
+        try {
+            // Lấy thông tin chi tiết của khóa học
+            Course course = courseDAO.getCourseDetail(courseId); // Sử dụng getCourseDetail theo code của bạn
+
+            if (course == null) {
+                request.setAttribute("errorMessage", "Không tìm thấy khóa học với ID: " + courseId);
+                request.setAttribute("currentAction", "list"); // Chuyển về chế độ danh sách
+                listCourses(request, response); // Tải dữ liệu cho danh sách
+                return;
+            }
+
+            // Lấy danh sách modules của khóa học
+            List<CourseModule> modules = courseModuleDAO.getCourseModules(courseId); // Sử dụng getCourseModules theo code của bạn
+
+            // Lấy danh sách lessons cho từng module và lưu vào Map
+            Map<Integer, List<CourseLesson>> lessonsByModule = new HashMap<>();
+            for (CourseModule module : modules) {
+                // Giả sử CourseModule có phương thức getId() để lấy ID module
+                List<CourseLesson> lessons = courseLessonDAO.getLessonsByModuleId(module.getId());
+                lessonsByModule.put(module.getId(), lessons);
+            }
+
+            // Đặt các thuộc tính vào request để JSP có thể truy cập
+            request.setAttribute("course", course);
+            request.setAttribute("modules", modules);
+            request.setAttribute("lessonsByModule", lessonsByModule);
+
+        } catch (Exception e) {
+            // Log lỗi chi tiết và truyền thông báo lỗi về JSP
+            throw new ServletException("Lỗi khi tải chi tiết khóa học cho ID: " + courseId, e);
+        }
+    }
+
+    // Các phương thức private khác (reorderModules, deleteCourse, toggleCourseStatus, deleteLesson, logError)
+    // Các phương thức này vẫn giữ nguyên như bạn đã cung cấp, hoặc được chỉnh sửa nhẹ
+    // để phù hợp với việc truyền action từ doGet/doPost.
+    // Thêm phương thức xử lý sắp xếp module
     private void reorderModules(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         try {
             int courseId = Integer.parseInt(request.getParameter("courseId"));
             String[] moduleIds = request.getParameterValues("moduleOrder");
@@ -175,6 +240,9 @@ public class CourseAdminServlet extends HttpServlet {
 
     private void deleteCourse(HttpServletRequest request, HttpServletResponse response)
             throws Exception, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         int id = Integer.parseInt(request.getParameter("id"));
         boolean success = courseDAO.deleteCourse(id);
 
@@ -189,6 +257,9 @@ public class CourseAdminServlet extends HttpServlet {
 
     private void toggleCourseStatus(HttpServletRequest request, HttpServletResponse response)
             throws Exception, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         int id = Integer.parseInt(request.getParameter("id"));
         Course course = courseDAO.getCourseDetail(id);
 
@@ -207,6 +278,9 @@ public class CourseAdminServlet extends HttpServlet {
 
     private void deleteLesson(HttpServletRequest request, HttpServletResponse response)
             throws Exception, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         int lessonId = Integer.parseInt(request.getParameter("id"));
         boolean success = courseLessonDAO.deleteLesson(lessonId);
 
@@ -221,8 +295,10 @@ public class CourseAdminServlet extends HttpServlet {
         response.sendRedirect(referer);
     }
 
-    private void logError(String lỗi_khi_sắp_xếp_modules, Exception e) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private void logError(String message, Exception e) {
+        
+        System.err.println("[CourseAdminServlet] " + message);
+        e.printStackTrace();
     }
 
 }

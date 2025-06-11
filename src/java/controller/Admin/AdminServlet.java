@@ -26,7 +26,9 @@ public class AdminServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
 
@@ -224,6 +226,7 @@ public class AdminServlet extends HttpServlet {
     }
 
     public String getCompletionRatesJson(List<CourseStat> courses) {
+        
         Random rand = new Random();
         List<Integer> rates = new ArrayList<>();
         for (int i = 0; i < courses.size(); i++) {
@@ -235,6 +238,9 @@ public class AdminServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         doGet(request, response);
     }
 }

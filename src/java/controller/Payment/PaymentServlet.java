@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.UUID;
@@ -33,6 +34,9 @@ public class PaymentServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String action = request.getParameter("action");
         String paymentMethod = request.getParameter("paymentMethod");
         String packageIdParam = request.getParameter("packageId");
@@ -68,6 +72,9 @@ public class PaymentServlet extends HttpServlet {
     private void handleNewRegistrationPayment(HttpServletRequest request, HttpServletResponse response,
             HttpSession session, ServicePackage pkg, String paymentMethod)
             throws ServletException, IOException, SQLException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
 
         User pendingUser = (User) session.getAttribute("pendingUser");
 
@@ -120,6 +127,9 @@ public class PaymentServlet extends HttpServlet {
     private void handleUpgradePayment(HttpServletRequest request, HttpServletResponse response,
             HttpSession session, ServicePackage pkg, String paymentMethod)
             throws ServletException, IOException, SQLException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
 
         User user = (User) session.getAttribute("user");
 
@@ -175,7 +185,8 @@ public class PaymentServlet extends HttpServlet {
         }
     }
 
-    private void sendUpgradeEmail(HttpServletRequest request, User user, ServicePackage pkg) {
+    private void sendUpgradeEmail(HttpServletRequest request, User user, ServicePackage pkg) throws UnsupportedEncodingException {
+        request.setCharacterEncoding("UTF-8");
         try {
             String emailBody = "<!DOCTYPE html>"
                     + "<html lang='vi'>"

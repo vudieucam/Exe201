@@ -28,6 +28,9 @@ public class LessonServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
+        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType("text/html;charset=UTF-8");
         String action = req.getParameter("action");
 
         try {
@@ -47,6 +50,9 @@ public class LessonServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
+        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType("text/html;charset=UTF-8");
         String action = req.getParameter("action");
 
         try {
@@ -73,6 +79,9 @@ public class LessonServlet extends HttpServlet {
     // Cải thiện phương thức addLesson
     private void addLesson(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         try {
             int moduleId = Integer.parseInt(request.getParameter("moduleId"));
             String title = request.getParameter("title").trim();
@@ -125,6 +134,9 @@ public class LessonServlet extends HttpServlet {
 
     private void reorderLessons(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         try {
             int moduleId = Integer.parseInt(request.getParameter("moduleId"));
             String[] lessonIds = request.getParameterValues("lessonOrder");
@@ -147,6 +159,9 @@ public class LessonServlet extends HttpServlet {
 
     private void updateLesson(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
+        req.setCharacterEncoding("UTF-8");
+        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType("text/html;charset=UTF-8");
         try {
             int lessonId = Integer.parseInt(req.getParameter("lessonId"));
             String title = req.getParameter("title");
@@ -175,6 +190,9 @@ public class LessonServlet extends HttpServlet {
 
     private void deleteLesson(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
+        req.setCharacterEncoding("UTF-8");
+        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType("text/html;charset=UTF-8");
         try {
             int lessonId = Integer.parseInt(req.getParameter("id"));
             int moduleId = courseLessonDAO.getModuleIdByLessonId(lessonId);
@@ -188,6 +206,9 @@ public class LessonServlet extends HttpServlet {
 
     private void toggleLessonStatus(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
+        req.setCharacterEncoding("UTF-8");
+        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType("text/html;charset=UTF-8");
         try {
             int lessonId = Integer.parseInt(req.getParameter("id"));
             int moduleId = Integer.parseInt(req.getParameter("moduleId"));
@@ -207,7 +228,9 @@ public class LessonServlet extends HttpServlet {
         }
     }
 
-    private void logError(String lỗi_khi_thêm_lesson, Exception e) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private void logError(String message, Exception e) {
+        System.err.println("[CourseAdminServlet] " + message);
+        e.printStackTrace();
     }
+
 }

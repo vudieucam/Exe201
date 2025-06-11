@@ -32,6 +32,7 @@ public class SessionTrackingListener implements HttpSessionListener {
 
     @Override
     public void sessionDestroyed(HttpSessionEvent se) {
+        
         activeSessions.decrementAndGet();
 
         try {

@@ -58,6 +58,9 @@ public class CourseEditServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         try {
             String idParam = request.getParameter("id");
             if (idParam == null || idParam.isEmpty()) {
@@ -90,6 +93,9 @@ public class CourseEditServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         try {
             String idParam = request.getParameter("id");
             String title = request.getParameter("title");
@@ -176,6 +182,7 @@ public class CourseEditServlet extends HttpServlet {
     }
 
     private String saveUploadedFile(String fileName, InputStream fileContent) throws IOException {
+        
         String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads";
         File uploadDir = new File(uploadPath);
         if (!uploadDir.exists()) {

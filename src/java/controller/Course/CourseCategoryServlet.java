@@ -38,6 +38,9 @@ public class CourseCategoryServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String action = request.getParameter("action");
 
         if (action == null || action.equals("list")) {
@@ -53,6 +56,9 @@ public class CourseCategoryServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String action = request.getParameter("action");
 
         if (action == null || action.equals("add")) {
@@ -65,6 +71,9 @@ public class CourseCategoryServlet extends HttpServlet {
 
     private void listCategories(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         try {
             List<CourseCategory> categories = courseCategoryDAO.getAllCategories();
             request.setAttribute("categories", categories);
@@ -77,6 +86,9 @@ public class CourseCategoryServlet extends HttpServlet {
 
     private void addCategory(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         try {
             String name = request.getParameter("categoryName");
 
@@ -109,6 +121,9 @@ public class CourseCategoryServlet extends HttpServlet {
 
     private void updateCategory(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         try {
             String idParam = request.getParameter("categoryId");
             String name = request.getParameter("categoryName");
@@ -153,6 +168,9 @@ public class CourseCategoryServlet extends HttpServlet {
 
     private void deleteCategory(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         try {
             String idParam = request.getParameter("id");
 
@@ -190,6 +208,9 @@ public class CourseCategoryServlet extends HttpServlet {
 
     private void toggleCategoryStatus(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         try {
             int id = Integer.parseInt(request.getParameter("id"));
             boolean success = courseCategoryDAO.toggleStatus(id);

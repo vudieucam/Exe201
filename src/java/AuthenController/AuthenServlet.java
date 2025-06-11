@@ -28,6 +28,9 @@ public class AuthenServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
 
         try {
@@ -66,6 +69,9 @@ public class AuthenServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String action = request.getParameter("action") != null ? request.getParameter("action") : "";
 
         try {
@@ -96,6 +102,9 @@ public class AuthenServlet extends HttpServlet {
 
     private void login(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
 
         String email = request.getParameter("email");
         String password = request.getParameter("password");
@@ -166,6 +175,9 @@ public class AuthenServlet extends HttpServlet {
 
     private void logout(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         HttpSession session = request.getSession(false);
 
         if (session != null) {
@@ -233,6 +245,9 @@ public class AuthenServlet extends HttpServlet {
 
     private String changePassword(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         HttpSession session = request.getSession();
         User currentUser = (User) session.getAttribute("user");
 
@@ -302,6 +317,9 @@ public class AuthenServlet extends HttpServlet {
 
     private String resetPassword(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         HttpSession session = request.getSession(); // <-- phải khai báo session ở đây
 
         String email = request.getParameter("email");
@@ -383,6 +401,9 @@ public class AuthenServlet extends HttpServlet {
 
     private void verifyEmail(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String token = request.getParameter("token");
         HttpSession session = request.getSession();
 
@@ -401,6 +422,7 @@ public class AuthenServlet extends HttpServlet {
     }
 
     private String generateRandomPassword(int length) {
+        
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         StringBuilder sb = new StringBuilder();
 

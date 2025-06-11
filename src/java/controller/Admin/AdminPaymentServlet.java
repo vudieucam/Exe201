@@ -23,7 +23,9 @@ public class AdminPaymentServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String confirmationCode = request.getParameter("confirmationCode");
         String action = request.getParameter("action"); // approve or reject
 
@@ -74,6 +76,7 @@ public class AdminPaymentServlet extends HttpServlet {
     }
 
     private void sendApprovalEmail(User user, ServicePackage pkg) {
+        
         String emailBody = "<!DOCTYPE html>"
                 + "<html><head><style>body{font-family:Arial,sans-serif}</style></head>"
                 + "<body>"

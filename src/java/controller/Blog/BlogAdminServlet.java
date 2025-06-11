@@ -36,6 +36,8 @@ public class BlogAdminServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String action = request.getParameter("action");
 
         try {
@@ -64,6 +66,8 @@ public class BlogAdminServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String action = request.getParameter("action");
 
         try {
@@ -90,6 +94,9 @@ public class BlogAdminServlet extends HttpServlet {
 
     private void listBlogs(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         try {
             String statusFilter = request.getParameter("statusFilter");
             String featuredFilter = request.getParameter("featuredFilter");
@@ -132,14 +139,20 @@ public class BlogAdminServlet extends HttpServlet {
 
     private void insertBlog(HttpServletRequest request, HttpServletResponse response)
             throws Exception {
-        Blog blog = extractBlogFromRequest(request, false);
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
+        Blog blog = extractBlogFromRequest(request,response, false);
         blogDAO.addBlog(blog);
         response.sendRedirect("blogadmin");
     }
 
     private void updateBlog(HttpServletRequest request, HttpServletResponse response)
             throws Exception {
-        Blog blog = extractBlogFromRequest(request, true);
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
+        Blog blog = extractBlogFromRequest(request, response,true);
         blog.setBlogId(Integer.parseInt(request.getParameter("id")));
         blogDAO.updateBlog(blog);
         response.sendRedirect("blogadmin");
@@ -147,6 +160,9 @@ public class BlogAdminServlet extends HttpServlet {
 
     private void deleteBlog(HttpServletRequest request, HttpServletResponse response)
             throws Exception {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         int id = Integer.parseInt(request.getParameter("id"));
         blogDAO.deleteBlog(id);
         response.sendRedirect("blogadmin");
@@ -154,13 +170,19 @@ public class BlogAdminServlet extends HttpServlet {
 
     private void toggleBlogStatus(HttpServletRequest request, HttpServletResponse response)
             throws Exception {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         int id = Integer.parseInt(request.getParameter("id"));
         blogDAO.toggleBlogStatus(id);
         response.sendRedirect("blogadmin");
     }
 
-    private Blog extractBlogFromRequest(HttpServletRequest request, boolean isEdit)
+    private Blog extractBlogFromRequest(HttpServletRequest request,HttpServletResponse response, boolean isEdit)
             throws IOException, ServletException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         Blog blog = new Blog();
 
         blog.setTitle(request.getParameter("title"));

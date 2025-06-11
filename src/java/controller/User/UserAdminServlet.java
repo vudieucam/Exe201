@@ -10,6 +10,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import model.User;
 
@@ -30,6 +31,9 @@ public class UserAdminServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String action = request.getParameter("action");
 
         try {
@@ -59,6 +63,9 @@ public class UserAdminServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String action = request.getParameter("action");
 
         try {
@@ -86,6 +93,9 @@ public class UserAdminServlet extends HttpServlet {
 
     private void listUsers(HttpServletRequest request, HttpServletResponse response)
             throws Exception, ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         List<User> users = userDAO.getAllUsers();
         request.setAttribute("users", users);
         request.getRequestDispatcher("/userAdmin.jsp").forward(request, response);
@@ -93,6 +103,9 @@ public class UserAdminServlet extends HttpServlet {
 
     private void insertUser(HttpServletRequest request, HttpServletResponse response)
             throws Exception {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         User newUser = extractUserFromRequest(request);
 
         if (userDAO.checkEmailExists(newUser.getEmail())) {
@@ -108,6 +121,9 @@ public class UserAdminServlet extends HttpServlet {
 
     private void updateUser(HttpServletRequest request, HttpServletResponse response)
             throws Exception, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         User user = extractUserFromRequest(request);
         user.setId(Integer.parseInt(request.getParameter("id")));
         userDAO.updateUser(user);
@@ -116,6 +132,9 @@ public class UserAdminServlet extends HttpServlet {
 
     private void deleteUser(HttpServletRequest request, HttpServletResponse response)
             throws Exception, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         int id = Integer.parseInt(request.getParameter("id"));
         userDAO.deleteUser(id);
         response.sendRedirect("useradmin");
@@ -123,12 +142,16 @@ public class UserAdminServlet extends HttpServlet {
 
     private void deactivateUser(HttpServletRequest request, HttpServletResponse response)
             throws Exception, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         int id = Integer.parseInt(request.getParameter("id"));
         userDAO.deactivateUser(id);
         response.sendRedirect("useradmin");
     }
 
-    private User extractUserFromRequest(HttpServletRequest request) {
+    private User extractUserFromRequest(HttpServletRequest request) throws UnsupportedEncodingException {
+        request.setCharacterEncoding("UTF-8");
         User user = new User();
         user.setEmail(request.getParameter("email"));
         // Chỉ cập nhật password nếu có giá trị (khi thêm mới hoặc thay đổi password)

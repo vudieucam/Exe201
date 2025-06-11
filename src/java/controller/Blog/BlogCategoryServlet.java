@@ -22,6 +22,9 @@ public class BlogCategoryServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String action = request.getParameter("action");
 
         try {
@@ -53,6 +56,9 @@ public class BlogCategoryServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String action = request.getParameter("action");
 
         try {
@@ -79,6 +85,9 @@ public class BlogCategoryServlet extends HttpServlet {
 
     private void getCategoryJson(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         int id = Integer.parseInt(request.getParameter("id"));
         BlogCategory category = blogCategoryDAO.getCategoryById(id);
 
@@ -110,6 +119,9 @@ public class BlogCategoryServlet extends HttpServlet {
 
     private void listCategories(HttpServletRequest request, HttpServletResponse response)
             throws Exception {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         List<BlogCategory> categories = blogCategoryDAO.getAllCategories();
         request.setAttribute("categories", categories);
         request.getRequestDispatcher("/blogCategories.jsp").forward(request, response);
@@ -117,6 +129,9 @@ public class BlogCategoryServlet extends HttpServlet {
 
     private void insertCategory(HttpServletRequest request, HttpServletResponse response)
             throws Exception {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         BlogCategory category = extractCategoryFromRequest(request);
 
         if (blogCategoryDAO.existsByName(category.getCategoryName())) {
@@ -132,6 +147,9 @@ public class BlogCategoryServlet extends HttpServlet {
 
     private void updateCategory(HttpServletRequest request, HttpServletResponse response)
             throws Exception {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         int id = Integer.parseInt(request.getParameter("id"));
         BlogCategory existing = blogCategoryDAO.getCategoryById(id);
 
@@ -161,6 +179,9 @@ public class BlogCategoryServlet extends HttpServlet {
 
     private void deleteCategory(HttpServletRequest request, HttpServletResponse response)
             throws Exception {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String idParam = request.getParameter("id");
         if (idParam == null || idParam.isEmpty()) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu ID danh mục.");
@@ -182,6 +203,9 @@ public class BlogCategoryServlet extends HttpServlet {
 
     private void toggleCategoryStatus(HttpServletRequest request, HttpServletResponse response)
             throws Exception {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String idParam = request.getParameter("id");
         if (idParam == null || idParam.isEmpty()) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu ID danh mục.");

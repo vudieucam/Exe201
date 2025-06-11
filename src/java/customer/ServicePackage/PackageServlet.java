@@ -28,6 +28,9 @@ public class PackageServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String action = request.getParameter("action");
 
         try {
@@ -65,6 +68,9 @@ public class PackageServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String action = request.getParameter("action");
 
         if (action == null) {
@@ -102,6 +108,9 @@ public class PackageServlet extends HttpServlet {
 
     private void registerPackage(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
 
@@ -147,6 +156,9 @@ public class PackageServlet extends HttpServlet {
 
     private void upgradePackage(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
 
@@ -198,6 +210,9 @@ public class PackageServlet extends HttpServlet {
 
     private void reloadPackages(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         try {
             List<ServicePackage> packages = PackageDAO.getAllPackages();
             request.setAttribute("packages", packages);
@@ -209,6 +224,9 @@ public class PackageServlet extends HttpServlet {
 
     private void payAndRegister(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, SQLException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         HttpSession session = request.getSession();
         User pendingUser = (User) session.getAttribute("pendingUser");
 
@@ -407,6 +425,9 @@ public class PackageServlet extends HttpServlet {
 
     private void processPayment(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
         User pendingUser = (User) session.getAttribute("pendingUser");
@@ -461,6 +482,7 @@ public class PackageServlet extends HttpServlet {
     }
 
     private void sendPaymentConfirmationEmail(User user, ServicePackage pkg, String confirmationCode, HttpServletRequest request) {
+
         String activationLink = "";
         if (user.getActivationToken() != null) {
             activationLink = request.getScheme() + "://"
