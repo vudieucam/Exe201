@@ -4,6 +4,7 @@
  */
 package customer.Course;
 
+import dal.BlogDAO;
 import dal.CourseDAO;
 import dal.CourseModuleDAO;
 import dal.CustomerCourseDAO;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import model.BlogCategory;
 import model.Course;
 import model.CourseCategory;
 import model.CourseLesson;
@@ -52,6 +54,7 @@ public class CourseDetailServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        BlogDAO blogDAO = new BlogDAO();
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
@@ -66,7 +69,11 @@ public class CourseDetailServlet extends HttpServlet {
 
             List<Course> featuredCourses = CustomercourseDAO.getFeaturedCourses(9);
             request.setAttribute("featuredCourses", featuredCourses);
+// Dữ liệu bổ sung
+            List<BlogCategory> featuredCategories = blogDAO.getFeaturedCategories();
 
+// Gửi sang JSP
+            request.setAttribute("featuredCategories", featuredCategories);
             String idRaw = request.getParameter("id");
 
             // Kiểm tra tham số id

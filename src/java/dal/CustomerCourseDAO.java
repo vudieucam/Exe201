@@ -46,6 +46,59 @@ public class CustomerCourseDAO extends DBConnect {
         return categories;
     }
 
+    public List<Course> getCoursesByCategoryId(int categoryId) {
+        List<Course> courses = new ArrayList<>();
+        String sql = "String sql = \"SELECT \" +\n"
+                + "             \"c.id, \" +\n"
+                + "             \"c.title, \" +\n"
+                + "             \"c.content, \" +\n"
+                + "             \"c.post_date, \" +\n"
+                + "             \"c.researcher, \" +\n"
+                + "             \"c.video_url, \" +\n"
+                + "             \"c.status, \" +\n"
+                + "             \"c.duration, \" +\n"
+                + "             \"c.thumbnail_url, \" +\n"
+                + "             \"c.created_at, \" +\n"
+                + "             \"c.updated_at, \" +\n"
+                + "             \"c.is_paid \" +\n"
+                + "             \"FROM courses c \" +\n"
+                + "             \"JOIN course_category_mapping m ON c.id = m.course_id \" +\n"
+                + "             \"JOIN course_categories cat ON m.category_id = cat.id \" +\n"
+                + "             \"WHERE m.category_id = ? \" +\n"
+                + "             \"AND c.status = 1 \" +\n"
+                + "             \"AND m.status = 1 \" +\n"
+                + "             \"AND cat.status = 1\";";
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, categoryId);
+
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    Course course = new Course();
+                    course.setId(rs.getInt("id"));
+                    course.setTitle(rs.getString("title"));
+                    course.setContent(rs.getString("content"));
+                    course.setPostDate(rs.getDate("post_date"));
+                    course.setResearcher(rs.getString("researcher"));
+                    course.setVideoUrl(rs.getString("video_url"));
+                    course.setStatus(rs.getInt("status"));
+                    course.setDuration(rs.getString("duration"));
+                    course.setThumbnailUrl(rs.getString("thumbnail_url"));
+                    course.setCreatedAt(rs.getTimestamp("created_at"));
+                    course.setUpdatedAt(rs.getTimestamp("updated_at"));
+                    course.setIsPaid(rs.getBoolean("is_paid"));
+
+                    // categories, images, modules, reviews sẽ được set riêng nếu cần lazy loading
+                    courses.add(course);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return courses;
+    }
+
     private List<CourseCategory> getCategoriesByCourseId(int courseId) throws SQLException {
         List<CourseCategory> categories = new ArrayList<>();
         String sql = "SELECT cc.id, cc.name, cc.description, cc.status FROM course_category_mapping ccm "

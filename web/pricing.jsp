@@ -909,9 +909,9 @@
                                 <div class="dropdown-header">
                                     <i class="fa fa-book mr-2"></i>Danh mục khóa học
                                 </div>
-                                <c:forEach items="${featuredCourses}" var="course" end="8">
-                                    <a class="dropdown-item" href="coursedetail?id=${course.id}">
-                                        ${fn:substring(course.title, 0, 50)}${fn:length(course.title) > 50 ? '...' : ''}
+                                <c:forEach items="${courseCategories}" var="category">
+                                    <a class="dropdown-item" href="course?categoryId=${category.id}">
+                                        ${category.name}
                                     </a>
                                 </c:forEach>
                                 <div class="dropdown-divider"></div>
@@ -919,6 +919,7 @@
                                     <i class="fa fa-arrow-right mr-2"></i>Xem tất cả
                                 </a>
                             </div>
+
                         </li>
                         <li class="nav-item"><a href="expert" class="nav-link">Chuyên gia</a></li>
                         <li class="nav-item"><a href="product" class="nav-link">Sản phẩm</a></li>
@@ -1033,7 +1034,7 @@
                                                          <li><i></i>Tham gia thảo luận các bài viết</li>
                                                          <li><i></i>Bài viết nâng cao theo loại thú cưng</li>
                                                          <li><i></i>Khóa học cơ bản</li>
-                                                         </c:when>
+                                                             </c:when>
 
                                                      <c:when test="${pkg.id == 2}">
                                                          <li><i></i>Truy cập bài viết cơ bản</li>
@@ -1042,7 +1043,7 @@
                                                          <li><i></i>Bài viết nâng cao theo loại thú cưng</li>
                                                          <li><i></i>Khóa học cơ bản</li>
                                                          <li><i></i>Tư vấn chuyên gia 1 lần/Tuần</li>
-                                                         </c:when>
+                                                             </c:when>
 
                                                      <c:when test="${pkg.id == 3}">
                                                          <li><i></i>Truy cập bài viết cơ bản</li>
@@ -1053,8 +1054,8 @@
                                                          <li><i></i>Tư vấn 1-1 không giới hạn</li>
                                                          <li><i></i>Tài liệu độc quyền</li>
                                                          <li><i></i>Ưu đãi 10% sản phẩm từ hệ thống</li>
-                                                         </c:when>
-                                                     </c:choose>
+                                                             </c:when>
+                                                         </c:choose>
                                              </ul>
 
                                              <div class="package-actions">

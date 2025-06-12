@@ -926,10 +926,12 @@
                                     <i class="fa fa-book mr-2"></i>Danh mục khóa học
                                 </div>
                                 <c:forEach items="${courseCategories}" var="category">
-                                    <a class="dropdown-item" href="course?categoryId=${category.id}">
+                                    <a class="dropdown-item ${selectedCategoryId == category.id ? 'active' : ''}" 
+                                       href="course?categoryId=${category.id}">
                                         ${category.name}
                                     </a>
                                 </c:forEach>
+
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item text-center view-all-btn" href="course">
                                     <i class="fa fa-arrow-right mr-2"></i>Xem tất cả

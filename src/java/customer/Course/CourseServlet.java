@@ -4,6 +4,7 @@
  */
 package customer.Course;
 
+import dal.BlogDAO;
 import dal.CourseDAO;
 import dal.CustomerCourseDAO;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
 import java.util.List;
+import model.BlogCategory;
 import model.Course;
 import model.CourseCategory;
 
@@ -42,6 +44,7 @@ public class CourseServlet extends HttpServlet {
 
     private CustomerCourseDAO CustomercourseDAO = new CustomerCourseDAO();
     private CourseDAO courseDAO = new CourseDAO();
+    private BlogDAO blogDAO = new BlogDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -96,7 +99,7 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void handleCourseList(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException, Exception {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
@@ -108,6 +111,11 @@ public class CourseServlet extends HttpServlet {
         List<Course> featuredCourses = CustomercourseDAO.getFeaturedCourses(6);
         request.setAttribute("featuredCourses", featuredCourses);
 
+// Dữ liệu bổ sung
+        List<BlogCategory> featuredCategories = blogDAO.getFeaturedCategories();
+
+// Gửi sang JSP
+        request.setAttribute("featuredCategories", featuredCategories);
         // Xử lý phân trang và tìm kiếm
         String searchQuery = request.getParameter("search");
         int currentPage = 1;

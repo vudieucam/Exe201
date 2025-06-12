@@ -1,6 +1,7 @@
 package controller.Blog;
 
 import dal.BlogDAO;
+import dal.CustomerCourseDAO;
 import model.Blog;
 import model.BlogCategory;
 
@@ -12,8 +13,17 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+import model.CourseCategory;
 
 public class BlogDetailServlet extends HttpServlet {
+
+    private CustomerCourseDAO courseDAO;
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        courseDAO = new CustomerCourseDAO();
+    }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -38,6 +48,15 @@ public class BlogDetailServlet extends HttpServlet {
             request.setAttribute("blog", blog);
             request.setAttribute("categories", categories);
             request.setAttribute("featuredBlogs", featuredBlogs);
+// Lấy danh sách tất cả danh mục khóa học
+            List<CourseCategory> courseCategories = courseDAO.getAllCategories();
+            request.setAttribute("courseCategories", courseCategories);
+
+// Dữ liệu bổ sung
+            List<BlogCategory> featuredCategories = blogDAO.getFeaturedCategories();
+
+// Gửi sang JSP
+            request.setAttribute("featuredCategories", featuredCategories);
 
             request.getRequestDispatcher("blog-single.jsp").forward(request, response);
 

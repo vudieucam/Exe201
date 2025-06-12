@@ -736,9 +736,9 @@
                                 <div class="dropdown-header">
                                     <i class="fa fa-book mr-2"></i>Danh mục khóa học
                                 </div>
-                                <c:forEach items="${featuredCourses}" var="course" end="8">
-                                    <a class="dropdown-item" href="coursedetail?id=${course.id}">
-                                        ${fn:substring(course.title, 0, 50)}${fn:length(course.title) > 50 ? '...' : ''}
+                                <c:forEach items="${courseCategories}" var="category">
+                                    <a class="dropdown-item" href="course?categoryId=${category.id}">
+                                        ${category.name}
                                     </a>
                                 </c:forEach>
                                 <div class="dropdown-divider"></div>
@@ -757,17 +757,16 @@
                             </a>
                             <div class="dropdown-menu blog-dropdown" aria-labelledby="blogDropdown">
                                 <c:forEach items="${featuredCategories}" var="category">
-                                    <a class="dropdown-item" href="blog?categoryId=${category.categoryId}">
+                                    <a class="dropdown-item" href="blog?category=${category.categoryId}">
                                         <i class="fa fa-paw mr-2"></i>${category.categoryName}
                                     </a>
                                 </c:forEach>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item view-all" href="blog">
+                                <a class="view-all" href="blog">
                                     <i class="fa fa-arrow-right mr-2"></i>Xem tất cả
                                 </a>
                             </div>
                         </li>
-
                         <li class="nav-item"><a href="contact" class="nav-link">Liên hệ</a></li>
                     </ul>
                 </div>

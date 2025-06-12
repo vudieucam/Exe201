@@ -4,6 +4,7 @@
  */
 package controller.homepage;
 
+import dal.BlogDAO;
 import dal.CustomerCourseDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -12,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
+import model.BlogCategory;
 import model.Course;
 import model.CourseCategory;
 import model.User;
@@ -32,6 +34,7 @@ public class HomeServlet extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        BlogDAO blogDAO = new BlogDAO();
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
@@ -54,6 +57,11 @@ public class HomeServlet extends HttpServlet {
             // Lấy danh sách khóa học nổi bật (giới hạn 3 khóa)
             List<Course> featuredCourses = courseDAO.getFeaturedCourses(3);
             request.setAttribute("featuredCourses", featuredCourses);
+// Dữ liệu bổ sung
+            List<BlogCategory> featuredCategories = blogDAO.getFeaturedCategories();
+
+// Gửi sang JSP
+            request.setAttribute("featuredCategories", featuredCategories);
 
             // Forward đến trang JSP
             request.getRequestDispatcher("/Home.jsp").forward(request, response);

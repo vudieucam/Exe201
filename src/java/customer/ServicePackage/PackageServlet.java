@@ -1,5 +1,8 @@
 package customer.ServicePackage;
 
+import dal.BlogDAO;
+import dal.CourseDAO;
+import dal.CustomerCourseDAO;
 import dal.PackageDAO;
 import dal.UserDAO;
 import dal.UserServiceDAO;
@@ -18,6 +21,11 @@ import model.ServicePackage;
 import model.User;
 import java.util.Date;
 import java.util.Calendar;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import model.BlogCategory;
+import model.Course;
+import model.CourseCategory;
 import model.UserService;
 
 public class PackageServlet extends HttpServlet {
@@ -41,6 +49,9 @@ public class PackageServlet extends HttpServlet {
     private PackageDAO PackageDAO = new PackageDAO();
     private UserDAO userDAO = new UserDAO();
     private static final int FREE_PACKAGE_ID = 1;
+    private CustomerCourseDAO CustomercourseDAO = new CustomerCourseDAO();
+    private CourseDAO courseDAO = new CourseDAO();
+    private BlogDAO blogDAO = new BlogDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -66,6 +77,17 @@ public class PackageServlet extends HttpServlet {
                     HttpSession session = request.getSession();
                     User pendingUser = (User) session.getAttribute("pendingUser");
                     request.setAttribute("fromRegistration", pendingUser != null);
+
+                    // ✅ Chèn ở đây nếu cần trong trang payment.jsp
+                    List<CourseCategory> courseCategories = CustomercourseDAO.getAllCategories();
+                    request.setAttribute("courseCategories", courseCategories);
+
+                    List<Course> featuredCourses = CustomercourseDAO.getFeaturedCourses(6);
+                    request.setAttribute("featuredCourses", featuredCourses);
+
+                    List<BlogCategory> featuredCategories = blogDAO.getFeaturedCategories();
+                    request.setAttribute("featuredCategories", featuredCategories);
+
                     request.getRequestDispatcher("payment.jsp").forward(request, response);
                     return;
                 }
@@ -74,12 +96,22 @@ public class PackageServlet extends HttpServlet {
             List<ServicePackage> packages = PackageDAO.getAllPackages();
             request.setAttribute("packages", packages);
 
+            // ✅ CHÈN Ở ĐÂY TRƯỚC KHI forward sang pricing.jsp
+            List<CourseCategory> courseCategories = CustomercourseDAO.getAllCategories();
+            request.setAttribute("courseCategories", courseCategories);
+
+            List<BlogCategory> featuredCategories = blogDAO.getFeaturedCategories();
+            request.setAttribute("featuredCategories", featuredCategories);
+
         } catch (SQLException | NumberFormatException e) {
             request.setAttribute("error", "Không thể tải danh sách gói: " + e.getMessage());
             e.printStackTrace();
+        } catch (Exception ex) {
+            Logger.getLogger(PackageServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         request.getRequestDispatcher("pricing.jsp").forward(request, response);
+
     }
 
     @Override

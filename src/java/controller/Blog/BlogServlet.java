@@ -5,6 +5,7 @@
 package controller.Blog;
 
 import dal.BlogDAO;
+import dal.CustomerCourseDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -13,13 +14,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import model.Blog;
 import model.BlogCategory;
+import model.CourseCategory;
 
 /**
  *
  * @author FPT
  */
 public class BlogServlet extends HttpServlet {
-
+    private CustomerCourseDAO CustomercourseDAO = new CustomerCourseDAO();
     private static final int BLOGS_PER_PAGE = 9;
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -77,7 +79,9 @@ public class BlogServlet extends HttpServlet {
             List<BlogCategory> categories = blogDAO.getAllCategories();
             List<BlogCategory> featuredCategories = blogDAO.getFeaturedCategories();
             List<Blog> featuredBlogs = blogDAO.getFeaturedBlogs(3);
-
+            // ✅ CHÈN Ở ĐÂY TRƯỚC KHI forward sang pricing.jsp
+            List<CourseCategory> courseCategories = CustomercourseDAO.getAllCategories();
+            request.setAttribute("courseCategories", courseCategories);
             // Gửi dữ liệu sang JSP
             request.setAttribute("blogs", blogs);
             request.setAttribute("categories", categories);
