@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import model.CourseCategory;
 
@@ -21,6 +22,22 @@ import model.CourseCategory;
  */
 public class CourseCategoryServlet extends HttpServlet {
 
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            /* TODO output your page here. You may use following sample code. */
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<title>Servlet CourseDetailAdminServlet</title>");
+            out.println("</head>");
+            out.println("<body>");
+            out.println("<h1>Servlet CourseDetailAdminServlet at " + request.getContextPath() + "</h1>");
+            out.println("</body>");
+            out.println("</html>");
+        }
+    }
     private CourseDAO courseDAO;
     private dal.CourseLessonDAO courseLessonDAO;
     private CourseModuleDAO courseModuleDAO;
@@ -65,7 +82,7 @@ public class CourseCategoryServlet extends HttpServlet {
             addCategory(request, response);
         } else if (action.equals("update")) {
             updateCategory(request, response);
-        } 
+        }
 
     }
 
@@ -77,10 +94,12 @@ public class CourseCategoryServlet extends HttpServlet {
         try {
             List<CourseCategory> categories = courseCategoryDAO.getAllCategories();
             request.setAttribute("categories", categories);
-            request.getRequestDispatcher("courseCategory.jsp").forward(request, response);
+            request.getRequestDispatcher("courseAdmin.jsp").forward(request, response);
+
         } catch (Exception e) {
             request.setAttribute("error", "Lỗi khi tải danh sách danh mục: " + e.getMessage());
-            request.getRequestDispatcher("courseCategory.jsp").forward(request, response);
+            request.getRequestDispatcher("courseAdmin.jsp").forward(request, response);
+
         }
     }
 

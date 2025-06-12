@@ -4,14 +4,12 @@ import dal.CourseDAO;
 import dal.CourseLessonDAO;
 import dal.CourseModuleDAO;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import model.CourseLesson;
 
 import java.io.IOException;
 import java.util.Date;
 
-@WebServlet("/lessonadmin")
 public class LessonServlet extends HttpServlet {
 
     private CourseDAO courseDAO;
@@ -35,7 +33,7 @@ public class LessonServlet extends HttpServlet {
 
         try {
             if (action == null) {
-                resp.sendRedirect(req.getContextPath() + "/courseadmin");
+                resp.sendRedirect(req.getContextPath() + "/coursedetailadmin");
             } else if (action.equals("delete")) {
                 deleteLesson(req, resp);
             } else if (action.equals("toggleStatus")) {
@@ -43,7 +41,7 @@ public class LessonServlet extends HttpServlet {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            resp.sendRedirect(req.getContextPath() + "/courseadmin");
+            resp.sendRedirect(req.getContextPath() + "/coursedetailadmin");
         }
     }
 
@@ -67,39 +65,31 @@ public class LessonServlet extends HttpServlet {
                     reorderLessons(req, resp);
                     break;
                 default:
-                    resp.sendRedirect(req.getContextPath() + "/courseadmin");
+                    resp.sendRedirect(req.getContextPath() + "/coursedetailadmin");
                     break;
             }
         } catch (Exception e) {
             e.printStackTrace();
-            resp.sendRedirect(req.getContextPath() + "/courseadmin");
+            resp.sendRedirect(req.getContextPath() + "/coursedetailadmin");
         }
     }
 
-    // Cải thiện phương thức addLesson
     private void addLesson(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        request.setCharacterEncoding("UTF-8");
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("text/html;charset=UTF-8");
         try {
             int moduleId = Integer.parseInt(request.getParameter("moduleId"));
             String title = request.getParameter("title").trim();
             String content = request.getParameter("content").trim();
             String videoUrl = request.getParameter("videoUrl").trim();
             int duration = 0;
-
             try {
                 duration = Integer.parseInt(request.getParameter("duration"));
-            } catch (NumberFormatException e) {
-                // Giữ giá trị mặc định là 0 nếu duration không hợp lệ
+            } catch (NumberFormatException ignored) {
             }
 
-            // Validate input
             if (title.isEmpty()) {
                 request.getSession().setAttribute("error", "Tên lesson không được để trống");
-                response.sendRedirect(request.getContextPath() + "/courseadmin?id="
-                        + courseModuleDAO.getCourseIdByModuleId(moduleId));
+                response.sendRedirect(request.getContextPath() + "/coursedetailadmin?id=" + courseModuleDAO.getCourseIdByModuleId(moduleId));
                 return;
             }
 
@@ -115,28 +105,20 @@ public class LessonServlet extends HttpServlet {
             lesson.setUpdatedAt(new Date());
 
             boolean success = courseLessonDAO.addLesson(lesson);
-
-            if (success) {
-                request.getSession().setAttribute("success", "Thêm lesson thành công");
-            } else {
-                request.getSession().setAttribute("error", "Thêm lesson thất bại");
-            }
+            request.getSession().setAttribute(success ? "success" : "error",
+                    success ? "Thêm lesson thành công" : "Thêm lesson thất bại");
 
             int courseId = courseModuleDAO.getCourseIdByModuleId(moduleId);
-            response.sendRedirect(request.getContextPath() + "/courseadmin?id=" + courseId);
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin?id=" + courseId);
         } catch (Exception e) {
             logError("Lỗi khi thêm lesson", e);
             request.getSession().setAttribute("error", "Lỗi hệ thống khi thêm lesson");
-            response.sendRedirect(request.getContextPath() + "/courseadmin");
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin");
         }
     }
-// Thêm phương thức xử lý sắp xếp lesson
 
     private void reorderLessons(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("text/html;charset=UTF-8");
+            throws IOException {
         try {
             int moduleId = Integer.parseInt(request.getParameter("moduleId"));
             String[] lessonIds = request.getParameterValues("lessonOrder");
@@ -149,19 +131,15 @@ public class LessonServlet extends HttpServlet {
                 }
                 request.getSession().setAttribute("success", "Sắp xếp lessons thành công");
             }
-            response.sendRedirect(request.getContextPath() + "/courseadmin?id=" + courseId);
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin?id=" + courseId);
         } catch (Exception e) {
             logError("Lỗi khi sắp xếp lessons", e);
             request.getSession().setAttribute("error", "Lỗi khi sắp xếp lessons");
-            response.sendRedirect(request.getContextPath() + "/courseadmin");
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin");
         }
     }
 
-    private void updateLesson(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-        req.setCharacterEncoding("UTF-8");
-        resp.setCharacterEncoding("UTF-8");
-        resp.setContentType("text/html;charset=UTF-8");
+    private void updateLesson(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             int lessonId = Integer.parseInt(req.getParameter("lessonId"));
             String title = req.getParameter("title");
@@ -179,36 +157,30 @@ public class LessonServlet extends HttpServlet {
                 courseLessonDAO.updateLesson(lesson);
 
                 int courseId = courseModuleDAO.getCourseIdByModuleId(lesson.getModuleId());
-                resp.sendRedirect(req.getContextPath() + "/courseadmin?id=" + courseId);
+                resp.sendRedirect(req.getContextPath() + "/coursedetailadmin?id=" + courseId);
             } else {
-                resp.sendRedirect(req.getContextPath() + "/courseadmin");
+                resp.sendRedirect(req.getContextPath() + "/coursedetailadmin");
             }
         } catch (Exception e) {
-            resp.sendRedirect(req.getContextPath() + "/courseadmin");
+            logError("Lỗi khi cập nhật lesson", e);
+            resp.sendRedirect(req.getContextPath() + "/coursedetailadmin");
         }
     }
 
-    private void deleteLesson(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-        req.setCharacterEncoding("UTF-8");
-        resp.setCharacterEncoding("UTF-8");
-        resp.setContentType("text/html;charset=UTF-8");
+    private void deleteLesson(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             int lessonId = Integer.parseInt(req.getParameter("id"));
             int moduleId = courseLessonDAO.getModuleIdByLessonId(lessonId);
             int courseId = courseModuleDAO.getCourseIdByModuleId(moduleId);
             courseLessonDAO.deleteLesson(lessonId);
-            resp.sendRedirect(req.getContextPath() + "/courseadmin?id=" + courseId);
-        } catch (NumberFormatException e) {
-            resp.sendRedirect(req.getContextPath() + "/courseadmin");
+            resp.sendRedirect(req.getContextPath() + "/coursedetailadmin?id=" + courseId);
+        } catch (Exception e) {
+            logError("Lỗi khi xóa lesson", e);
+            resp.sendRedirect(req.getContextPath() + "/coursedetailadmin");
         }
     }
 
-    private void toggleLessonStatus(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-        req.setCharacterEncoding("UTF-8");
-        resp.setCharacterEncoding("UTF-8");
-        resp.setContentType("text/html;charset=UTF-8");
+    private void toggleLessonStatus(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             int lessonId = Integer.parseInt(req.getParameter("id"));
             int moduleId = Integer.parseInt(req.getParameter("moduleId"));
@@ -217,20 +189,19 @@ public class LessonServlet extends HttpServlet {
             if (lesson != null) {
                 lesson.setStatus(!lesson.isStatus());
                 courseLessonDAO.updateLesson(lesson);
-
                 int courseId = courseModuleDAO.getCourseIdByModuleId(moduleId);
-                resp.sendRedirect(req.getContextPath() + "/courseadmin?id=" + courseId);
+                resp.sendRedirect(req.getContextPath() + "/coursedetailadmin?id=" + courseId);
             } else {
-                resp.sendRedirect(req.getContextPath() + "/courseadmin");
+                resp.sendRedirect(req.getContextPath() + "/coursedetailadmin");
             }
-        } catch (NumberFormatException e) {
-            resp.sendRedirect(req.getContextPath() + "/courseadmin");
+        } catch (Exception e) {
+            logError("Lỗi khi đổi trạng thái lesson", e);
+            resp.sendRedirect(req.getContextPath() + "/coursedetailadmin");
         }
     }
 
     private void logError(String message, Exception e) {
-        System.err.println("[CourseAdminServlet] " + message);
+        System.err.println("[LessonServlet] " + message);
         e.printStackTrace();
     }
-
 }

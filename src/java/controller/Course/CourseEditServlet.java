@@ -19,6 +19,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -40,7 +41,22 @@ import org.apache.commons.io.IOUtils;
 )
 public class CourseEditServlet extends HttpServlet {
 
-
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            /* TODO output your page here. You may use following sample code. */
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<title>Servlet CourseDetailAdminServlet</title>");
+            out.println("</head>");
+            out.println("<body>");
+            out.println("<h1>Servlet CourseDetailAdminServlet at " + request.getContextPath() + "</h1>");
+            out.println("</body>");
+            out.println("</html>");
+        }
+    }
     private CourseDAO courseDAO;
     private dal.CourseLessonDAO courseLessonDAO;
     private CourseModuleDAO courseModuleDAO;
@@ -54,7 +70,7 @@ public class CourseEditServlet extends HttpServlet {
         courseLessonDAO = new dal.CourseLessonDAO();
         courseCategoryDAO = new CourseCategoryDAO();
     }
-    
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -182,7 +198,7 @@ public class CourseEditServlet extends HttpServlet {
     }
 
     private String saveUploadedFile(String fileName, InputStream fileContent) throws IOException {
-        
+
         String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads";
         File uploadDir = new File(uploadPath);
         if (!uploadDir.exists()) {

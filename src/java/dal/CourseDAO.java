@@ -200,34 +200,58 @@ public class CourseDAO extends DBConnect {
         return false;
     }
 
-    public List<Course> searchCourses(String keyword) {
+    public List<Course> searchCourses(String keyword, Boolean status, Integer categoryId) {
         List<Course> list = new ArrayList<>();
-        String sql = "SELECT c.*, "
-                + "COALESCE(ci.image_url, c.thumbnail_url, '/images/corgin-1.jpg') AS thumbnail_url "
-                + "FROM courses c "
-                + "LEFT JOIN course_images ci ON c.id = ci.course_id AND ci.is_primary = 1 "
-                + "WHERE (c.title LIKE ? OR c.content LIKE ? OR c.researcher LIKE ?) "
-                + "AND c.status = 1 "
-                + "ORDER BY c.id";
 
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
-            String searchParam = "%" + keyword + "%";
-            st.setString(1, searchParam);
-            st.setString(2, searchParam);
-            st.setString(3, searchParam);
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT DISTINCT c.*, ")
+                .append("COALESCE(ci.image_url, c.thumbnail_url, '/images/corgin-1.jpg') AS thumbnail_url ")
+                .append("FROM courses c ")
+                .append("LEFT JOIN course_images ci ON c.id = ci.course_id AND ci.is_primary = 1 ")
+                .append("LEFT JOIN course_categories cc ON c.id = cc.course_id ")
+                .append("WHERE 1=1 ");
+
+        // Các điều kiện lọc động
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append("AND (c.title LIKE ? OR c.content LIKE ? OR c.researcher LIKE ?) ");
+        }
+        if (status != null) {
+            sql.append("AND c.status = ? ");
+        }
+        if (categoryId != null) {
+            sql.append("AND cc.category_id = ? ");
+        }
+
+        sql.append("ORDER BY c.id");
+
+        try (PreparedStatement st = connection.prepareStatement(sql.toString())) {
+            int index = 1;
+
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String param = "%" + keyword.trim() + "%";
+                st.setString(index++, param);
+                st.setString(index++, param);
+                st.setString(index++, param);
+            }
+            if (status != null) {
+                st.setBoolean(index++, status);
+            }
+            if (categoryId != null) {
+                st.setInt(index++, categoryId);
+            }
 
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
                 Course course = mapCourseFromResultSet(rs);
                 course.setThumbnailUrl(rs.getString("thumbnail_url"));
-
                 course.setCategories(courseCategoryDAO.getCategoriesByCourseId(course.getId()));
                 list.add(course);
             }
         } catch (SQLException e) {
-            System.out.println("Lỗi SQL: " + e.getMessage());
+            System.out.println("Lỗi SQL searchCourses: " + e.getMessage());
             e.printStackTrace();
         }
+
         return list;
     }
 

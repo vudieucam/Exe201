@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.util.List;
 import model.Blog;
@@ -23,6 +24,22 @@ import model.BlogCategory;
 
 public class BlogAdminServlet extends HttpServlet {
 
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            /* TODO output your page here. You may use following sample code. */
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<title>Servlet CourseDetailAdminServlet</title>");
+            out.println("</head>");
+            out.println("<body>");
+            out.println("<h1>Servlet CourseDetailAdminServlet at " + request.getContextPath() + "</h1>");
+            out.println("</body>");
+            out.println("</html>");
+        }
+    }
     private BlogDAO blogDAO;
     private BlogCategoryDAO categoryDAO;
 
@@ -142,7 +159,7 @@ public class BlogAdminServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
-        Blog blog = extractBlogFromRequest(request,response, false);
+        Blog blog = extractBlogFromRequest(request, response, false);
         blogDAO.addBlog(blog);
         response.sendRedirect("blogadmin");
     }
@@ -152,7 +169,7 @@ public class BlogAdminServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
-        Blog blog = extractBlogFromRequest(request, response,true);
+        Blog blog = extractBlogFromRequest(request, response, true);
         blog.setBlogId(Integer.parseInt(request.getParameter("id")));
         blogDAO.updateBlog(blog);
         response.sendRedirect("blogadmin");
@@ -178,7 +195,7 @@ public class BlogAdminServlet extends HttpServlet {
         response.sendRedirect("blogadmin");
     }
 
-    private Blog extractBlogFromRequest(HttpServletRequest request,HttpServletResponse response, boolean isEdit)
+    private Blog extractBlogFromRequest(HttpServletRequest request, HttpServletResponse response, boolean isEdit)
             throws IOException, ServletException {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");

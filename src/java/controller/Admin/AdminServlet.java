@@ -6,6 +6,7 @@ import dal.UserDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -13,6 +14,22 @@ import model.*;
 
 public class AdminServlet extends HttpServlet {
 
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            /* TODO output your page here. You may use following sample code. */
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<title>Servlet CourseDetailAdminServlet</title>");
+            out.println("</head>");
+            out.println("<body>");
+            out.println("<h1>Servlet CourseDetailAdminServlet at " + request.getContextPath() + "</h1>");
+            out.println("</body>");
+            out.println("</html>");
+        }
+    }
     private CourseDAO courseDAO;
     private PaymentDAO paymentDAO;
     private UserDAO userDAO;
@@ -226,7 +243,7 @@ public class AdminServlet extends HttpServlet {
     }
 
     public String getCompletionRatesJson(List<CourseStat> courses) {
-        
+
         Random rand = new Random();
         List<Integer> rates = new ArrayList<>();
         for (int i = 0; i < courses.size(); i++) {

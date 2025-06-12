@@ -5,17 +5,32 @@ import dal.CourseDAO;
 import dal.CourseLessonDAO;
 import dal.CourseModuleDAO;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.List;
 import model.Course;
 import model.CourseModule;
 
-@WebServlet("/moduleadmin")
 public class ModuleServlet extends HttpServlet {
 
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            /* TODO output your page here. You may use following sample code. */
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<title>Servlet CourseDetailAdminServlet</title>");
+            out.println("</head>");
+            out.println("<body>");
+            out.println("<h1>Servlet CourseDetailAdminServlet at " + request.getContextPath() + "</h1>");
+            out.println("</body>");
+            out.println("</html>");
+        }
+    }
     private CourseDAO courseDAO;
 
     private CourseCategoryDAO courseCategoryDAO;
@@ -44,7 +59,7 @@ public class ModuleServlet extends HttpServlet {
         try {
             if (action == null) {
                 // show all modules or redirect to courseadmin
-                response.sendRedirect(request.getContextPath() + "/courseadmin");
+                response.sendRedirect(request.getContextPath() + "/coursedetailadmin");
             } else {
                 switch (action) {
                     case "edit":
@@ -57,13 +72,13 @@ public class ModuleServlet extends HttpServlet {
                         toggleModuleStatus(request, response);
                         break;
                     default:
-                        response.sendRedirect(request.getContextPath() + "/courseadmin");
+                        response.sendRedirect(request.getContextPath() + "/coursedetailadmin");
                         break;
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/courseadmin");
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin");
         }
     }
 
@@ -87,12 +102,12 @@ public class ModuleServlet extends HttpServlet {
                     reorderLessons(request, response); // xử lý reorder
                     break;
                 default:
-                    response.sendRedirect(request.getContextPath() + "/courseadmin");
+                    response.sendRedirect(request.getContextPath() + "/coursedetailadmin");
                     break;
             }
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/courseadmin");
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin");
         }
     }
 
@@ -122,7 +137,7 @@ public class ModuleServlet extends HttpServlet {
 
             request.getRequestDispatcher("courseAdmin.jsp").forward(request, response);
         } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/courseadmin");
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin");
         }
     }
 
@@ -140,7 +155,7 @@ public class ModuleServlet extends HttpServlet {
             // Validate input
             if (title.isEmpty()) {
                 request.getSession().setAttribute("error", "Tên module không được để trống");
-                response.sendRedirect(request.getContextPath() + "/courseadmin?id=" + courseId);
+                response.sendRedirect(request.getContextPath() + "/coursedetailadmin?id=" + courseId);
                 return;
             }
 
@@ -158,14 +173,14 @@ public class ModuleServlet extends HttpServlet {
             } else {
                 request.getSession().setAttribute("error", "Thêm module thất bại");
             }
-            response.sendRedirect(request.getContextPath() + "/courseadmin?id=" + courseId);
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin?id=" + courseId);
         } catch (NumberFormatException e) {
             request.getSession().setAttribute("error", "ID không hợp lệ");
-            response.sendRedirect(request.getContextPath() + "/courseadmin");
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin");
         } catch (Exception e) {
             logError("Lỗi khi thêm module", e);
             request.getSession().setAttribute("error", "Lỗi hệ thống khi thêm module");
-            response.sendRedirect(request.getContextPath() + "/courseadmin");
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin");
         }
     }
 
@@ -187,11 +202,11 @@ public class ModuleServlet extends HttpServlet {
                 }
                 request.getSession().setAttribute("success", "Sắp xếp lessons thành công");
             }
-            response.sendRedirect(request.getContextPath() + "/courseadmin?id=" + courseId);
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin?id=" + courseId);
         } catch (Exception e) {
             logError("Lỗi khi sắp xếp lessons", e);
             request.getSession().setAttribute("error", "Lỗi khi sắp xếp lessons");
-            response.sendRedirect(request.getContextPath() + "/courseadmin");
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin");
         }
     }
 
@@ -212,12 +227,12 @@ public class ModuleServlet extends HttpServlet {
                 courseModuleDAO.updateModule(module);
 
                 int courseId = courseModuleDAO.getCourseIdByModuleId(moduleId);
-                response.sendRedirect(request.getContextPath() + "/courseadmin?id=" + courseId);
+                response.sendRedirect(request.getContextPath() + "/coursedetailadmin?id=" + courseId);
             } else {
-                response.sendRedirect(request.getContextPath() + "/courseadmin");
+                response.sendRedirect(request.getContextPath() + "/coursedetailadmin");
             }
         } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/courseadmin");
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin");
         }
     }
 
@@ -230,9 +245,9 @@ public class ModuleServlet extends HttpServlet {
             int moduleId = Integer.parseInt(request.getParameter("id"));
             int courseId = courseModuleDAO.getCourseIdByModuleId(moduleId);
             courseModuleDAO.deleteModule(moduleId);
-            response.sendRedirect(request.getContextPath() + "/courseadmin?id=" + courseId);
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin?id=" + courseId);
         } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/courseadmin");
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin");
         }
     }
 
@@ -251,9 +266,9 @@ public class ModuleServlet extends HttpServlet {
                 courseModuleDAO.toggleModuleStatus(moduleId, newStatus);
             }
 
-            response.sendRedirect(request.getContextPath() + "/courseadmin?id=" + courseId);
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin?id=" + courseId);
         } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/courseadmin");
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin");
         }
     }
 

@@ -9,6 +9,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
 import model.Payments;
 import model.SendMailOK;
 import model.ServicePackage;
@@ -16,6 +17,22 @@ import model.User;
 
 public class AdminPaymentServlet extends HttpServlet {
 
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            /* TODO output your page here. You may use following sample code. */
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<title>Servlet CourseDetailAdminServlet</title>");
+            out.println("</head>");
+            out.println("<body>");
+            out.println("<h1>Servlet CourseDetailAdminServlet at " + request.getContextPath() + "</h1>");
+            out.println("</body>");
+            out.println("</html>");
+        }
+    }
     private PaymentDAO paymentDAO = new PaymentDAO();
     private UserDAO userDAO = new UserDAO();
     private PackageDAO packageDAO = new PackageDAO();
@@ -76,7 +93,7 @@ public class AdminPaymentServlet extends HttpServlet {
     }
 
     private void sendApprovalEmail(User user, ServicePackage pkg) {
-        
+
         String emailBody = "<!DOCTYPE html>"
                 + "<html><head><style>body{font-family:Arial,sans-serif}</style></head>"
                 + "<body>"
