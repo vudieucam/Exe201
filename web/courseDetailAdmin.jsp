@@ -695,7 +695,6 @@
                                                         </a>
 
                                                         <!-- Edit -->
-                                                        <!-- Cập nhật nút Sửa bài học -->
                                                         <button class="btn btn-sm btn-outline-orange" 
                                                                 data-bs-toggle="modal" 
                                                                 data-bs-target="#editLessonModal"
@@ -704,9 +703,11 @@
                                                                 data-lesson-content="${lesson.content}"
                                                                 data-lesson-video="${lesson.videoUrl}"
                                                                 data-lesson-duration="${lesson.duration}"
+                                                                data-lesson-status="${lesson.status}"
                                                                 data-module-id="${module.id}">
                                                             <i class="bi bi-pencil"></i>
                                                         </button>
+
 
 
                                                         <!-- Delete -->
@@ -1006,28 +1007,8 @@
                         });
                     }
 
-                    const editLessonModal = document.getElementById('editLessonModal');
-                    if (editLessonModal) {
-                        editLessonModal.addEventListener('show.bs.modal', function (event) {
-                            const button = event.relatedTarget;
 
-                            const id = button.getAttribute('data-lesson-id');
-                            const title = button.getAttribute('data-lesson-title');
-                            const content = button.getAttribute('data-lesson-content');
-                            const video = button.getAttribute('data-lesson-video');
-                            const duration = button.getAttribute('data-lesson-duration');
 
-                            this.querySelector('#editLessonId').value = id;
-                            this.querySelector('#editLessonName').value = title;
-                            this.querySelector('#editLessonVideo').value = video;
-                            this.querySelector('#editLessonDuration').value = duration;
-
-                            // CKEditor xử lý đặc biệt: cần dùng setData()
-                            if (CKEDITOR.instances.editLessonContent) {
-                                CKEDITOR.instances.editLessonContent.setData(content || '');
-                            }
-                        });
-                    }
 
 
                     const deleteModal = document.getElementById('deleteModuleModal');
@@ -1098,6 +1079,32 @@
                         this.querySelector('#editModuleName').value = title;
                         this.querySelector('#editModuleDesc').value = desc;
                         this.querySelector('#editModuleStatus').checked = status;
+                    });
+                }
+                const editLessonModal = document.getElementById('editLessonModal');
+                if (editLessonModal) {
+                    editLessonModal.addEventListener('show.bs.modal', function (event) {
+                        const button = event.relatedTarget;
+
+                        const id = button.getAttribute('data-lesson-id');
+                        const title = button.getAttribute('data-lesson-title');
+                        const content = button.getAttribute('data-lesson-content');
+                        const video = button.getAttribute('data-lesson-video');
+                        const duration = button.getAttribute('data-lesson-duration');
+                        const status = button.getAttribute('data-lesson-status') === 'true';
+                        const moduleId = button.getAttribute('data-module-id');
+
+                        this.querySelector('#editLessonId').value = id;
+                        this.querySelector('#editLessonName').value = title;
+                        this.querySelector('#editLessonVideo').value = video;
+                        this.querySelector('#editLessonDuration').value = duration;
+                        this.querySelector('#editLessonModuleId').value = moduleId;
+                        this.querySelector('#editLessonStatus').checked = status;
+
+                        // Gán nội dung CKEditor
+                        if (CKEDITOR.instances.editLessonContent) {
+                            CKEDITOR.instances.editLessonContent.setData(content || '');
+                        }
                     });
                 }
 
