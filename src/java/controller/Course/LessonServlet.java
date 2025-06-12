@@ -100,7 +100,7 @@ public class LessonServlet extends HttpServlet {
             lesson.setVideoUrl(videoUrl.isEmpty() ? null : videoUrl);
             lesson.setDuration(duration);
             lesson.setStatus(true);
-            lesson.setOrderIndex(courseLessonDAO.getLessonsByModuleId(moduleId).size() + 1);
+            lesson.setOrderIndex(courseLessonDAO.getLessonsByModuleIdAdmin(moduleId).size() + 1);
             lesson.setCreatedAt(new Date());
             lesson.setUpdatedAt(new Date());
 
@@ -108,7 +108,7 @@ public class LessonServlet extends HttpServlet {
             request.getSession().setAttribute(success ? "success" : "error",
                     success ? "Thêm lesson thành công" : "Thêm lesson thất bại");
 
-            int courseId = courseModuleDAO.getCourseIdByModuleId(moduleId);
+            int courseId = courseModuleDAO.getCourseIdByModuleIdAdmin(moduleId);
             response.sendRedirect(request.getContextPath() + "/coursedetailadmin?id=" + courseId);
         } catch (Exception e) {
             logError("Lỗi khi thêm lesson", e);
@@ -142,27 +142,40 @@ public class LessonServlet extends HttpServlet {
     private void updateLesson(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             int lessonId = Integer.parseInt(req.getParameter("lessonId"));
-            String title = req.getParameter("title");
-            String content = req.getParameter("content");
-            String videoUrl = req.getParameter("videoUrl");
-            int duration = Integer.parseInt(req.getParameter("duration"));
+            String title = req.getParameter("title").trim();
+            String content = req.getParameter("content").trim();
+            String videoUrl = req.getParameter("videoUrl").trim();
+            int duration = 0;
+            try {
+                duration = Integer.parseInt(req.getParameter("duration"));
+            } catch (NumberFormatException ignored) {
+            }
 
             CourseLesson lesson = courseLessonDAO.getLessonById(lessonId);
             if (lesson != null) {
                 lesson.setTitle(title);
                 lesson.setContent(content);
-                lesson.setVideoUrl(videoUrl);
+                lesson.setVideoUrl(videoUrl.isEmpty() ? null : videoUrl);
                 lesson.setDuration(duration);
                 lesson.setUpdatedAt(new Date());
-                courseLessonDAO.updateLesson(lesson);
 
-                int courseId = courseModuleDAO.getCourseIdByModuleId(lesson.getModuleId());
+                boolean updated = courseLessonDAO.updateLesson(lesson);
+                int courseId = courseModuleDAO.getCourseIdByModuleIdAdmin(lesson.getModuleId());
+
+                if (updated) {
+                    req.getSession().setAttribute("success", "Cập nhật bài học thành công");
+                } else {
+                    req.getSession().setAttribute("error", "Cập nhật bài học thất bại");
+                }
+
                 resp.sendRedirect(req.getContextPath() + "/coursedetailadmin?id=" + courseId);
             } else {
+                req.getSession().setAttribute("error", "Không tìm thấy bài học để cập nhật");
                 resp.sendRedirect(req.getContextPath() + "/coursedetailadmin");
             }
         } catch (Exception e) {
             logError("Lỗi khi cập nhật lesson", e);
+            req.getSession().setAttribute("error", "Lỗi hệ thống khi cập nhật bài học");
             resp.sendRedirect(req.getContextPath() + "/coursedetailadmin");
         }
     }
@@ -170,12 +183,20 @@ public class LessonServlet extends HttpServlet {
     private void deleteLesson(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             int lessonId = Integer.parseInt(req.getParameter("id"));
-            int moduleId = courseLessonDAO.getModuleIdByLessonId(lessonId);
-            int courseId = courseModuleDAO.getCourseIdByModuleId(moduleId);
-            courseLessonDAO.deleteLesson(lessonId);
+            int moduleId = courseLessonDAO.getModuleIdByLessonIdAdmin(lessonId);
+            int courseId = courseModuleDAO.getCourseIdByModuleIdAdmin(moduleId);
+
+            boolean deleted = courseLessonDAO.deleteLesson(lessonId); // ✅ nên trả về true/false
+            if (deleted) {
+                req.getSession().setAttribute("success", "Xóa bài học thành công");
+            } else {
+                req.getSession().setAttribute("error", "Xóa bài học thất bại");
+            }
+
             resp.sendRedirect(req.getContextPath() + "/coursedetailadmin?id=" + courseId);
         } catch (Exception e) {
             logError("Lỗi khi xóa lesson", e);
+            req.getSession().setAttribute("error", "Lỗi hệ thống khi xóa bài học");
             resp.sendRedirect(req.getContextPath() + "/coursedetailadmin");
         }
     }
@@ -185,15 +206,18 @@ public class LessonServlet extends HttpServlet {
             int lessonId = Integer.parseInt(req.getParameter("id"));
             int moduleId = Integer.parseInt(req.getParameter("moduleId"));
 
-            CourseLesson lesson = courseLessonDAO.getLessonById(lessonId);
+            CourseLesson lesson = courseLessonDAO.getLessonByIdAdmin(lessonId);
             if (lesson != null) {
                 lesson.setStatus(!lesson.isStatus());
                 courseLessonDAO.updateLesson(lesson);
-                int courseId = courseModuleDAO.getCourseIdByModuleId(moduleId);
+                req.getSession().setAttribute("success", lesson.isStatus() ? "Hiển thị bài học thành công" : "Ẩn bài học thành công");
+                int courseId = courseModuleDAO.getCourseIdByModuleIdAdmin(moduleId);
                 resp.sendRedirect(req.getContextPath() + "/coursedetailadmin?id=" + courseId);
             } else {
+                req.getSession().setAttribute("error", "Không tìm thấy bài học để thay đổi trạng thái");
                 resp.sendRedirect(req.getContextPath() + "/coursedetailadmin");
             }
+
         } catch (Exception e) {
             logError("Lỗi khi đổi trạng thái lesson", e);
             resp.sendRedirect(req.getContextPath() + "/coursedetailadmin");

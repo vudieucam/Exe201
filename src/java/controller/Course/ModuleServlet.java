@@ -98,6 +98,10 @@ public class ModuleServlet extends HttpServlet {
                 case "update":
                     updateModule(request, response);
                     break;
+                case "delete":
+                    deleteModule(request, response);
+                    break;
+
                 case "reorder":
                     reorderLessons(request, response); // xử lý reorder
                     break;
@@ -118,7 +122,7 @@ public class ModuleServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         try {
             int moduleId = Integer.parseInt(request.getParameter("id"));
-            CourseModule module = courseModuleDAO.getModuleById(moduleId);
+            CourseModule module = courseModuleDAO.getModuleByIdAdmin(moduleId);
 
             if (module == null) {
                 throw new ServletException("Module không tồn tại");
@@ -127,7 +131,7 @@ public class ModuleServlet extends HttpServlet {
             // Lấy lại courseId để load đúng course và modules
             int courseId = module.getCourseId();
             Course course = courseDAO.getCourseById(courseId);
-            List<CourseModule> modules = courseDAO.getCourseModules(courseId);
+            List<CourseModule> modules = courseDAO.getCourseModulesAdmin(courseId);
 
             request.setAttribute("currentCourse", course);
             request.setAttribute("modules", modules);
@@ -155,7 +159,7 @@ public class ModuleServlet extends HttpServlet {
             // Validate input
             if (title.isEmpty()) {
                 request.getSession().setAttribute("error", "Tên module không được để trống");
-                response.sendRedirect(request.getContextPath() + "/coursedetailadmin?id=" + courseId);
+                response.sendRedirect(request.getContextPath() + "/coursedetailadmin?courseId=" + courseId);
                 return;
             }
 
@@ -173,7 +177,7 @@ public class ModuleServlet extends HttpServlet {
             } else {
                 request.getSession().setAttribute("error", "Thêm module thất bại");
             }
-            response.sendRedirect(request.getContextPath() + "/coursedetailadmin?id=" + courseId);
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin?courseId=" + courseId);
         } catch (NumberFormatException e) {
             request.getSession().setAttribute("error", "ID không hợp lệ");
             response.sendRedirect(request.getContextPath() + "/coursedetailadmin");
@@ -202,7 +206,7 @@ public class ModuleServlet extends HttpServlet {
                 }
                 request.getSession().setAttribute("success", "Sắp xếp lessons thành công");
             }
-            response.sendRedirect(request.getContextPath() + "/coursedetailadmin?id=" + courseId);
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin?courseId=" + courseId);
         } catch (Exception e) {
             logError("Lỗi khi sắp xếp lessons", e);
             request.getSession().setAttribute("error", "Lỗi khi sắp xếp lessons");
@@ -215,59 +219,91 @@ public class ModuleServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
+
         try {
             int moduleId = Integer.parseInt(request.getParameter("moduleId"));
             String title = request.getParameter("title");
             String description = request.getParameter("description");
 
-            CourseModule module = courseModuleDAO.getModuleById(moduleId);
+            CourseModule module = courseModuleDAO.getModuleByIdAdmin(moduleId);
             if (module != null) {
                 module.setTitle(title);
                 module.setDescription(description);
                 courseModuleDAO.updateModule(module);
 
                 int courseId = courseModuleDAO.getCourseIdByModuleId(moduleId);
-                response.sendRedirect(request.getContextPath() + "/coursedetailadmin?id=" + courseId);
+
+                // ✅ THÊM thông báo
+                request.getSession().setAttribute("success", "Cập nhật module thành công");
+
+                response.sendRedirect(request.getContextPath() + "/coursedetailadmin?courseId=" + courseId);
             } else {
+                request.getSession().setAttribute("error", "Không tìm thấy module");
                 response.sendRedirect(request.getContextPath() + "/coursedetailadmin");
             }
         } catch (NumberFormatException e) {
+            request.getSession().setAttribute("error", "ID module không hợp lệ");
             response.sendRedirect(request.getContextPath() + "/coursedetailadmin");
         }
     }
 
     private void deleteModule(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        request.setCharacterEncoding("UTF-8");
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("text/html;charset=UTF-8");
         try {
             int moduleId = Integer.parseInt(request.getParameter("id"));
             int courseId = courseModuleDAO.getCourseIdByModuleId(moduleId);
-            courseModuleDAO.deleteModule(moduleId);
-            response.sendRedirect(request.getContextPath() + "/coursedetailadmin?id=" + courseId);
+
+            CourseModule module = courseModuleDAO.getModuleByIdAdmin(moduleId);
+            if (module == null) {
+                request.getSession().setAttribute("error", "Module không tồn tại");
+                response.sendRedirect(request.getContextPath() + "/coursedetailadmin?courseId=" + courseId);
+                return;
+            }
+
+            // Gọi hàm void
+            courseModuleDAO.deleteModuleWithLessons(moduleId);
+
+            request.getSession().setAttribute("success", "Xóa module và các bài học liên quan thành công");
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin?courseId=" + courseId);
         } catch (NumberFormatException e) {
+            request.getSession().setAttribute("error", "ID không hợp lệ");
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            request.getSession().setAttribute("error", "Lỗi khi xóa module. Vui lòng thử lại.");
             response.sendRedirect(request.getContextPath() + "/coursedetailadmin");
         }
     }
 
     private void toggleModuleStatus(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        request.setCharacterEncoding("UTF-8");
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("text/html;charset=UTF-8");
         try {
             int moduleId = Integer.parseInt(request.getParameter("id"));
             int courseId = Integer.parseInt(request.getParameter("courseId"));
 
-            CourseModule module = courseModuleDAO.getModuleById(moduleId);
-            if (module != null) {
-                boolean newStatus = !module.isStatus();
-                courseModuleDAO.toggleModuleStatus(moduleId, newStatus);
+            // Kiểm tra module có tồn tại không
+            CourseModule module = courseModuleDAO.getModuleByIdAdmin(moduleId);
+            if (module == null) {
+                request.getSession().setAttribute("error", "Module không tồn tại");
+                response.sendRedirect(request.getContextPath() + "/coursedetailadmin?courseId=" + courseId);
+                return;
             }
 
-            response.sendRedirect(request.getContextPath() + "/coursedetailadmin?id=" + courseId);
+            boolean newStatus = !module.isStatus();
+            boolean success = courseModuleDAO.toggleModuleStatus(moduleId, newStatus);
+
+            if (success) {
+                String statusMsg = newStatus ? "hiển thị" : "ẩn";
+                request.getSession().setAttribute("success",
+                        "Đã chuyển trạng thái module thành " + statusMsg);
+            } else {
+                request.getSession().setAttribute("error",
+                        "Thay đổi trạng thái module thất bại");
+            }
+
+            response.sendRedirect(request.getContextPath() + "/coursedetailadmin?courseId=" + courseId);
         } catch (NumberFormatException e) {
+            request.getSession().setAttribute("error", "ID không hợp lệ");
             response.sendRedirect(request.getContextPath() + "/coursedetailadmin");
         }
     }

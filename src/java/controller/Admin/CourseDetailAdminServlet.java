@@ -75,13 +75,13 @@ public class CourseDetailAdminServlet extends HttpServlet {
             String lessonIdRaw = req.getParameter("lesson");
             int lessonId = (lessonIdRaw != null && !lessonIdRaw.isEmpty()) ? Integer.parseInt(lessonIdRaw) : 0;
 
-            List<CourseModule> modules = moduleDAO.getCourseModules(courseId);
+            List<CourseModule> modules = moduleDAO.getCourseModulesAdmin(courseId);
             Map<Integer, List<CourseLesson>> lessonsByModule = new HashMap<>();
             CourseLesson currentLesson = null;
             List<CourseLesson> allLessons = new ArrayList<>();
 
             for (CourseModule module : modules) {
-                List<CourseLesson> lessons = lessonDAO.getLessonsByModuleId(module.getId());
+                List<CourseLesson> lessons = lessonDAO.getLessonsByModuleIdAdmin(module.getId());
                 lessonsByModule.put(module.getId(), lessons != null ? lessons : new ArrayList<>());
                 allLessons.addAll(lessons);
 
@@ -93,7 +93,7 @@ public class CourseDetailAdminServlet extends HttpServlet {
 
             // Nếu chỉ định lessonId
             if (lessonId > 0) {
-                currentLesson = lessonDAO.getLessonById(lessonId);
+                currentLesson = lessonDAO.getLessonByIdAdmin(lessonId);
                 if (currentLesson != null) {
                     boolean valid = false;
                     for (CourseLesson lesson : allLessons) {

@@ -347,6 +347,34 @@ public class CourseDAO extends DBConnect {
         return modules;
     }
 
+    public List<CourseModule> getCourseModulesAdmin(int courseId) throws SQLException {
+        List<CourseModule> modules = new ArrayList<>();
+        String sql = "SELECT * FROM course_modules WHERE course_id = ? ORDER BY order_index";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, courseId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                CourseModule module = new CourseModule();
+                module.setId(rs.getInt("id"));
+                module.setCourseId(rs.getInt("course_id"));
+                module.setTitle(rs.getString("title"));
+                module.setDescription(rs.getString("description"));
+                module.setOrderIndex(rs.getInt("order_index"));
+                module.setCreatedAt(rs.getTimestamp("created_at"));
+                module.setUpdatedAt(rs.getTimestamp("updated_at"));
+                module.setStatus(rs.getBoolean("status")); // ✅ BỔ SUNG DÒNG NÀY
+
+                // Load danh sách bài học của module
+                module.setLessons(getModuleLessons(module.getId()));
+
+                modules.add(module);
+            }
+        }
+        return modules;
+    }
+
     private List<CourseLesson> getModuleLessons(int moduleId) throws SQLException {
         List<CourseLesson> lessons = new ArrayList<>();
         String sql = "SELECT * FROM course_lessons WHERE module_id = ? AND status = 1 ORDER BY order_index";
@@ -434,13 +462,21 @@ public class CourseDAO extends DBConnect {
                 course.setStatus(rs.getInt("status"));
                 course.setThumbnailUrl(rs.getString("thumbnail_url"));
 
+                // Lấy ngày tạo
+                Timestamp createdAt = rs.getTimestamp("created_at");
+                if (createdAt != null) {
+                    course.setCreatedAt(new Date(createdAt.getTime()));
+                }
+
+                // Lấy ngày cập nhật
+                Timestamp updatedAt = rs.getTimestamp("updated_at");
+                if (updatedAt != null) {
+                    course.setUpdatedAt(new Date(updatedAt.getTime()));
+                }
+
+                // Lấy danh mục
                 CourseCategoryDAO categoryDAO = new CourseCategoryDAO();
                 course.setCategories(categoryDAO.getCategoriesByCourseId(courseId));
-
-                Timestamp ts = rs.getTimestamp("updated_at");
-                if (ts != null) {
-                    course.setUpdatedAt(new Date(ts.getTime()));
-                }
 
                 return course;
             }

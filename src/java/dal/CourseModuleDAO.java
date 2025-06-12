@@ -91,8 +91,53 @@ public class CourseModuleDAO extends DBConnect {
         }
     }
 
+    public void deleteModuleWithLessons(int moduleId) throws SQLException {
+        // Cập nhật status = 0 thay vì xóa
+        String updateLessonsSQL = "UPDATE course_lessons SET status = 0 WHERE module_id = ?";
+        String updateModuleSQL = "UPDATE course_modules SET status = 0 WHERE id = ?";
+
+        try (PreparedStatement updateLessonsStmt = connection.prepareStatement(updateLessonsSQL); PreparedStatement updateModuleStmt = connection.prepareStatement(updateModuleSQL)) {
+
+            // Cập nhật lesson
+            updateLessonsStmt.setInt(1, moduleId);
+            updateLessonsStmt.executeUpdate();
+
+            // Cập nhật module
+            updateModuleStmt.setInt(1, moduleId);
+            updateModuleStmt.executeUpdate();
+        }
+    }
+
     public CourseModule getModuleById(int moduleId) {
         String sql = "SELECT * FROM course_modules WHERE id = ? AND status = 1";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, moduleId);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                CourseModule module = new CourseModule();
+                module.setId(rs.getInt("id"));
+                module.setCourseId(rs.getInt("course_id"));
+                module.setTitle(rs.getString("title"));
+                module.setDescription(rs.getString("description"));
+                module.setOrderIndex(rs.getInt("order_index"));
+                module.setStatus(rs.getBoolean("status"));
+                module.setCreatedAt(rs.getTimestamp("created_at"));
+                module.setUpdatedAt(rs.getTimestamp("updated_at"));
+
+                // Lấy danh sách lessons (chỉ những lesson active)
+                CourseLessonDAO lessonDAO = new CourseLessonDAO();
+                module.setLessons(lessonDAO.getLessonsByModuleId(moduleId));
+
+                return module;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public CourseModule getModuleByIdAdmin(int moduleId) {
+        String sql = "SELECT * FROM course_modules WHERE id = ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setInt(1, moduleId);
             ResultSet rs = st.executeQuery();
@@ -150,10 +195,53 @@ public class CourseModuleDAO extends DBConnect {
         return modules;
     }
 
-    
+    public List<CourseModule> getCourseModulesAdmin(int courseId) {
+        List<CourseModule> modules = new ArrayList<>();
+        String sql = "SELECT * FROM course_modules WHERE course_id = ? ORDER BY order_index ASC";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, courseId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                CourseModule module = new CourseModule();
+                module.setId(rs.getInt("id"));
+                module.setCourseId(courseId);
+                module.setTitle(rs.getString("title"));
+                module.setDescription(rs.getString("description"));
+                module.setOrderIndex(rs.getInt("order_index"));
+                module.setStatus(rs.getBoolean("status"));
+                module.setCreatedAt(rs.getTimestamp("created_at"));
+                module.setUpdatedAt(rs.getTimestamp("updated_at"));
+
+                // Lấy danh sách bài học (chỉ những lesson active)
+                CourseLessonDAO lessonDAO = new CourseLessonDAO();
+                module.setLessons(lessonDAO.getLessonsByModuleId(module.getId()));
+
+                modules.add(module);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return modules;
+    }
 
     public int getCourseIdByModuleId(int moduleId) {
         String sql = "SELECT course_id FROM course_modules WHERE id = ? AND status = 1";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, moduleId);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("course_id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int getCourseIdByModuleIdAdmin(int moduleId) {
+        String sql = "SELECT course_id FROM course_modules WHERE id = ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setInt(1, moduleId);
             ResultSet rs = st.executeQuery();
@@ -172,6 +260,7 @@ public class CourseModuleDAO extends DBConnect {
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setBoolean(1, newStatus);
             st.setInt(2, moduleId);
+
             return st.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -203,8 +292,5 @@ public class CourseModuleDAO extends DBConnect {
             return 1;
         }
     }
-    
-   
-
 
 }

@@ -101,6 +101,20 @@ public class CourseLessonDAO extends DBConnect {
         return 0;
     }
 
+    public int getModuleIdByLessonIdAdmin(int lessonId) {
+        String sql = "SELECT module_id FROM course_lessons WHERE id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, lessonId);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("module_id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     public List<CourseLesson> getLessonsByModuleId(int moduleId) {
         List<CourseLesson> list = new ArrayList<>();
         String sql = "SELECT * FROM course_lessons WHERE module_id = ? AND status = 1 ORDER BY order_index ASC";
@@ -130,7 +144,34 @@ public class CourseLessonDAO extends DBConnect {
         return list;
     }
 
-    
+    public List<CourseLesson> getLessonsByModuleIdAdmin(int moduleId) {
+        List<CourseLesson> list = new ArrayList<>();
+        String sql = "SELECT * FROM course_lessons WHERE module_id = ? ORDER BY order_index ASC";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, moduleId);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                CourseLesson lesson = new CourseLesson(
+                        rs.getInt("id"),
+                        rs.getInt("module_id"),
+                        rs.getString("title"),
+                        rs.getString("content"),
+                        rs.getString("video_url"),
+                        rs.getInt("duration"),
+                        rs.getInt("order_index"),
+                        new Date(rs.getTimestamp("created_at").getTime()),
+                        new Date(rs.getTimestamp("updated_at").getTime()),
+                        rs.getBoolean("status"),
+                        new ArrayList<>()
+                );
+                lesson.setAttachments(getAttachmentsByLessonId(rs.getInt("id")));
+                list.add(lesson);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 
     public List<LessonAttachment> getAttachmentsByLessonId(int lessonId) {
         List<LessonAttachment> list = new ArrayList<>();
@@ -182,6 +223,35 @@ public class CourseLessonDAO extends DBConnect {
         }
         return null;
     }
+    
+    public CourseLesson getLessonByIdAdmin(int lessonId) {
+        String sql = "SELECT * FROM course_lessons WHERE id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, lessonId);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                CourseLesson lesson = new CourseLesson(
+                        rs.getInt("id"),
+                        rs.getInt("module_id"),
+                        rs.getString("title"),
+                        rs.getString("content"),
+                        rs.getString("video_url"),
+                        rs.getInt("duration"),
+                        rs.getInt("order_index"),
+                        new Date(rs.getTimestamp("created_at").getTime()),
+                        new Date(rs.getTimestamp("updated_at").getTime()),
+                        rs.getBoolean("status"),
+                        new ArrayList<>()
+                );
+                lesson.setAttachments(getAttachmentsByLessonId(lessonId));
+                return lesson;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
     // Trong CourseLessonDAO.java
 
     public boolean updateLessonOrder(int lessonId, int orderIndex) {
