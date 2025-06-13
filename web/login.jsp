@@ -144,19 +144,18 @@
             <div class="alert alert-success" style="width: fit-content; margin: 20px auto; text-align: center;">
                 <span>${not empty success ? success : sessionScope.success}</span>
             </div>
-            <% session.removeAttribute("success"); %>
+            <% session.removeAttribute("success");%>
         </c:if>
 
-        <c:if test="${not empty notification || not empty sessionScope.notification}">
+        <c:if test="${not empty sessionScope.notification}">
             <div class="notification-container">
                 <div class="alert alert-info notification">
-                    <span>${not empty notification ? notification : sessionScope.notification}</span>
+                    <span>${sessionScope.notification}</span>
                 </div>
             </div>
-            <%
-                session.removeAttribute("notification");
-            %>
+            <c:remove var="notification" scope="session" />
         </c:if>
+
         <script>
             setTimeout(function () {
                 var notificationContainer = document.querySelector('.notification-container');

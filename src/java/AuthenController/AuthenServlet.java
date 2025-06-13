@@ -132,20 +132,20 @@ public class AuthenServlet extends HttpServlet {
             User user = userDAO.login(email, password);
 
             if (user == null) {
-                request.setAttribute("notification", "❌ Sai email hoặc mật khẩu. Vui lòng thử lại.");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
+                request.getSession().setAttribute("notification", "❌ Sai email hoặc mật khẩu. Vui lòng thử lại.");
+                response.sendRedirect("login.jsp");
                 return;
             }
 
             if (!user.isStatus()) {
-                request.setAttribute("notification", "⚠️ Tài khoản chưa được kích hoạt. Vui lòng kiểm tra email.");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
+                request.getSession().setAttribute("notification", "⚠️ Tài khoản chưa được kích hoạt. Vui lòng kiểm tra email.");
+                response.sendRedirect("login.jsp");
                 return;
             }
 
             if (!user.isIsActive()) {
-                request.setAttribute("notification", "⚠️ Gói dịch vụ của bạn chưa được kích hoạt. Vui lòng chọn gói hoặc chờ xác nhận.");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
+                request.getSession().setAttribute("notification", "⚠️ Gói dịch vụ của bạn chưa được kích hoạt. Vui lòng chọn gói hoặc chờ xác nhận.");
+                response.sendRedirect("login.jsp");
                 return;
             }
 
@@ -157,37 +157,34 @@ public class AuthenServlet extends HttpServlet {
             if (rememberMe != null) {
                 Cookie cEmail = new Cookie("cEmail", email);
                 Cookie cPassword = new Cookie("cPassword", password);
-                cEmail.setMaxAge(60 * 60 * 24 * 30 * 6);
-                cPassword.setMaxAge(60 * 60 * 24 * 30 * 6);
+
+                // Set thời hạn 6 tháng
+                int expiry = 60 * 60 * 24 * 30 * 6;
+                cEmail.setMaxAge(expiry);
+                cPassword.setMaxAge(expiry);
+
+                // Quan trọng: set path để cookie hoạt động toàn hệ thống
+                cEmail.setPath("/");
+                cPassword.setPath("/");
+
                 response.addCookie(cEmail);
                 response.addCookie(cPassword);
             }
 
-            System.out.println("Đăng nhập thành công: " + user.getFullname() + " | Vai trò: " + user.getRoleId());
+            System.out.println("✅ Đăng nhập thành công: " + user.getFullname() + " | Vai trò: " + user.getRoleId());
 
-            // Xác định URL chuyển hướng
-            String redirectUrl;
-
-            // Ưu tiên tham số redirect trong URL
-            String redirectParam = request.getParameter("redirect");
-            if (redirectParam != null && !redirectParam.isEmpty()) {
-                redirectUrl = redirectParam;
-            } // Nếu không có tham số redirect, kiểm tra role
-            else {
-                // Thành:
-                if (user.getRoleId() == 2 || user.getRoleId() == 3) {
-                    redirectUrl = "admin";
-                } else {
-                    redirectUrl = "home";
-                }
+            // Điều hướng sau đăng nhập
+            String redirectUrl = request.getParameter("redirect");
+            if (redirectUrl == null || redirectUrl.isEmpty()) {
+                redirectUrl = (user.getRoleId() == 2 || user.getRoleId() == 3) ? "admin" : "home";
             }
 
-            // Thực hiện chuyển hướng
             response.sendRedirect(redirectUrl);
 
         } catch (SQLException ex) {
-            request.setAttribute("error", "🚨 Lỗi hệ thống: " + ex.getMessage());
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+            ex.printStackTrace(); // Log server
+            request.getSession().setAttribute("notification", "🚨 Lỗi hệ thống: " + ex.getMessage());
+            response.sendRedirect("login.jsp");
         }
     }
 
