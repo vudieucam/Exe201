@@ -1,82 +1,59 @@
 pipeline {
     agent any
-    
-    environment {
-        DOCKER_IMAGE = 'pettech-app'
-        DOCKER_TAG = "${BUILD_NUMBER}"
-        DOCKER_NETWORK = 'pettech-network'
+
+    triggers {
+        pollSCM('H/5 * * * *')  // Poll every 5 minutes
     }
-    
+
+    environment {
+        JAVA_HOME = 'C:\\Program Files\\Java\\jdk-17'
+        TOMCAT_HOME = 'C:\\tomcat\\apache-tomcat-10.1.41'
+        MAVEN_HOME = tool 'Maven'
+        PATH = "${JAVA_HOME}\\bin;${MAVEN_HOME}\\bin;${env.PATH}"
+        TOMCAT_SHUTDOWN_PORT = '9005'
+        TOMCAT_HTTP_PORT = '8181'
+    }
+
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-        
-        stage('Build with Ant') {
+
+        stage('Build with Maven') {
             steps {
-                bat 'ant clean dist'
+                bat 'mvn clean package -DskipTests'
             }
         }
-        
-        stage('Build Docker Image') {
-            steps {
-                bat "docker build -t %DOCKER_IMAGE%:%DOCKER_TAG% ."
-            }
-        }
-        
-        stage('Create Network') {
+
+        stage('Deploy WAR') {
             steps {
                 bat '''
-                    docker network create %DOCKER_NETWORK% || exit 0
-                '''
-            }
-        }
-        
-        stage('Deploy SQL Server') {
-            steps {
-                bat '''
-                    docker stop mssql || exit 0
-                    docker rm mssql || exit 0
-                    docker run -d --name mssql ^
-                        --network %DOCKER_NETWORK% ^
-                        -e "ACCEPT_EULA=Y" ^
-                        -e "SA_PASSWORD=YourStrong@Passw0rd" ^
-                        -p 1433:1433 ^
-                        mcr.microsoft.com/mssql/server:2019-latest
-                '''
-            }
-        }
-        
-        stage('Deploy Application') {
-            steps {
-                bat '''
-                    docker stop %DOCKER_IMAGE% || exit 0
-                    docker rm %DOCKER_IMAGE% || exit 0
-                    docker run -d --name %DOCKER_IMAGE% ^
-                        --network %DOCKER_NETWORK% ^
-                        -p 8080:8080 ^
-                        -e DB_HOST=mssql ^
-                        -e DB_PORT=1433 ^
-                        -e DB_NAME=PetTechDB ^
-                        -e DB_USER=sa ^
-                        -e DB_PASSWORD=YourStrong@Passw0rd ^
-                        %DOCKER_IMAGE%:%DOCKER_TAG%
+                    echo "Copying WAR file to Tomcat..."
+                    xcopy /y "target\\PetTech.war" "%TOMCAT_HOME%\\webapps\\"
                 '''
             }
         }
     }
-    
+
     post {
         failure {
             bat '''
-                docker logs %DOCKER_IMAGE%
-                docker logs mssql
+                echo "Deployment failed! Checking logs..."
+                if exist "%TOMCAT_HOME%\\logs\\catalina.out" (
+                    type "%TOMCAT_HOME%\\logs\\catalina.out"
+                )
+                if exist "%TOMCAT_HOME%\\logs\\catalina.%date:~-4,4%-%date:~-7,2%-%date:~-10,2%.log" (
+                    type "%TOMCAT_HOME%\\logs\\catalina.%date:~-4,4%-%date:~-7,2%-%date:~-10,2%.log"
+                )
             '''
+        }
+        success {
+            echo "🎉 Deployment successful! App is live at: http://localhost:${TOMCAT_HTTP_PORT}/PetTech"
         }
         always {
             cleanWs()
         }
     }
-} 
+}
