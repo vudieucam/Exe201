@@ -27,49 +27,6 @@ pipeline {
             }
         }
 
-        stage('Stop Tomcat') {
-            steps {
-                bat '''
-                    echo "Stopping Tomcat..."
-                    netstat -ano | findstr ":%TOMCAT_HTTP_PORT%" > nul
-                    if not errorlevel 1 (
-                        cd "%TOMCAT_HOME%\\bin"
-                        set CATALINA_HOME=%TOMCAT_HOME%
-                        call shutdown.bat
-
-                        :WAIT_LOOP
-                        timeout /t 2 /nobreak > nul
-                        netstat -ano | findstr ":%TOMCAT_HTTP_PORT%" > nul
-                        if not errorlevel 1 (
-                            echo "Port %TOMCAT_HTTP_PORT% still in use, waiting..."
-                            goto WAIT_LOOP
-                        )
-                    ) else (
-                        echo "Tomcat is not running"
-                    )
-
-                    for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":%TOMCAT_HTTP_PORT%"') do (
-                        taskkill /F /PID %%a 2>nul
-                    )
-
-                    if exist "%TOMCAT_HOME%\\temp" (
-                        rmdir /s /q "%TOMCAT_HOME%\\temp"
-                        mkdir "%TOMCAT_HOME%\\temp"
-                    )
-                    if exist "%TOMCAT_HOME%\\work" (
-                        rmdir /s /q "%TOMCAT_HOME%\\work"
-                        mkdir "%TOMCAT_HOME%\\work"
-                    )
-                    if exist "%TOMCAT_HOME%\\webapps\\PetTech" (
-                        rmdir /s /q "%TOMCAT_HOME%\\webapps\\PetTech"
-                    )
-                    if exist "%TOMCAT_HOME%\\webapps\\PetTech.war" (
-                        del /f /q "%TOMCAT_HOME%\\webapps\\PetTech.war"
-                    )
-                '''
-            }
-        }
-
         stage('Deploy WAR') {
             steps {
                 bat '''
