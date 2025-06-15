@@ -86,7 +86,8 @@ pipeline {
                     cd "%TOMCAT_HOME%\\bin"
                     set CATALINA_HOME=%TOMCAT_HOME%
                     set JAVA_HOME=%JAVA_HOME%
-                    call startup.bat
+                    rem Start in detached mode
+                    start "" "%TOMCAT_HOME%\\bin\\startup.bat"
 
                     :CHECK_STARTUP
                     timeout /t 2 /nobreak > nul
