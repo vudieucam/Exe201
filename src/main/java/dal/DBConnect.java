@@ -12,8 +12,8 @@ public class DBConnect {
     {
         try {
             // Edit URL , username, password to authenticate with your MS SQL Server
-            String url = "jdbc:sqlserver://localhost:1433;databaseName= PetTech";
-            String username = "sa";
+            String url = "jdbc:sqlserver://WIN157\\MSSQLSERVER01;databaseName=PetTech";
+            String username = "admin";
             String password = "123";
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             connection = DriverManager.getConnection(url, username, password);
