@@ -1,10 +1,10 @@
 pipeline {
     agent any
-    
+
     triggers {
-        pollSCM('H/5 * * * *')  // Poll every 5 minutes for changes
+        pollSCM('H/5 * * * *')  // Poll every 5 minutes
     }
-    
+
     environment {
         JAVA_HOME = 'C:\\Program Files\\Java\\jdk-17'
         TOMCAT_HOME = 'C:\\tomcat\\apache-tomcat-10.1.41'
@@ -13,44 +13,30 @@ pipeline {
         TOMCAT_SHUTDOWN_PORT = '9005'
         TOMCAT_HTTP_PORT = '8181'
     }
-    
+
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-        
+
         stage('Build with Maven') {
             steps {
-                // Clean Tomcat work directory
-                bat '''
-                    if exist "%TOMCAT_HOME%\\work" (
-                        rmdir /s /q "%TOMCAT_HOME%\\work"
-                    )
-                '''
-                
-                // Build with Maven
                 bat 'mvn clean package -DskipTests'
             }
         }
-        
+
         stage('Stop Tomcat') {
             steps {
                 bat '''
                     echo "Stopping Tomcat..."
-                    
-                    rem Check if Tomcat is running on configured port
                     netstat -ano | findstr ":%TOMCAT_HTTP_PORT%" > nul
                     if not errorlevel 1 (
-                        echo "Tomcat is running, attempting to stop..."
-                        
-                        rem Try graceful shutdown
                         cd "%TOMCAT_HOME%\\bin"
                         set CATALINA_HOME=%TOMCAT_HOME%
                         call shutdown.bat
-                        
-                        rem Wait for port to be released
+
                         :WAIT_LOOP
                         timeout /t 2 /nobreak > nul
                         netstat -ano | findstr ":%TOMCAT_HTTP_PORT%" > nul
@@ -61,13 +47,11 @@ pipeline {
                     ) else (
                         echo "Tomcat is not running"
                     )
-                    
-                    rem Force kill any remaining Tomcat processes
+
                     for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":%TOMCAT_HTTP_PORT%"') do (
                         taskkill /F /PID %%a 2>nul
                     )
-                    
-                    rem Clean directories
+
                     if exist "%TOMCAT_HOME%\\temp" (
                         rmdir /s /q "%TOMCAT_HOME%\\temp"
                         mkdir "%TOMCAT_HOME%\\temp"
@@ -76,38 +60,34 @@ pipeline {
                         rmdir /s /q "%TOMCAT_HOME%\\work"
                         mkdir "%TOMCAT_HOME%\\work"
                     )
-                '''
-            }
-        }
-        
-        stage('Deploy to Tomcat') {
-            steps {
-                bat '''
-                    rem Remove old deployment
                     if exist "%TOMCAT_HOME%\\webapps\\PetTech" (
                         rmdir /s /q "%TOMCAT_HOME%\\webapps\\PetTech"
                     )
                     if exist "%TOMCAT_HOME%\\webapps\\PetTech.war" (
                         del /f /q "%TOMCAT_HOME%\\webapps\\PetTech.war"
                     )
-                    
-                    rem Copy new WAR file
+                '''
+            }
+        }
+
+        stage('Deploy WAR') {
+            steps {
+                bat '''
+                    echo "Copying WAR file to Tomcat..."
                     xcopy /y "target\\PetTech.war" "%TOMCAT_HOME%\\webapps\\"
                 '''
             }
         }
-        
+
         stage('Start Tomcat') {
             steps {
                 bat '''
                     echo "Starting Tomcat..."
                     cd "%TOMCAT_HOME%\\bin"
                     set CATALINA_HOME=%TOMCAT_HOME%
-                    
-                    rem Start Tomcat in background
-                    start /b cmd /c catalina.bat run
-                    
-                    rem Wait for Tomcat to start
+                    set JAVA_HOME=%JAVA_HOME%
+                    call startup.bat
+
                     :CHECK_STARTUP
                     timeout /t 2 /nobreak > nul
                     netstat -ano | findstr ":%TOMCAT_HTTP_PORT%" > nul
@@ -115,25 +95,25 @@ pipeline {
                         echo "Waiting for Tomcat to start on port %TOMCAT_HTTP_PORT%..."
                         goto CHECK_STARTUP
                     )
-                    
+
                     echo "Tomcat started successfully on port %TOMCAT_HTTP_PORT%"
                 '''
             }
         }
-        
+
         stage('Verify Deployment') {
             steps {
                 bat '''
-                    echo "Checking if application is deployed..."
+                    echo "Verifying deployment..."
                     set MAX_RETRIES=12
                     set RETRY_COUNT=0
-                    
+
                     :VERIFY_LOOP
                     if %RETRY_COUNT% geq %MAX_RETRIES% (
                         echo "Deployment verification failed after %MAX_RETRIES% attempts!"
                         exit 1
                     )
-                    
+
                     if exist "%TOMCAT_HOME%\\webapps\\PetTech\\WEB-INF" (
                         echo "Application deployed successfully!"
                         exit 0
@@ -146,43 +126,8 @@ pipeline {
                 '''
             }
         }
-
-        stage('Verify Tomcat Running') {
-            steps {
-                bat '''
-                    echo "Verifying Tomcat is running and accessible..."
-                    set MAX_RETRIES=5
-                    set RETRY_COUNT=0
-                    
-                    :CHECK_TOMCAT
-                    if %RETRY_COUNT% geq %MAX_RETRIES% (
-                        echo "Failed to verify Tomcat is running after %MAX_RETRIES% attempts!"
-                        exit 1
-                    )
-                    
-                    netstat -ano | findstr ":%TOMCAT_HTTP_PORT%" > nul
-                    if errorlevel 1 (
-                        set /a RETRY_COUNT+=1
-                        echo "Tomcat not detected on port %TOMCAT_HTTP_PORT%. Attempt %RETRY_COUNT% of %MAX_RETRIES%"
-                        timeout /t 10 /nobreak
-                        goto CHECK_TOMCAT
-                    )
-                    
-                    echo "Tomcat is running successfully on port %TOMCAT_HTTP_PORT%"
-                    
-                    rem Try to access the application
-                    powershell -Command "try { $response = Invoke-WebRequest -Uri 'http://localhost:%TOMCAT_HTTP_PORT%/PetTech' -UseBasicParsing; if ($response.StatusCode -eq 200) { exit 0 } else { exit 1 } } catch { exit 1 }"
-                    if errorlevel 1 (
-                        echo "Failed to access application!"
-                        exit 1
-                    ) else (
-                        echo "Successfully accessed application at http://localhost:%TOMCAT_HTTP_PORT%/PetTech"
-                    )
-                '''
-            }
-        }
     }
-    
+
     post {
         failure {
             bat '''
@@ -196,10 +141,10 @@ pipeline {
             '''
         }
         success {
-            echo "Deployment completed successfully! Application is available at http://localhost:${TOMCAT_HTTP_PORT}/PetTech"
+            echo "🎉 Deployment successful! App is live at: http://localhost:${TOMCAT_HTTP_PORT}/PetTech"
         }
         always {
             cleanWs()
         }
     }
-} 
+}
