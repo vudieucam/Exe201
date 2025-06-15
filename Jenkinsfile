@@ -1,6 +1,10 @@
 pipeline {
     agent any
     
+    triggers {
+        pollSCM('H/5 * * * *')  // Poll every 5 minutes for changes
+    }
+    
     environment {
         JAVA_HOME = 'C:\\Program Files\\Java\\jdk-17'
         TOMCAT_HOME = 'C:\\tomcat\\apache-tomcat-10.1.41'
@@ -100,8 +104,8 @@ pipeline {
                     cd "%TOMCAT_HOME%\\bin"
                     set CATALINA_HOME=%TOMCAT_HOME%
                     
-                    rem Start Tomcat
-                    call startup.bat
+                    rem Start Tomcat in background
+                    start /b cmd /c catalina.bat run
                     
                     rem Wait for Tomcat to start
                     :CHECK_STARTUP
@@ -138,6 +142,41 @@ pipeline {
                         echo "Waiting for deployment... Attempt %RETRY_COUNT% of %MAX_RETRIES%"
                         timeout /t 10 /nobreak
                         goto VERIFY_LOOP
+                    )
+                '''
+            }
+        }
+
+        stage('Verify Tomcat Running') {
+            steps {
+                bat '''
+                    echo "Verifying Tomcat is running and accessible..."
+                    set MAX_RETRIES=5
+                    set RETRY_COUNT=0
+                    
+                    :CHECK_TOMCAT
+                    if %RETRY_COUNT% geq %MAX_RETRIES% (
+                        echo "Failed to verify Tomcat is running after %MAX_RETRIES% attempts!"
+                        exit 1
+                    )
+                    
+                    netstat -ano | findstr ":%TOMCAT_HTTP_PORT%" > nul
+                    if errorlevel 1 (
+                        set /a RETRY_COUNT+=1
+                        echo "Tomcat not detected on port %TOMCAT_HTTP_PORT%. Attempt %RETRY_COUNT% of %MAX_RETRIES%"
+                        timeout /t 10 /nobreak
+                        goto CHECK_TOMCAT
+                    )
+                    
+                    echo "Tomcat is running successfully on port %TOMCAT_HTTP_PORT%"
+                    
+                    rem Try to access the application
+                    powershell -Command "try { $response = Invoke-WebRequest -Uri 'http://localhost:%TOMCAT_HTTP_PORT%/PetTech' -UseBasicParsing; if ($response.StatusCode -eq 200) { exit 0 } else { exit 1 } } catch { exit 1 }"
+                    if errorlevel 1 (
+                        echo "Failed to access application!"
+                        exit 1
+                    ) else (
+                        echo "Successfully accessed application at http://localhost:%TOMCAT_HTTP_PORT%/PetTech"
                     )
                 '''
             }
