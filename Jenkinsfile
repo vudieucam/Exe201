@@ -78,55 +78,6 @@ pipeline {
                 '''
             }
         }
-
-        stage('Start Tomcat') {
-            steps {
-                bat '''
-                    echo "Starting Tomcat..."
-                    cd "%TOMCAT_HOME%\\bin"
-                    set CATALINA_HOME=%TOMCAT_HOME%
-                    set JAVA_HOME=%JAVA_HOME%
-                    rem Start in detached mode
-                    start "" "%TOMCAT_HOME%\\bin\\startup.bat"
-
-                    :CHECK_STARTUP
-                    timeout /t 2 /nobreak > nul
-                    netstat -ano | findstr ":%TOMCAT_HTTP_PORT%" > nul
-                    if errorlevel 1 (
-                        echo "Waiting for Tomcat to start on port %TOMCAT_HTTP_PORT%..."
-                        goto CHECK_STARTUP
-                    )
-
-                    echo "Tomcat started successfully on port %TOMCAT_HTTP_PORT%"
-                '''
-            }
-        }
-
-        stage('Verify Deployment') {
-            steps {
-                bat '''
-                    echo "Verifying deployment..."
-                    set MAX_RETRIES=12
-                    set RETRY_COUNT=0
-
-                    :VERIFY_LOOP
-                    if %RETRY_COUNT% geq %MAX_RETRIES% (
-                        echo "Deployment verification failed after %MAX_RETRIES% attempts!"
-                        exit 1
-                    )
-
-                    if exist "%TOMCAT_HOME%\\webapps\\PetTech\\WEB-INF" (
-                        echo "Application deployed successfully!"
-                        exit 0
-                    ) else (
-                        set /a RETRY_COUNT+=1
-                        echo "Waiting for deployment... Attempt %RETRY_COUNT% of %MAX_RETRIES%"
-                        timeout /t 10 /nobreak
-                        goto VERIFY_LOOP
-                    )
-                '''
-            }
-        }
     }
 
     post {
