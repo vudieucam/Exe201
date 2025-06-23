@@ -9,6 +9,7 @@
 <html lang="vi">
     <head>
         <meta charset="UTF-8">
+        <link rel="icon" type="image/png" href="images/logo_pettech.jpg">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>PetTech Admin Dashboard</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -645,6 +646,16 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/blogadmin">
+                                <i class="bi bi-newspaper"></i>Tin tức
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/packageadmin">
+                                <i class="bi bi-newspaper"></i>Gói dịch vụ
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="${pageContext.request.contextPath}/productsAdmin.jsp">
                                 <i class="bi bi-cart"></i>Sản phẩm
                             </a>
@@ -659,11 +670,7 @@
                                 <i class="bi bi-credit-card"></i>Thanh toán
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="${pageContext.request.contextPath}/blogadmin">
-                                <i class="bi bi-newspaper"></i>Blog
-                            </a>
-                        </li>
+                        
                         <li class="nav-item">
                             <a class="nav-link" href="${pageContext.request.contextPath}/partnersAdmin.jsp">
                                 <i class="bi bi-building"></i>Đối tác

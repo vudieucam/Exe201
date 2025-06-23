@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel="icon" type="image/png" href="images/logo_pettech.jpg">
     <title>Chờ Xác nhận Thanh toán</title>
     <style>
         body {

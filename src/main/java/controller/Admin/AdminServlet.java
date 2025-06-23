@@ -183,6 +183,7 @@ public class AdminServlet extends HttpServlet {
 
             // Truyền về JSP
             request.setAttribute("stats", stats);
+            
             request.getRequestDispatcher("/Admin.jsp").forward(request, response);
 
         } catch (Exception e) {
