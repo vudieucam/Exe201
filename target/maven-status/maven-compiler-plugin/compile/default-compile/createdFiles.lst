@@ -14,6 +14,7 @@ dal\CourseReviewDAO.class
 model\Product.class
 controller\contact\ExpertServlet.class
 dal\CourseModuleDAO.class
+controller\Package\PackageAdminServlet.class
 dal\CourseLessonDAO.class
 controller\Course\LessonServlet.class
 model\ServicePackage.class

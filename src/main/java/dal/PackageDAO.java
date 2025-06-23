@@ -188,4 +188,67 @@ public class PackageDAO extends DBConnect {
         }
         return services;
     }
+    // Lấy tất cả các gói (cả ẩn và hiện)
+
+    public List<ServicePackage> getAllPackagesAdmin() throws SQLException {
+        String sql = "SELECT * FROM service_packages";
+        List<ServicePackage> list = new ArrayList<>();
+        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                ServicePackage sp = new ServicePackage(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("description"),
+                        rs.getBigDecimal("price"),
+                        rs.getString("type"),
+                        rs.getBoolean("status")
+                );
+                list.add(sp);
+            }
+        }
+        return list;
+    }
+
+// Cập nhật trạng thái ẩn/hiện
+    public boolean toggleStatus(int id, boolean status) throws SQLException {
+        String sql = "UPDATE service_packages SET status = ? WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setBoolean(1, status);
+            stmt.setInt(2, id);
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+// Thêm gói
+    public boolean addPackage(ServicePackage pkg) throws SQLException {
+        String sql = "INSERT INTO service_packages(name, description, price, type, status) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, pkg.getName());
+            stmt.setString(2, pkg.getDescription());
+            stmt.setBigDecimal(3, pkg.getPrice());
+            stmt.setString(4, pkg.getType());
+            stmt.setBoolean(5, pkg.isStatus());
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+// Sửa gói
+    public boolean updatePackage(ServicePackage pkg) throws SQLException {
+        String sql = "UPDATE service_packages SET name=?, description=?, price=?, type=?, status=? WHERE id=?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, pkg.getName());
+            stmt.setString(2, pkg.getDescription());
+            stmt.setBigDecimal(3, pkg.getPrice());
+            stmt.setString(4, pkg.getType());
+            stmt.setBoolean(5, pkg.isStatus());
+            stmt.setInt(6, pkg.getId());
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+// Xóa (soft delete: set status = 0)
+    public boolean deletePackage(int id) throws SQLException {
+        return toggleStatus(id, false);
+    }
+
 }
