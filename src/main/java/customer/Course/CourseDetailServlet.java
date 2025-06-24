@@ -7,6 +7,7 @@ package customer.Course;
 import dal.BlogDAO;
 import dal.CourseDAO;
 import dal.CourseModuleDAO;
+import dal.CourseReviewDAO;
 import dal.CustomerCourseDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -23,6 +24,7 @@ import model.Course;
 import model.CourseCategory;
 import model.CourseLesson;
 import model.CourseModule;
+import model.CourseReview;
 
 /**
  *
@@ -64,8 +66,8 @@ public class CourseDetailServlet extends HttpServlet {
                     + ", lesson: " + request.getParameter("lesson"));
 
             // Lấy danh sách danh mục và khóa học nổi bật
-            List<CourseCategory> courseCategories = CustomercourseDAO.getAllCategories();
-            request.setAttribute("courseCategories", courseCategories);
+//            List<CourseCategory> courseCategories = CustomercourseDAO.getAllCategories();
+//            request.setAttribute("courseCategories", courseCategories);
 
             List<Course> featuredCourses = CustomercourseDAO.getFeaturedCourses(9);
             request.setAttribute("featuredCourses", featuredCourses);
@@ -168,7 +170,24 @@ public class CourseDetailServlet extends HttpServlet {
                     }
                 }
             }
+            CourseReviewDAO reviewDAO = new CourseReviewDAO();
+            List<CourseReview> reviews = reviewDAO.getReviewsByCourse(courseId);
+            double avgRating = reviewDAO.getAverageRating(courseId);
+            int reviewCount = reviewDAO.getReviewCount(courseId);
+            boolean hasReviewed = false;
+            int userId = 0;
 
+            if (request.getSession().getAttribute("userId") != null) {
+                userId = (int) request.getSession().getAttribute("userId");
+                hasReviewed = reviewDAO.hasUserReviewed(userId, courseId);
+            }
+
+            request.setAttribute("courseReviews", reviews);
+            request.setAttribute("avgRating", avgRating);
+            request.setAttribute("reviewCount", reviewCount);
+            request.setAttribute("hasReviewed", hasReviewed);
+
+            //
             CourseLesson previousLesson = (currentIndex > 0) ? allLessons.get(currentIndex - 1) : null;
             CourseLesson nextLesson = (currentIndex >= 0 && currentIndex < allLessons.size() - 1)
                     ? allLessons.get(currentIndex + 1) : null;
@@ -191,13 +210,65 @@ public class CourseDetailServlet extends HttpServlet {
         }
     }
 
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
-        response.setContentType("text/html;charset=UTF-8");
-        processRequest(request, response);
+
+        Integer userIdObj = (Integer) request.getSession().getAttribute("userId");
+        if (userIdObj == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+
+        int userId = userIdObj;
+        CourseReviewDAO reviewDAO = new CourseReviewDAO();
+        String action = request.getParameter("action"); // "edit", "delete", or null
+        int courseId = Integer.parseInt(request.getParameter("courseId"));
+
+        try {
+            if ("edit".equals(action)) {
+                // 📝 Sửa đánh giá
+                int reviewId = Integer.parseInt(request.getParameter("reviewId"));
+                int rating = Integer.parseInt(request.getParameter("rating"));
+                String comment = request.getParameter("comment");
+
+                CourseReview review = new CourseReview();
+                review.setId(reviewId);
+                review.setRating(rating);
+                review.setComment(comment);
+
+                reviewDAO.updateReview(review);
+
+            } else if ("delete".equals(action)) {
+                // ❌ Xóa đánh giá
+                int reviewId = Integer.parseInt(request.getParameter("reviewId"));
+                reviewDAO.deleteReview(reviewId, userId);
+
+            } else {
+                // ✅ Gửi đánh giá mới
+                int rating = Integer.parseInt(request.getParameter("rating"));
+                String comment = request.getParameter("comment");
+
+                if (!reviewDAO.hasUserReviewed(userId, courseId)) {
+                    CourseReview review = new CourseReview();
+                    review.setCourseId(courseId);
+                    review.setUserId(userId);
+                    review.setRating(rating);
+                    review.setComment(comment);
+                    review.setStatus(true);
+                    reviewDAO.addReview(review);
+                }
+            }
+
+            response.sendRedirect("coursedetail?id=" + courseId);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect("coursedetail?id=" + courseId + "&error=1");
+        }
     }
 
     @Override

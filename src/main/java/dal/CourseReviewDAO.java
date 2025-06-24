@@ -50,6 +50,7 @@ public class CourseReviewDAO extends DBConnect {
 
             while (rs.next()) {
                 User user = new User();
+                user.setId(rs.getInt("user_id"));
                 user.setFullname(rs.getString("fullname"));
 
                 CourseReview review = new CourseReview(
@@ -115,14 +116,12 @@ public class CourseReviewDAO extends DBConnect {
         }
     }
 
-    // Update a review
     public boolean updateReview(CourseReview review) {
-        String sql = "UPDATE course_reviews SET rating = ?, comment = ?, status = ? WHERE id = ?";
+        String sql = "UPDATE course_reviews SET rating = ?, comment = ? WHERE id = ?";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setInt(1, review.getRating());
             st.setString(2, review.getComment());
-            st.setBoolean(3, review.isStatus());
-            st.setInt(4, review.getId());
+            st.setInt(3, review.getId());
             return st.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Error updating review: " + e.getMessage());
@@ -154,6 +153,7 @@ public class CourseReviewDAO extends DBConnect {
 
             if (rs.next()) {
                 User user = new User();
+                user.setId(rs.getInt("user_id"));
                 user.setFullname(rs.getString("fullname"));
 
                 return new CourseReview(
@@ -264,4 +264,17 @@ public class CourseReviewDAO extends DBConnect {
         }
         return 0;
     }
+
+    public boolean deleteReview(int reviewId, int userId) {
+        String sql = "UPDATE course_reviews SET status = 0 WHERE id = ? AND user_id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, reviewId);
+            st.setInt(2, userId);
+            return st.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }

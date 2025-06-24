@@ -130,10 +130,17 @@ public class CourseServlet extends HttpServlet {
             // Giữ giá trị mặc định nếu page không hợp lệ
         }
 
+        String categoryIdRaw = request.getParameter("categoryId");
+
         List<Course> courses;
         int totalCourses;
 
-        if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+        if (categoryIdRaw != null && !categoryIdRaw.isEmpty()) {
+            int categoryId = Integer.parseInt(categoryIdRaw);
+            courses = courseDAO.getCoursesByCategory(categoryId); // ✅ gọi đúng DAO đã có
+            totalCourses = courses.size(); // Không phân trang với lọc theo danh mục
+            request.setAttribute("selectedCategoryId", categoryId);
+        } else if (searchQuery != null && !searchQuery.trim().isEmpty()) {
             courses = CustomercourseDAO.searchCourses(searchQuery.trim());
             totalCourses = CustomercourseDAO.getTotalSearchCourses(searchQuery.trim());
         } else {

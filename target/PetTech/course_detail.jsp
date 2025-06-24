@@ -33,6 +33,10 @@ if (course == null) {
         <link href="https://fonts.googleapis.com/css?family=Montserrat:200,300,400,500,600,700,800&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+        <!-- Thêm trong <head> nếu chưa có Bootstrap -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
         <style>
 
             .error-container {
@@ -1417,6 +1421,7 @@ if (imageUrl != null && !imageUrl.isEmpty()) {
                                 </a>
                             </div>
                         </li>
+
                         <li class="nav-item"><a href="expert" class="nav-link">Chuyên gia</a></li>
                         <li class="nav-item"><a href="product" class="nav-link">Sản phẩm</a></li>
                         <li class="nav-item"><a href="pet" class="nav-link">Thú cưng</a></li>
@@ -1668,33 +1673,122 @@ if (imageUrl != null && !imageUrl.isEmpty()) {
                             </c:otherwise>
                         </c:choose>
 
-                        <!-- Discussion Section -->
+                        <!-- ⭐ Discussion & Feedback Section -->
                         <div class="discussion-section mt-5">
-                            <h4><i class="fa fa-comments"></i> Thảo luận</h4>
-                            <div class="discussion-form">
-                                <textarea class="form-control" placeholder="Bạn có câu hỏi gì về bài học không?"></textarea>
-                                <button class="btn btn-primary mt-2">Gửi câu hỏi</button>
+                            <!-- PHẦN ĐÁNH GIÁ TỪ HỌC VIÊN -->
+                            <div class="feedback-section">
+                                <h4 class="mt-4"><i class="fa fa-star text-warning"></i> Đánh giá từ học viên (${reviewCount})</h4>
+                                <p>Điểm trung bình: 
+                                    <strong class="text-warning">${avgRating}★</strong>
+                                </p>
+
+                                <c:forEach var="r" items="${courseReviews}">
+                                    <c:set var="isOwner" value="${sessionScope.userId == r.user.id}" />
+                                    <div class="border rounded p-3 mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <strong>${r.user.fullname}</strong>
+                                            <span class="badge bg-warning text-dark">${r.rating}★</span>
+                                        </div>
+
+                                        <p class="mb-1">${r.comment}</p>
+                                        <small class="text-muted">${r.createdAt}</small>
+
+                                        <c:if test="${isOwner}">
+                                            <!-- Nút mở modal -->
+                                            <button type="button" class="btn btn-sm btn-outline-secondary mt-2"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#editModal${r.id}">
+                                                ✏️ Sửa đánh giá
+                                            </button>
+
+
+                                            <!-- Nút xóa -->
+                                            <form action="coursedetail" method="post" style="display:inline;">
+                                                <input type="hidden" name="action" value="delete" />
+                                                <input type="hidden" name="reviewId" value="${r.id}" />
+                                                <input type="hidden" name="courseId" value="${course.id}" />
+                                                <button type="submit" class="btn btn-outline-danger btn-sm mt-2"
+                                                        onclick="return confirm('Bạn chắc chắn muốn xóa đánh giá này?')">
+                                                    🗑️ Xóa
+                                                </button>
+                                            </form>
+
+                                            <!-- Modal sửa -->
+                                            <div class="modal fade" id="editModal${r.id}" tabindex="-1" aria-labelledby="editModalLabel${r.id}" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <form action="coursedetail" method="post">
+                                                            <input type="hidden" name="action" value="edit" />
+                                                            <input type="hidden" name="reviewId" value="${r.id}" />
+                                                            <input type="hidden" name="courseId" value="${course.id}" />
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="editModalLabel${r.id}">Sửa đánh giá</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <div class="form-group mb-3">
+                                                                    <label><strong>Số sao:</strong></label>
+                                                                    <select name="rating" class="form-select" required>
+                                                                        <c:forEach var="i" begin="1" end="5">
+                                                                            <option value="${i}" <c:if test="${i == r.rating}">selected</c:if>>${i}</option>
+                                                                        </c:forEach>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="form-group mb-3">
+                                                                    <label><strong>Nhận xét:</strong></label>
+                                                                    <textarea name="comment" class="form-control" rows="3">${r.comment}</textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                                <button type="submit" class="btn btn-warning">Cập nhật</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </c:if>
+
+
+                                    </div>
+                                </c:forEach>
+
                             </div>
 
-                            <div class="discussion-list mt-3">
-                                <div class="discussion-item">
-                                    <div class="user-avatar">
-                                        <img src="${pageContext.request.contextPath}/images/user-avatar.jpg" alt="User">
-                                    </div>
-                                    <div class="discussion-content">
-                                        <div class="user-name">Nguyễn Văn A</div>
-                                        <div class="discussion-text">Bài học rất hay và bổ ích. Cảm ơn giảng viên!</div>
-                                        <div class="discussion-meta">
-                                            <span class="text-muted">2 ngày trước</span>
-                                            <a href="#" class="ml-3">Trả lời</a>
+                            <!-- PHẦN FORM GỬI ĐÁNH GIÁ -->
+                            <div class="mt-4">
+                                <c:if test="${not hasReviewed}">
+                                    <h5 class="mb-3">Viết đánh giá của bạn</h5>
+                                    <form action="coursedetail" method="post">
+                                        <input type="hidden" name="courseId" value="${course.id}" />
+                                        <div class="form-group mb-3">
+                                            <label><strong>Chọn số sao:</strong></label>
+                                            <select name="rating" class="form-select" required>
+                                                <option value="5">5 - Tuyệt vời</option>
+                                                <option value="4">4 - Tốt</option>
+                                                <option value="3">3 - Trung bình</option>
+                                                <option value="2">2 - Kém</option>
+                                                <option value="1">1 - Rất tệ</option>
+                                            </select>
                                         </div>
+                                        <div class="form-group mb-3">
+                                            <label><strong>Viết nhận xét:</strong></label>
+                                            <textarea name="comment" class="form-control" rows="3" required></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-success">Gửi đánh giá</button>
+                                    </form>
+                                </c:if>
+                                <c:if test="${hasReviewed}">
+                                    <div class="alert alert-success mt-3">
+                                        <i class="fa fa-check-circle"></i> Bạn đã đánh giá khóa học này.
                                     </div>
-                                </div>
+                                </c:if>
                             </div>
+
                         </div>
+
                     </div>
                 </div>
-            </div>
         </section>
 
 
@@ -1775,7 +1869,7 @@ if (imageUrl != null && !imageUrl.isEmpty()) {
         </script>
 
 
-
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script src="${pageContext.request.contextPath}/js/jquery.min.js"></script>
         <script src="${pageContext.request.contextPath}/js/jquery-migrate-3.0.1.min.js"></script>
         <script src="${pageContext.request.contextPath}/js/popper.min.js"></script>

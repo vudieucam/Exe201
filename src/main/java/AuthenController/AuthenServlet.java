@@ -150,8 +150,10 @@ public class AuthenServlet extends HttpServlet {
             }
 
             // Lưu user vào session
+            // Lưu user và userId vào session
             HttpSession session = request.getSession();
-            session.setAttribute("user", user);
+            session.setAttribute("user", user); // giữ nguyên
+            session.setAttribute("userId", user.getId()); // 🔥 thêm dòng này
 
             // Xử lý remember me
             if (rememberMe != null) {

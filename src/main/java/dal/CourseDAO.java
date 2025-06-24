@@ -72,6 +72,48 @@ public class CourseDAO extends DBConnect {
         return list;
     }
 
+    public List<Course> getCoursesByCategory(int categoryId) throws SQLException {
+        List<Course> courses = new ArrayList<>();
+        String sql = "SELECT c.* FROM courses c "
+                + "JOIN course_category_mapping ccm ON c.id = ccm.course_id "
+                + "WHERE ccm.category_id = ? AND c.status = 1 AND ccm.status = 1";
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, categoryId);
+            ResultSet rs = st.executeQuery();
+
+            CourseCategoryDAO categoryDAO = new CourseCategoryDAO(); // Tạo 1 lần
+
+            while (rs.next()) {
+                Course course = new Course();
+                course.setId(rs.getInt("id"));
+                course.setTitle(rs.getString("title"));
+                course.setContent(rs.getString("content"));
+                course.setResearcher(rs.getString("researcher"));
+                course.setDuration(rs.getString("duration"));
+                course.setStatus(rs.getInt("status"));
+                course.setThumbnailUrl(rs.getString("thumbnail_url"));
+
+                Timestamp createdAt = rs.getTimestamp("created_at");
+                if (createdAt != null) {
+                    course.setCreatedAt(new Date(createdAt.getTime()));
+                }
+
+                Timestamp updatedAt = rs.getTimestamp("updated_at");
+                if (updatedAt != null) {
+                    course.setUpdatedAt(new Date(updatedAt.getTime()));
+                }
+
+                // ✅ Gán danh mục cho từng khóa học
+                course.setCategories(categoryDAO.getCategoriesByCourseId(course.getId()));
+
+                courses.add(course);
+            }
+        }
+
+        return courses;
+    }
+
     public List<Course> getRecentCourses(int limit) throws SQLException {
         List<Course> courses = new ArrayList<>();
         String sql = "SELECT TOP (?) * FROM courses ORDER BY post_date DESC";
