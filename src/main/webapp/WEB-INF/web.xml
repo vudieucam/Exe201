@@ -28,6 +28,10 @@
         <servlet-name>ListCourseServlet</servlet-name>
         <servlet-class>customer.Course.ListCourseServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>PaymentAdminServlet</servlet-name>
+        <servlet-class>controller.Payment.PaymentAdminServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginGoogleServlet</servlet-name>
         <url-pattern>/logingoogle</url-pattern>
@@ -67,6 +71,10 @@
     <servlet-mapping>
         <servlet-name>ListCourseServlet</servlet-name>
         <url-pattern>/listcourse</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PaymentAdminServlet</servlet-name>
+        <url-pattern>/paymentadmin</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>home</welcome-file>

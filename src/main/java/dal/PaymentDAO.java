@@ -4,9 +4,11 @@
  */
 package dal;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import model.Payments;
@@ -16,6 +18,35 @@ import model.Payments;
  * @author FPT
  */
 public class PaymentDAO extends DBConnect {
+
+    public List<Payments> getAllPayments() throws SQLException {
+        List<Payments> list = new ArrayList<>();
+        String sql = "SELECT * FROM payments ORDER BY payment_date DESC";
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Payments payment = extractPayment(rs); // Gọi hàm hỗ trợ
+                list.add(payment);
+            }
+        }
+        return list;
+    }
+
+    public boolean setConfirmed(int paymentId, boolean confirmed) throws SQLException {
+        String sql = "UPDATE payments SET is_confirmed = ? WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setBoolean(1, confirmed);
+            ps.setInt(2, paymentId);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    public boolean setCompleted(int paymentId) throws SQLException {
+        String sql = "UPDATE payments SET status = 'completed', is_confirmed = 1 WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, paymentId);
+            return ps.executeUpdate() > 0;
+        }
+    }
 
     // Tìm thanh toán theo mã xác nhận
     public Payments getPaymentByConfirmationCode(String code) throws SQLException {
@@ -133,8 +164,30 @@ public class PaymentDAO extends DBConnect {
         }
         return 0.0;
     }
-    
-    
+
+    public boolean recordPayment(int userId, int packageId, String paymentMethod, BigDecimal amount, String confirmationCode) {
+        String sql = "INSERT INTO Payments (userId, servicePackageId, paymentMethod, amount, status, isConfirmed, confirmationCode, confirmationExpiry, paymentDate) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, GETDATE())";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ps.setInt(2, packageId);
+            ps.setString(3, paymentMethod);
+            ps.setBigDecimal(4, amount);
+            ps.setString(5, "Chờ xác nhận");
+            ps.setBoolean(6, false);
+            ps.setString(7, confirmationCode);
+
+            Timestamp expiryTime = new Timestamp(System.currentTimeMillis() + (10 * 60 * 1000));
+            ps.setTimestamp(8, expiryTime);
+
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
     public static void main(String[] args) {
         // Giả sử bạn đã có kết nối database

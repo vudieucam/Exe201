@@ -41,13 +41,6 @@ public class HomeServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User currentUser = (User) session.getAttribute("user");
 
-        // CHỈ redirect nếu là admin/staff, còn lại cho phép truy cập
-        if (currentUser != null) {
-            if (currentUser.getRoleId() == 2 || currentUser.getRoleId() == 3) {
-                response.sendRedirect("admin");
-                return;
-            }
-        }
 
         try {
             // Lấy danh sách tất cả danh mục khóa học

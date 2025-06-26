@@ -4,7 +4,13 @@
     Author     : FPT
 --%>
 
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<fmt:setLocale value="vi_VN" />
+
+
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -352,7 +358,7 @@
                 .navbar-toggler {
                     display: block;
                 }
-                
+
                 .admin-profile {
                     margin-top: 20px;
                 }
@@ -385,6 +391,16 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/blogadmin">
+                                <i class="bi bi-newspaper"></i>Tin tức
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/packageadmin">
+                                <i class="bi bi-newspaper"></i>Gói dịch vụ
+                            </a>
+                        </li>
+                        <li class="nav-item" hidden="">
                             <a class="nav-link" href="${pageContext.request.contextPath}/productsAdmin.jsp">
                                 <i class="bi bi-cart"></i>Sản phẩm
                             </a>
@@ -395,432 +411,267 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="${pageContext.request.contextPath}/paymentsAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/paymentadmin">
                                 <i class="bi bi-credit-card"></i>Thanh toán
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="${pageContext.request.contextPath}/blogadmin">
-                                <i class="bi bi-newspaper"></i>Blog
-                            </a>
-                        </li>
+
                         <li class="nav-item">
                             <a class="nav-link" href="${pageContext.request.contextPath}/partnersAdmin.jsp">
                                 <i class="bi bi-building"></i>Đối tác
                             </a>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item" hidden="">
                             <a class="nav-link" href="${pageContext.request.contextPath}/reports.jsp">
                                 <i class="bi bi-graph-up"></i>Báo cáo
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <div class="admin-profile">
+                                <c:choose>
+                                    <c:when test="${not empty sessionScope.user}">
+                                        <div class="dropdown">
+                                            <a href="#" class="dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false">
+
+                                                <div class="admin-info text-start">
+                                                    <div class="admin-name fw-bold">${sessionScope.user.fullname}</div>
+                                                    <div class="admin-role text-muted">
+                                                        <c:choose>
+                                                            <c:when test="${sessionScope.user.roleId == 1}">Khách hàng</c:when>
+                                                            <c:when test="${sessionScope.user.roleId == 2}">Nhân viên</c:when>
+                                                            <c:when test="${sessionScope.user.roleId == 3}">Quản trị viên</c:when>
+                                                        </c:choose>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li><a class="dropdown-item" href="authen?action=editprofile">
+                                                        <i class="bi bi-person me-2"></i>Thông tin cá nhân
+                                                    </a></li>
+                                                <li><a class="dropdown-item" href="home">
+                                                        <i class="bi bi-house-door me-2"></i>Trang Chủ
+                                                    </a></li>
+                                                <li><hr class="dropdown-divider"></li>
+
+                                                <li><a class="dropdown-item text-danger" href="authen?action=logout">
+                                                        <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                                                    </a></li>
+                                            </ul>
+                                        </div>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <a href="authen?action=login" class="login-link d-flex align-items-center me-3">
+                                            <i class="fa fa-sign-in me-2"></i>
+                                            <span>Đăng Nhập</span>
+                                        </a>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+                        </li>
                     </ul>
-                    
-                    <!-- Admin Profile Section -->
-                    <div class="admin-profile">
-                        <div class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                <img src="https://via.placeholder.com/40" alt="Admin Avatar" class="admin-avatar">
-                                <div class="admin-info">
-                                    <div class="admin-name">Admin Name</div>
-                                    <div class="admin-role">Quản trị viên</div>
-                                </div>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="editProfile.jsp">
-                                    <i class="bi bi-person me-2"></i>Thông tin cá nhân
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item logout" href="home">
-                                    <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
-                                </a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+                </div><!-- comment -->
 
-
+                <!-- MAIN CONTENT -->
                 <!-- Main Content -->
                 <div class="col-md-10 p-4">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h2>Quản Lý Thanh Toán</h2>
                     </div>
+                    <!-- Thông báo -->
+                    <c:if test="${not empty success}">
+                        <div class="alert alert-success">${success}</div>
+                    </c:if>
+                    <c:if test="${not empty error}">
+                        <div class="alert alert-danger">${error}</div>
+                    </c:if>
 
-                    <!-- Filter Section -->
-                    <div class="filter-section">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <label class="form-label filter-title">Trạng thái</label>
-                                <select class="form-select" id="payment-status-filter">
-                                    <option value="all">Tất cả trạng thái</option>
-                                    <option value="success">Thành công</option>
-                                    <option value="pending">Đang chờ</option>
-                                    <option value="failed">Thất bại</option>
-                                    <option value="refunded">Hoàn tiền</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label filter-title">Phương thức</label>
-                                <select class="form-select" id="payment-method-filter">
-                                    <option value="all">Tất cả phương thức</option>
-                                    <option value="bank">Chuyển khoản</option>
-                                    <option value="card">Thẻ tín dụng</option>
-                                    <option value="paypal">PayPal</option>
-                                    <option value="momo">Momo</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label filter-title">Khoảng thời gian</label>
-                                <select class="form-select" id="payment-date-filter">
-                                    <option value="all">Tất cả thời gian</option>
-                                    <option value="today">Hôm nay</option>
-                                    <option value="week">Tuần này</option>
-                                    <option value="month">Tháng này</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label filter-title">Tìm kiếm</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="payment-search" placeholder="Mã thanh toán...">
-                                    <button class="btn btn-primary" type="button" id="search-btn">
-                                        <i class="bi bi-search"></i>
-                                    </button>
-                                </div>
+                    <!-- Bộ lọc đơn giản -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Trạng thái</label>
+                            <select class="form-select" id="payment-status-filter">
+                                <option value="all">Tất cả</option>
+                                <c:forEach var="p" items="${pendingPayments}">
+                                    <c:if test="${not empty p.status}">
+                                        <c:if test="${not fn:contains(statusOptions, p.status)}">
+                                            <c:set var="statusOptions" value="${statusOptions}${p.status}," scope="request"/>
+                                            <option value="${p.status}">${p.status}</option>
+                                        </c:if>
+                                    </c:if>
+                                </c:forEach>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Phương thức</label>
+                            <select class="form-select" id="payment-method-filter">
+                                <option value="all">Tất cả</option>
+                                <c:forEach var="p" items="${pendingPayments}">
+                                    <c:if test="${not empty p.paymentMethod}">
+                                        <c:if test="${not fn:contains(methodOptions, p.paymentMethod)}">
+                                            <c:set var="methodOptions" value="${methodOptions}${p.paymentMethod}," scope="request"/>
+                                            <option value="${p.paymentMethod}">${p.paymentMethod}</option>
+                                        </c:if>
+                                    </c:if>
+                                </c:forEach>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Tìm kiếm</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="payment-search" placeholder="Mã thanh toán...">
+                                <button class="btn btn-primary" type="button" id="search-btn">
+                                    <i class="bi bi-search"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Payments Table -->
+
+                    <!-- Bảng thanh toán -->
                     <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <div>
-                                <button class="btn btn-outline-secondary me-2" id="advanced-filter-btn">
-                                    <i class="bi bi-funnel me-1"></i> Lọc nâng cao
-                                </button>
-                                <button class="btn btn-outline-secondary" id="export-excel-btn">
-                                    <i class="bi bi-download me-1"></i> Xuất Excel
-                                </button>
-                            </div>
-                            <div>
-                                <div class="btn-group">
-                                    <button class="btn btn-sm btn-outline-secondary active">Tất cả (298)</button>
-                                    <button class="btn btn-sm btn-outline-secondary">Thành công (265)</button>
-                                    <button class="btn btn-sm btn-outline-secondary">Đang chờ (18)</button>
-                                    <button class="btn btn-sm btn-outline-secondary">Thất bại (15)</button>
-                                </div>
-                            </div>
-                        </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-hover" id="payments-table">
                                     <thead>
                                         <tr>
-                                            <th style="width: 50px">#</th>
+                                            <th>#</th>
                                             <th>Mã thanh toán</th>
-                                            <th>Đơn hàng</th>
-                                            <th>Khách hàng</th>
+                                            <th>User ID</th>
+                                            <th>Gói</th>
                                             <th>Số tiền</th>
                                             <th>Phương thức</th>
                                             <th>Ngày thanh toán</th>
                                             <th>Trạng thái</th>
-                                            <th style="width: 100px">Hành động</th>
+                                            <th>Hành động</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>1</td>
-                                            <td>PAY-2306001</td>
-                                            <td>ORD-2306001</td>
-                                            <td>Nguyễn Văn A</td>
-                                            <td>₫3,450,000</td>
-                                            <td><span class="badge bg-primary">Chuyển khoản</span></td>
-                                            <td>15/06/2023 09:30</td>
-                                            <td><span class="status-badge status-active">Thành công</span></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#paymentDetailModal">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-secondary action-btn">
-                                                    <i class="bi bi-receipt"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>2</td>
-                                            <td>PAY-2306002</td>
-                                            <td>ORD-2306002</td>
-                                            <td>Trần Thị B</td>
-                                            <td>₫1,500,000</td>
-                                            <td><span class="badge bg-success">Thẻ tín dụng</span></td>
-                                            <td>14/06/2023 14:15</td>
-                                            <td><span class="status-badge status-pending">Đang chờ</span></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#paymentDetailModal">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-secondary action-btn">
-                                                    <i class="bi bi-receipt"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>3</td>
-                                            <td>PAY-2306003</td>
-                                            <td>ORD-2306003</td>
-                                            <td>Lê Văn C</td>
-                                            <td>₫5,200,000</td>
-                                            <td><span class="badge bg-info">Momo</span></td>
-                                            <td>13/06/2023 10:45</td>
-                                            <td><span class="status-badge status-active">Thành công</span></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#paymentDetailModal">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-secondary action-btn">
-                                                    <i class="bi bi-receipt"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>4</td>
-                                            <td>PAY-2306004</td>
-                                            <td>ORD-2306004</td>
-                                            <td>Phạm Thị D</td>
-                                            <td>₫250,000</td>
-                                            <td><span class="badge bg-warning">PayPal</span></td>
-                                            <td>12/06/2023 16:20</td>
-                                            <td><span class="status-badge status-inactive">Thất bại</span></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#paymentDetailModal">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-secondary action-btn">
-                                                    <i class="bi bi-receipt"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>5</td>
-                                            <td>PAY-2306005</td>
-                                            <td>ORD-2306005</td>
-                                            <td>Hoàng Văn E</td>
-                                            <td>₫7,800,000</td>
-                                            <td><span class="badge bg-info">Momo</span></td>
-                                            <td>11/06/2023 11:10</td>
-                                            <td><span class="status-badge status-active">Thành công</span></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="modal" data-bs-target="#paymentDetailModal">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-secondary action-btn">
-                                                    <i class="bi bi-receipt"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
+                                        <c:forEach var="p" items="${pendingPayments}" varStatus="st">
+                                            <tr>
+                                                <td>${st.index + 1}</td>
+                                                <td>${p.orderId}</td>
+                                                <td>${p.userId}</td>
+                                                <td>${p.servicePackageId}</td>
+                                                <td>
+                                                    <fmt:formatNumber value="${p.amount}" pattern="#,##0 '₫'"/>
+                                                </td>
+                                                <td>${p.paymentMethod}</td>
+                                                <td><fmt:formatDate value="${p.paymentDate}" pattern="dd/MM/yyyy HH:mm"/></td>
+                                                <td>
+                                                    <span class="status-badge ${p.isConfirmed ? 'status-active' : 'status-pending'}">
+                                                        ${p.status}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <c:choose>
+
+
+                                                        <c:when test="${p.status == 'confirmed' && !p.isConfirmed}">
+                                                            <form action="paymentadmin" method="post" class="d-inline">
+                                                                <input type="hidden" name="action" value="confirmPayment"/>
+                                                                <input type="hidden" name="paymentId" value="${p.id}"/>
+                                                                <button class="btn btn-sm btn-success" type="submit"
+                                                                        onclick="return confirm('Xác nhận thanh toán này?');">
+                                                                    ✅ Xác nhận
+                                                                </button>
+                                                            </form>
+                                                            <form action="paymentadmin" method="post" class="d-inline">
+                                                                <input type="hidden" name="action" value="revokeConfirmation"/>
+                                                                <input type="hidden" name="paymentId" value="${p.id}"/>
+                                                                <button class="btn btn-sm btn-warning" type="submit"
+                                                                        onclick="return confirm('Bạn có chắc muốn huỷ xác nhận không?');">
+                                                                    ❌ Huỷ xác nhận
+                                                                </button>
+                                                            </form>
+                                                        </c:when>
+
+
+                                                        <c:when test="${p.status == 'confirmed' && p.isConfirmed}">
+                                                            <form action="paymentadmin" method="post" class="d-inline">
+                                                                <input type="hidden" name="action" value="completePayment"/>
+                                                                <input type="hidden" name="paymentId" value="${p.id}"/>
+                                                                <button class="btn btn-sm btn-primary" type="submit"
+                                                                        onclick="return confirm('Xác nhận hoàn tất thanh toán này?');">
+                                                                    🎯 Hoàn tất
+                                                                </button>
+                                                            </form>
+                                                            <form action="paymentadmin" method="post" class="d-inline">
+                                                                <input type="hidden" name="action" value="revokeConfirmation"/>
+                                                                <input type="hidden" name="paymentId" value="${p.id}"/>
+                                                                <button class="btn btn-sm btn-warning" type="submit"
+                                                                        onclick="return confirm('Bạn có chắc muốn huỷ xác nhận không?');">
+                                                                    ❌ Huỷ xác nhận
+                                                                </button>
+                                                            </form>
+                                                        </c:when>
+
+
+                                                        <c:when test="${p.status == 'completed'}">
+                                                            <span class="text-success">✅ Đã hoàn tất</span>
+                                                        </c:when>
+
+
+                                                        <c:when test="${p.status == 'failed'}">
+                                                            <form action="paymentadmin" method="post" class="d-inline">
+                                                                <input type="hidden" name="action" value="retryPayment"/>
+                                                                <input type="hidden" name="paymentId" value="${p.id}"/>
+                                                                <button class="btn btn-sm btn-secondary" type="submit"
+                                                                        onclick="return confirm('Gửi lại yêu cầu thanh toán này?');">
+                                                                    🔁 Gửi lại yêu cầu
+                                                                </button>
+                                                            </form>
+                                                        </c:when>
+
+
+                                                        <c:when test="${p.status == 'refunded'}">
+                                                            <span class="text-info">❕ Đã hoàn tiền</span>
+                                                        </c:when>
+
+
+                                                        <c:when test="${p.status == 'pending'}">
+                                                            <span class="text-muted">⏳ Chờ xử lý</span>
+                                                        </c:when>
+
+
+                                                        <c:otherwise>
+                                                            <span class="text-muted">Đã xử lý</span>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
                                     </tbody>
                                 </table>
                             </div>
-
-                            <!-- Pagination -->
-                            <nav aria-label="Page navigation" class="mt-3">
-                                <ul class="pagination justify-content-center">
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
-                                            <i class="bi bi-chevron-left"></i>
-                                        </a>
-                                    </li>
-                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">4</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">5</a></li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="#">
-                                            <i class="bi bi-chevron-right"></i>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </nav>
                         </div>
                     </div>
                 </div>
             </div>
+
         </div>
-
-        <!-- Payment Detail Modal -->
-        <div class="modal fade" id="paymentDetailModal" tabindex="-1" aria-labelledby="paymentDetailModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="paymentDetailModalLabel">Chi tiết thanh toán #PAY-2306001</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <h6>Thông tin khách hàng</h6>
-                                <div class="card p-3">
-                                    <p class="mb-1"><strong>Họ tên:</strong> Nguyễn Văn A</p>
-                                    <p class="mb-1"><strong>Email:</strong> nguyenvana@gmail.com</p>
-                                    <p class="mb-1"><strong>SĐT:</strong> 0987654321</p>
-                                    <p class="mb-0"><strong>Địa chỉ:</strong> 123 Đường ABC, Quận 1, TP.HCM</p>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <h6>Thông tin thanh toán</h6>
-                                <div class="card p-3">
-                                    <p class="mb-1"><strong>Mã thanh toán:</strong> PAY-2306001</p>
-                                    <p class="mb-1"><strong>Mã đơn hàng:</strong> ORD-2306001</p>
-                                    <p class="mb-1"><strong>Ngày thanh toán:</strong> 15/06/2023 09:30</p>
-                                    <p class="mb-1"><strong>Phương thức:</strong> Chuyển khoản</p>
-                                    <p class="mb-0"><strong>Trạng thái:</strong> <span class="status-badge status-active">Thành công</span></p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <h6>Chi tiết giao dịch</h6>
-                        <div class="table-responsive mb-4">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Mã giao dịch</th>
-                                        <th>Ngân hàng</th>
-                                        <th>Số tài khoản</th>
-                                        <th>Người nhận</th>
-                                        <th>Số tiền</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>TRANS-2306001</td>
-                                        <td>Vietcombank</td>
-                                        <td>***1234</td>
-                                        <td>Công ty TNHH PetShop</td>
-                                        <td>₫3,450,000</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="card p-3 mb-3">
-                                    <h6>Ghi chú thanh toán</h6>
-                                    <p class="mb-0">Thanh toán cho đơn hàng ORD-2306001 gồm 2 sản phẩm</p>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="card p-3">
-                                    <h6>Tổng cộng</h6>
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span>Tổng đơn hàng:</span>
-                                        <span>₫3,450,000</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span>Phí thanh toán:</span>
-                                        <span>₫0</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between fw-bold">
-                                        <span>Tổng thanh toán:</span>
-                                        <span>₫3,450,000</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                        <button type="button" class="btn btn-primary">In biên lai</button>
-                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#updatePaymentStatusModal">Cập nhật trạng thái</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Update Payment Status Modal -->
-        <div class="modal fade" id="updatePaymentStatusModal" tabindex="-1" aria-labelledby="updatePaymentStatusModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="updatePaymentStatusModalLabel">Cập nhật trạng thái thanh toán</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form>
-                            <div class="mb-3">
-                                <label for="payment-status" class="form-label">Trạng thái hiện tại</label>
-                                <input type="text" class="form-control" id="current-payment-status" value="Thành công" readonly>
-                            </div>
-                            <div class="mb-3">
-                                <label for="new-payment-status" class="form-label">Cập nhật trạng thái</label>
-                                <select class="form-select" id="new-payment-status">
-                                    <option value="success">Thành công</option>
-                                    <option value="pending">Đang chờ</option>
-                                    <option value="failed">Thất bại</option>
-                                    <option value="refunded">Hoàn tiền</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="payment-note" class="form-label">Ghi chú</label>
-                                <textarea class="form-control" id="payment-note" rows="3"></textarea>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button type="button" class="btn btn-primary">Cập nhật</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-            // Filter functionality
-            document.getElementById('search-btn').addEventListener('click', function() {
-                const searchText = document.getElementById('payment-search').value.toLowerCase();
-                const statusFilter = document.getElementById('payment-status-filter').value;
-                const methodFilter = document.getElementById('payment-method-filter').value;
-                const dateFilter = document.getElementById('payment-date-filter').value;
-                
-                const rows = document.querySelectorAll('#payments-table tbody tr');
-                
-                rows.forEach(row => {
-                    const paymentCode = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-                    const customerName = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
-                    const status = row.querySelector('td:nth-child(8) span').textContent;
-                    const method = row.querySelector('td:nth-child(6) span').textContent;
-                    
-                    const matchSearch = paymentCode.includes(searchText) || customerName.includes(searchText);
-                    const matchStatus = statusFilter === 'all' || 
-                        (statusFilter === 'success' && status === 'Thành công') ||
-                        (statusFilter === 'pending' && status === 'Đang chờ') ||
-                        (statusFilter === 'failed' && status === 'Thất bại') ||
-                        (statusFilter === 'refunded' && status === 'Hoàn tiền');
-                    
-                    const matchMethod = methodFilter === 'all' || 
-                        (methodFilter === 'bank' && method === 'Chuyển khoản') ||
-                        (methodFilter === 'card' && method === 'Thẻ tín dụng') ||
-                        (methodFilter === 'paypal' && method === 'PayPal') ||
-                        (methodFilter === 'momo' && method === 'Momo');
-                    
-                    if (matchSearch && matchStatus && matchMethod) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
-            });
-            
-            // Advanced filter button
-            document.getElementById('advanced-filter-btn').addEventListener('click', function() {
-                alert('Chức năng lọc nâng cao sẽ được mở rộng trong phiên bản sau');
-            });
-            
-            // Export Excel button
-            document.getElementById('export-excel-btn').addEventListener('click', function() {
-                alert('Chức năng xuất Excel sẽ được triển khai sau');
-            });
+                                                                            // Filter function simple (client side) - chỉ ẩn/hiện row, không gọi server
+                                                                            document.getElementById('search-btn').addEventListener('click', filterTable);
+                                                                            document.getElementById('payment-status-filter').addEventListener('change', filterTable);
+                                                                            document.getElementById('payment-method-filter').addEventListener('change', filterTable);
+
+                                                                            function filterTable() {
+                                                                                const search = document.getElementById('payment-search').value.toLowerCase();
+                                                                                const status = document.getElementById('payment-status-filter').value;
+                                                                                const method = document.getElementById('payment-method-filter').value;
+                                                                                document.querySelectorAll('#payments-table tbody tr').forEach(row => {
+                                                                                    const code = row.children[1].innerText.toLowerCase();
+                                                                                    const rowStatus = row.children[7].innerText.trim();
+                                                                                    const rowMethod = row.children[5].innerText.trim();
+                                                                                    const matchSearch = code.includes(search);
+                                                                                    const matchStatus = status === 'all' || rowStatus === status;
+                                                                                    const matchMethod = method === 'all' || rowMethod === method;
+                                                                                    row.style.display = (matchSearch && matchStatus && matchMethod) ? '' : 'none';
+                                                                                });
+                                                                            }
         </script>
     </body>
 </html>

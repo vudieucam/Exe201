@@ -143,7 +143,8 @@ public class AuthenServlet extends HttpServlet {
                 return;
             }
 
-            if (!user.isIsActive()) {
+            // Chỉ chặn nếu là khách hàng và chưa có gói
+            if (user.getRoleId() == 1 && !user.isIsActive()) {
                 request.getSession().setAttribute("notification", "⚠️ Gói dịch vụ của bạn chưa được kích hoạt. Vui lòng chọn gói hoặc chờ xác nhận.");
                 response.sendRedirect("login.jsp");
                 return;
@@ -175,13 +176,22 @@ public class AuthenServlet extends HttpServlet {
 
             System.out.println("✅ Đăng nhập thành công: " + user.getFullname() + " | Vai trò: " + user.getRoleId());
 
-            // Điều hướng sau đăng nhập
+// Điều hướng sau đăng nhập
             String redirectUrl = request.getParameter("redirect");
             if (redirectUrl == null || redirectUrl.isEmpty()) {
-                redirectUrl = (user.getRoleId() == 2 || user.getRoleId() == 3) ? "admin" : "home";
+                if (user.getRoleId() == 1) {
+                    redirectUrl = "home";
+                } else if (user.getRoleId() == 2) {
+                    redirectUrl = "admin";
+                } else if (user.getRoleId() == 3) {
+                    redirectUrl = "admin";
+                } else {
+                    // Default nếu role không xác định
+                    redirectUrl = "home";
+                }
             }
 
-            response.sendRedirect(redirectUrl);
+            response.sendRedirect(request.getContextPath() + "/" + redirectUrl); // ✅ redirect đúng context
 
         } catch (SQLException ex) {
             ex.printStackTrace(); // Log server

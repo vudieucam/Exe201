@@ -619,63 +619,106 @@
                 <!-- Sidebar -->
                 <div class="col-md-2 sidebar p-0">
                     <div class="sidebar-brand">
-                        <img src="images/logo_pettech.jpg" alt="Logo">
+                        <img src="${pageContext.request.contextPath}/images/logo_pettech.jpg" alt="Logo">
                         <h4 class="mb-0">PetTech</h4>
                     </div>
                     <ul class="nav flex-column mt-3">
                         <li class="nav-item">
-                            <a class="nav-link active" href="admin">
+                            <a class="nav-link active" href="${pageContext.request.contextPath}/admin">
                                 <i class="bi bi-speedometer2"></i>Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="userAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/useradmin">
                                 <i class="bi bi-people"></i>Người dùng
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="courseadmin">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/courseadmin">
                                 <i class="bi bi-book"></i>Khóa học
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="productsAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/blogadmin">
+                                <i class="bi bi-newspaper"></i>Tin tức
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/packageadmin">
+                                <i class="bi bi-newspaper"></i>Gói dịch vụ
+                            </a>
+                        </li>
+                        <li class="nav-item" hidden="">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/productsAdmin.jsp">
                                 <i class="bi bi-cart"></i>Sản phẩm
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="ordersAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/ordersAdmin.jsp">
                                 <i class="bi bi-receipt"></i>Đơn hàng
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="paymentsAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/paymentadmin">
                                 <i class="bi bi-credit-card"></i>Thanh toán
                             </a>
                         </li>
+
                         <li class="nav-item">
-                            <a class="nav-link" href="blogsAdmin.jsp">
-                                <i class="bi bi-newspaper"></i>Blog
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="partnersAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/partnersAdmin.jsp">
                                 <i class="bi bi-building"></i>Đối tác
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="reports.jsp">
+                        <li class="nav-item" hidden="">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/reports.jsp">
                                 <i class="bi bi-graph-up"></i>Báo cáo
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="settings.jsp">
-                                <i class="bi bi-gear"></i>Cài đặt
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                            <div class="admin-profile">
+                                <c:choose>
+                                    <c:when test="${not empty sessionScope.user}">
+                                        <div class="dropdown">
+                                            <a href="#" class="dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false">
 
+                                                <div class="admin-info text-start">
+                                                    <div class="admin-name fw-bold">${sessionScope.user.fullname}</div>
+                                                    <div class="admin-role text-muted">
+                                                        <c:choose>
+                                                            <c:when test="${sessionScope.user.roleId == 1}">Khách hàng</c:when>
+                                                            <c:when test="${sessionScope.user.roleId == 2}">Nhân viên</c:when>
+                                                            <c:when test="${sessionScope.user.roleId == 3}">Quản trị viên</c:when>
+                                                        </c:choose>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li><a class="dropdown-item" href="authen?action=editprofile">
+                                                        <i class="bi bi-person me-2"></i>Thông tin cá nhân
+                                                    </a></li>
+                                                <li><a class="dropdown-item" href="home">
+                                                        <i class="bi bi-house-door me-2"></i>Trang Chủ
+                                                    </a></li>
+                                                <li><hr class="dropdown-divider"></li>
+
+                                                <li><a class="dropdown-item text-danger" href="authen?action=logout">
+                                                        <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                                                    </a></li>
+                                            </ul>
+                                        </div>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <a href="authen?action=login" class="login-link d-flex align-items-center me-3">
+                                            <i class="fa fa-sign-in me-2"></i>
+                                            <span>Đăng Nhập</span>
+                                        </a>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+                        </li>
+
+                    </ul>
+                </div><!-- comment -->
 
                 <!-- Main Content -->
                 <div class="col-md-10 p-4">

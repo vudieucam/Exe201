@@ -46,13 +46,28 @@ public class AdminServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
-        HttpSession session = request.getSession();
-        User user = (User) session.getAttribute("user");
 
-        if (user == null || (user.getRoleId() != 2 && user.getRoleId() != 3)) {
+        HttpSession session = request.getSession(false); // ❗ Không tự tạo mới
+        if (session == null) {
+            System.out.println("❌ Session null trong AdminServlet");
             response.sendRedirect("authen?action=login");
             return;
         }
+
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            System.out.println("❌ Không có user trong session trong AdminServlet");
+            response.sendRedirect("authen?action=login");
+            return;
+        }
+
+        if (user.getRoleId() != 2 && user.getRoleId() != 3) {
+            System.out.println("❌ Không có quyền truy cập admin: " + user.getFullname());
+            response.sendRedirect("authen?action=login");
+            return;
+        }
+
+        System.out.println("✅ Truy cập Admin với: " + user.getFullname() + " | Vai trò: " + user.getRoleId());
 
         try {
             DashboardStats stats = new DashboardStats();
@@ -183,7 +198,7 @@ public class AdminServlet extends HttpServlet {
 
             // Truyền về JSP
             request.setAttribute("stats", stats);
-            
+
             request.getRequestDispatcher("/Admin.jsp").forward(request, response);
 
         } catch (Exception e) {

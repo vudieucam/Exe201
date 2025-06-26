@@ -392,6 +392,16 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/blogadmin">
+                                <i class="bi bi-newspaper"></i>Tin tức
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/packageadmin">
+                                <i class="bi bi-newspaper"></i>Gói dịch vụ
+                            </a>
+                        </li>
+                        <li class="nav-item" hidden="">
                             <a class="nav-link" href="${pageContext.request.contextPath}/productsAdmin.jsp">
                                 <i class="bi bi-cart"></i>Sản phẩm
                             </a>
@@ -402,49 +412,67 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="${pageContext.request.contextPath}/paymentsAdmin.jsp">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/paymentadmin">
                                 <i class="bi bi-credit-card"></i>Thanh toán
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="${pageContext.request.contextPath}/blogadmin">
-                                <i class="bi bi-newspaper"></i>Blog
-                            </a>
-                        </li>
+
                         <li class="nav-item">
                             <a class="nav-link" href="${pageContext.request.contextPath}/partnersAdmin.jsp">
                                 <i class="bi bi-building"></i>Đối tác
                             </a>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item" hidden="">
                             <a class="nav-link" href="${pageContext.request.contextPath}/reports.jsp">
                                 <i class="bi bi-graph-up"></i>Báo cáo
                             </a>
                         </li>
-                    </ul>
+                        <li class="nav-item">
+                            <div class="admin-profile">
+                                <c:choose>
+                                    <c:when test="${not empty sessionScope.user}">
+                                        <div class="dropdown">
+                                            <a href="#" class="dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false">
 
-                    <!-- Admin Profile Section -->
-                    <div class="admin-profile">
-                        <div class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                <img src="https://via.placeholder.com/40" alt="Admin Avatar" class="admin-avatar">
-                                <div class="admin-info">
-                                    <div class="admin-name">Admin Name</div>
-                                    <div class="admin-role">Quản trị viên</div>
-                                </div>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="editProfile.jsp">
-                                        <i class="bi bi-person me-2"></i>Thông tin cá nhân
-                                    </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item logout" href="home">
-                                        <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
-                                    </a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+                                                <div class="admin-info text-start">
+                                                    <div class="admin-name fw-bold">${sessionScope.user.fullname}</div>
+                                                    <div class="admin-role text-muted">
+                                                        <c:choose>
+                                                            <c:when test="${sessionScope.user.roleId == 1}">Khách hàng</c:when>
+                                                            <c:when test="${sessionScope.user.roleId == 2}">Nhân viên</c:when>
+                                                            <c:when test="${sessionScope.user.roleId == 3}">Quản trị viên</c:when>
+                                                        </c:choose>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li><a class="dropdown-item" href="authen?action=editprofile">
+                                                        <i class="bi bi-person me-2"></i>Thông tin cá nhân
+                                                    </a></li>
+                                                <li><a class="dropdown-item" href="home">
+                                                        <i class="bi bi-house-door me-2"></i>Trang Chủ
+                                                    </a></li>
+                                                <li><hr class="dropdown-divider"></li>
+
+                                                <li><a class="dropdown-item text-danger" href="authen?action=logout">
+                                                        <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                                                    </a></li>
+                                            </ul>
+                                        </div>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <a href="authen?action=login" class="login-link d-flex align-items-center me-3">
+                                            <i class="fa fa-sign-in me-2"></i>
+                                            <span>Đăng Nhập</span>
+                                        </a>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+                        </li>
+
+                    </ul>
+                </div><!-- comment -->
+                
                 <!-- Main Content -->
                 <div class="col-md-10 p-4">
                     <div class="d-flex justify-content-between align-items-center mb-4">

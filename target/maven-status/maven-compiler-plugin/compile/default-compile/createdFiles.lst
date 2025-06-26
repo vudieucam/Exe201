@@ -20,6 +20,7 @@ controller\Course\LessonServlet.class
 model\ServicePackage.class
 dal\OrderDAO.class
 model\User.class
+controller\Payment\PaymentAdminServlet.class
 controller\Product\ProductServlet.class
 model\LessonAttachment.class
 AuthenController\GoogleLogin.class
@@ -47,6 +48,7 @@ model\UserService.class
 controller\contact\PetServlet.class
 dal\UserDAO.class
 AuthenController\AuthenServlet.class
+customer\Course\CategoryFilter.class
 dal\ProductDAO.class
 controller\Blog\BlogDetailServlet.class
 model\GoogleAccount.class

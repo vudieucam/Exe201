@@ -477,6 +477,7 @@ public class PackageServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
+
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
         User pendingUser = (User) session.getAttribute("pendingUser");
@@ -486,48 +487,80 @@ public class PackageServlet extends HttpServlet {
 
         try {
             ServicePackage pkg = PackageDAO.getPackageById(packageId);
-
             String confirmationCode = UUID.randomUUID().toString().substring(0, 8);
-            boolean paymentRecorded = PackageDAO.recordPayment(
-                    user != null ? user.getId() : 0, // Changed to use 0 instead of null
-                    packageId,
-                    paymentMethod,
-                    pkg.getPrice(),
-                    confirmationCode
-            );
 
-            if (paymentRecorded) {
-                if (pendingUser != null) {
-                    String activationToken = UUID.randomUUID().toString();
+            // Nếu là người dùng đăng ký mới (chưa đăng nhập)
+            if (pendingUser != null) {
+                // Chưa đăng ký tài khoản, lưu payment trạng thái chờ
+                pendingUser.setActivationToken(UUID.randomUUID().toString());
+                pendingUser.setTokenExpiry(calculateExpiryDate(24));
+                session.setAttribute("pendingUser", pendingUser); // cập nhật lại token
 
-                    pendingUser.setActivationToken(activationToken);
-                    pendingUser.setTokenExpiry(calculateExpiryDate(24));
-                    session.setAttribute("pendingUser", pendingUser);
+                boolean paymentRecorded = PackageDAO.recordPayment(
+                        0, // userId chưa tồn tại
+                        packageId,
+                        paymentMethod,
+                        pkg.getPrice(),
+                        confirmationCode
+                );
 
+                if (paymentRecorded) {
                     sendPaymentConfirmationEmail(pendingUser, pkg, confirmationCode, request);
-
-                    session.removeAttribute("oldEmail");
-                    session.removeAttribute("oldFullname");
-                    session.removeAttribute("oldPhone");
-                    session.removeAttribute("oldAddress");
-
                     session.setAttribute("message", "Vui lòng kiểm tra email để xác nhận thanh toán. Bạn có 10 phút để hoàn tất quy trình.");
-                    request.getRequestDispatcher("payment_success.jsp").forward(request, response);
+                    request.getRequestDispatcher("payment_pending.jsp").forward(request, response);
                 } else {
-                    sendPaymentConfirmationEmail(user, pkg, confirmationCode, request);
-
-                    session.setAttribute("notification", "Yêu cầu nâng cấp gói của bạn đã được ghi nhận. Vui lòng kiểm tra email để xác nhận thanh toán.");
-                    response.sendRedirect("login.jsp");
+                    session.setAttribute("error", "Ghi nhận thanh toán thất bại. Vui lòng thử lại.");
+                    response.sendRedirect("payment.jsp?packageId=" + packageId);
                 }
+
+                // Nếu là người dùng đã đăng nhập, đang nâng cấp
+            } else if (user != null) {
+                // Kiểm tra trùng hoặc downgrade
+                if (user.getServicePackageId() == packageId) {
+                    session.setAttribute("notification", "Bạn đã đăng ký gói này rồi!");
+                    response.sendRedirect("pricing.jsp");
+                    return;
+                }
+                if (user.getServicePackageId() > packageId) {
+                    session.setAttribute("notification", "Không thể chuyển xuống gói thấp hơn!");
+                    response.sendRedirect("pricing.jsp");
+                    return;
+                }
+
+                boolean paymentRecorded = PackageDAO.recordPayment(
+                        user.getId(),
+                        packageId,
+                        paymentMethod,
+                        pkg.getPrice(),
+                        confirmationCode
+                );
+
+                if (paymentRecorded) {
+                    sendPaymentConfirmationEmail(user, pkg, confirmationCode, request);
+                    session.setAttribute("message", "Yêu cầu nâng cấp gói đã được ghi nhận. Vui lòng kiểm tra email.");
+                    request.getRequestDispatcher("payment_pending.jsp").forward(request, response);
+                } else {
+                    session.setAttribute("error", "Thanh toán thất bại. Vui lòng thử lại.");
+                    response.sendRedirect("payment.jsp?packageId=" + packageId);
+                }
+
             } else {
-                session.setAttribute("error", "Ghi nhận thanh toán thất bại. Vui lòng thử lại.");
-                response.sendRedirect("payment.jsp?packageId=" + packageId);
+                session.setAttribute("error", "Không xác định được người dùng. Vui lòng đăng nhập hoặc đăng ký lại.");
+                response.sendRedirect("login.jsp");
             }
+
         } catch (Exception e) {
             e.printStackTrace();
             session.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
             response.sendRedirect("payment.jsp?packageId=" + packageId);
         }
+    }
+
+    private Date calculateExpiryDate(int hours) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.add(Calendar.HOUR, hours);
+        return cal.getTime();
     }
 
     private void sendPaymentConfirmationEmail(User user, ServicePackage pkg, String confirmationCode, HttpServletRequest request) {
@@ -594,10 +627,5 @@ public class PackageServlet extends HttpServlet {
         }
     }
 
-    private Date calculateExpiryDate(int expiryTimeInHours) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());
-        cal.add(Calendar.HOUR, expiryTimeInHours);
-        return cal.getTime();
-    }
+    
 }

@@ -12,16 +12,21 @@ import model.UserService;
  *
  * @author FPT
  */
-public class UserServiceDAO extends DBConnect{
+public class UserServiceDAO extends DBConnect {
     public boolean save(UserService service) throws SQLException {
-        String sql = "INSERT INTO User_Service (user_id, package_id, start_date, end_date, status) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO user_packages (user_id, service_package_id, start_date, end_date, status) "
+                   + "VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
             ps.setInt(1, service.getUserId());
             ps.setInt(2, service.getPackageId());
             ps.setDate(3, new java.sql.Date(service.getStartDate().getTime()));
             ps.setDate(4, new java.sql.Date(service.getEndDate().getTime()));
-            ps.setString(5, service.getStatus());
+
+            // Chuyển String status ("active"/"inactive") → kiểu BIT (1/0)
+            String status = service.getStatus();
+            int statusBit = "active".equalsIgnoreCase(status) ? 1 : 0;
+            ps.setInt(5, statusBit);
 
             return ps.executeUpdate() > 0;
         }
