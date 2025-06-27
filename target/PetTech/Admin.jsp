@@ -617,6 +617,77 @@
                 color: white;
                 border-color: #4361ee;
             }
+
+            /* Cải thiện card thống kê */
+            .stat-card {
+                border-left: 4px solid;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+
+            .stat-card.bg-primary {
+                border-left-color: #3a0ca3;
+            }
+            .stat-card.bg-success {
+                border-left-color: #2d6a4f;
+            }
+            .stat-card.bg-info {
+                border-left-color: #1a759f;
+            }
+            .stat-card.bg-warning {
+                border-left-color: #f8961e;
+            }
+            .stat-card.bg-danger {
+                border-left-color: #d00000;
+            }
+
+            .stat-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+            }
+
+            /* Cải thiện biểu đồ */
+            .chart-card .card-header {
+                font-weight: 600;
+                color: var(--dark-color);
+                background-color: white !important;
+            }
+
+            .chart-container {
+                position: relative;
+                height: 300px;
+                min-height: 300px;
+            }
+
+            /* Hiệu ứng hover cho bảng */
+            .table-hover tbody tr {
+                transition: background-color 0.2s;
+            }
+
+            .table-hover tbody tr:hover {
+                background-color: rgba(67, 97, 238, 0.05);
+            }
+
+            /* Cải thiện nút lọc thời gian */
+            .time-filter .btn {
+                transition: all 0.3s;
+            }
+
+            .time-filter .btn.active {
+                background-color: var(--primary-color);
+                color: white;
+                box-shadow: 0 2px 5px rgba(67, 97, 238, 0.3);
+            }
+
+            /* Responsive cho các card */
+            @media (max-width: 768px) {
+                .stat-card {
+                    margin-bottom: 15px;
+                }
+
+                .chart-container {
+                    height: 250px;
+                }
+            }
         </style>
     </head>
     <body>
@@ -748,8 +819,9 @@
                                                 <div class="card-body">
                                                     <h5 class="card-title">Người dùng Online</h5>
                                                     <p class="card-value">${stats.onlineUsers}</p>
-                                                    <div class="card-change positive">
-                                                        <i class="bi bi-arrow-up"></i> 12% so với hôm qua
+                                                    <div class="card-change ${stats.userGrowth >= 0 ? 'positive' : 'negative'}">
+                                                        <i class="bi bi-arrow-${stats.userGrowth >= 0 ? 'up' : 'down'}"></i> 
+                                                        <fmt:formatNumber value="${Math.abs(stats.userGrowth)}" pattern="#,##0.0"/>% so với tháng trước
                                                     </div>
                                                 </div>
                                             </div>
@@ -759,8 +831,9 @@
                                                 <div class="card-body">
                                                     <h5 class="card-title">Tổng người dùng</h5>
                                                     <p class="card-value">${stats.totalUsers}</p>
-                                                    <div class="card-change positive">
-                                                        <i class="bi bi-arrow-up"></i> ${stats.userGrowth}% so với tháng trước
+                                                    <div class="card-change ${stats.userGrowth >= 0 ? 'positive' : 'negative'}">
+                                                        <i class="bi bi-arrow-${stats.userGrowth >= 0 ? 'up' : 'down'}"></i> 
+                                                        <fmt:formatNumber value="${Math.abs(stats.userGrowth)}" pattern="#,##0.0"/>% so với tháng trước
                                                     </div>
                                                 </div>
                                             </div>
@@ -770,8 +843,9 @@
                                                 <div class="card-body">
                                                     <h5 class="card-title">Người dùng hoạt động</h5>
                                                     <p class="card-value">${stats.activeUsers}</p>
-                                                    <div class="card-change positive">
-                                                        <i class="bi bi-arrow-up"></i> 8% so với tuần trước
+                                                    <div class="card-change ${stats.userGrowth >= 0 ? 'positive' : 'negative'}">
+                                                        <i class="bi bi-arrow-${stats.userGrowth >= 0 ? 'up' : 'down'}"></i> 
+                                                        <fmt:formatNumber value="${Math.abs(stats.userGrowth)}" pattern="#,##0.0"/>% so với tháng trước
                                                     </div>
                                                 </div>
                                             </div>
@@ -782,7 +856,8 @@
                                                     <h5 class="card-title">Doanh thu tháng</h5>
                                                     <p class="card-value"><fmt:formatNumber value="${stats.monthlyRevenue}" type="currency" currencySymbol="₫"/></p>
                                                     <div class="card-change positive">
-                                                        <i class="bi bi-arrow-up"></i> 15% so với tháng trước
+                                                        <i class="bi bi-arrow-up"></i> 
+                                                        <fmt:formatNumber value="${stats.monthlyRevenue.doubleValue() / stats.totalRevenue.doubleValue() * 100}" pattern="#,##0.0"/>% tổng doanh thu
                                                     </div>
                                                 </div>
                                             </div>
@@ -790,7 +865,210 @@
                                     </div>
                                 </div>
 
-                                <!-- Biểu đồ thống kê truy cập -->
+                                <!-- Chỉ số hiệu suất kỹ thuật -->
+                                <div class="dashboard-section">
+                                    <h4 class="section-title">Hiệu suất kỹ thuật</h4>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="card stat-card bg-info">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">Thời gian tải trang (s)</h5>
+                                                    <p class="card-value"><fmt:formatNumber value="${stats.pageLoadTime}" maxFractionDigits="2"/></p>
+                                                    <div class="progress progress-thin mt-2">
+                                                        <div class="progress-bar bg-white" 
+                                                             style="width: ${100 - (stats.pageLoadTime * 20)}%"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card stat-card bg-primary">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">Phản hồi máy chủ (ms)</h5>
+                                                    <p class="card-value"><fmt:formatNumber value="${stats.serverResponseTime}" maxFractionDigits="0"/></p>
+                                                    <div class="progress progress-thin mt-2">
+                                                        <div class="progress-bar bg-white" 
+                                                             style="width: ${100 - (stats.serverResponseTime / 10)}%"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card stat-card bg-warning">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">Tỉ lệ lỗi</h5>
+                                                    <p class="card-value"><fmt:formatNumber value="${stats.errorRate}" type="percent" maxFractionDigits="1"/></p>
+                                                    <div class="progress progress-thin mt-2">
+                                                        <div class="progress-bar bg-white" 
+                                                             style="width: ${stats.errorRate * 100}%"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card stat-card bg-danger">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">Tỉ lệ thoát</h5>
+                                                    <p class="card-value"><fmt:formatNumber value="${stats.bounceRate}" type="percent" maxFractionDigits="1"/></p>
+                                                    <div class="progress progress-thin mt-2">
+                                                        <div class="progress-bar bg-white" 
+                                                             style="width: ${stats.bounceRate * 100}%"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- TƯƠNG TÁC NGƯỜI DÙNG -->
+                                <div class="dashboard-section">
+                                    <h4 class="section-title">Tương tác người dùng</h4>
+                                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+                                        <!-- Tỉ lệ nhấp chuột (CTR) -->
+                                        <div class="col">
+                                            <div class="card chart-card h-100">
+                                                <div class="card-header d-flex justify-content-between align-items-center">
+                                                    <span><strong>CTR</strong></span>
+                                                    <span class="badge bg-primary bg-opacity-10 text-primary">
+                                                        <i class="bi bi-arrow-up"></i>
+                                                        <fmt:formatNumber value="${stats.clickThroughRate * 100}" pattern="#,##0.0"/>%
+                                                    </span>
+                                                </div>
+                                                <div class="card-body p-2">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="text-center flex-shrink-0 me-3" style="width: 80px;">
+                                                            <h4 class="mb-0">
+                                                                <fmt:formatNumber value="${stats.clickThroughRate * 100}" pattern="#,##0.0"/>%
+                                                            </h4>
+                                                            <small class="text-muted">Hiện tại</small>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <canvas id="ctrChart" style="height: 60px;"></canvas>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Thời gian phiên trung bình -->
+                                        <div class="col">
+                                            <div class="card h-100 text-center p-3">
+                                                <div class="card-header">Thời gian phiên</div>
+                                                <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                                                    <h4 class="mb-0">
+                                                        <fmt:formatNumber value="${stats.avgSessionDuration / 60}" maxFractionDigits="1"/> phút
+                                                    </h4>
+                                                    <span class="badge mt-2 bg-${stats.avgSessionDuration > 180 ? 'success' : 'warning'}">
+                                                        <i class="bi bi-arrow-${stats.avgSessionDuration > 180 ? 'up' : 'down'}"></i>
+                                                        ${stats.avgSessionDuration > 180 ? 'Tốt' : 'Cần cải thiện'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Trang mỗi phiên -->
+                                        <div class="col">
+                                            <div class="card h-100 text-center p-3">
+                                                <div class="card-header">Trang mỗi phiên</div>
+                                                <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                                                    <h4 class="mb-0">
+                                                        <fmt:formatNumber value="${stats.pagesPerSession}" maxFractionDigits="1"/>
+                                                    </h4>
+                                                    <span class="badge mt-2 bg-${stats.pagesPerSession > 3 ? 'success' : 'warning'}">
+                                                        <i class="bi bi-arrow-${stats.pagesPerSession > 3 ? 'up' : 'down'}"></i>
+                                                        ${stats.pagesPerSession > 3 ? 'Tốt' : 'Cần cải thiện'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Độ cuộn trung bình -->
+                                        <div class="col">
+                                            <div class="card h-100 text-center p-3">
+                                                <div class="card-header">Độ cuộn trung bình</div>
+                                                <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                                                    <h4 class="mb-0">
+                                                        <fmt:formatNumber value="${stats.scrollDepth}" type="percent" maxFractionDigits="0"/>
+                                                    </h4>
+                                                    <span class="badge mt-2 bg-${stats.scrollDepth > 0.6 ? 'success' : 'warning'}">
+                                                        <i class="bi bi-arrow-${stats.scrollDepth > 0.6 ? 'up' : 'down'}"></i>
+                                                        ${stats.scrollDepth > 0.6 ? 'Tốt' : 'Cần cải thiện'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <!-- Nguồn lưu lượng truy cập -->
+                                <div class="dashboard-section">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card chart-card">
+                                                <div class="card-header">
+                                                    Phân bổ người dùng mới & quay lại
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="chart-container">
+                                                        <canvas id="userTypeChart"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card chart-card">
+                                                <div class="card-header">
+                                                    Nguồn lưu lượng truy cập
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="chart-container">
+                                                        <canvas id="trafficSourceChart"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Tỉ lệ chuyển đổi -->
+                                <div class="dashboard-section">
+                                    <h4 class="section-title">Tỉ lệ chuyển đổi</h4>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="card stat-card bg-success">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">Tỉ lệ chuyển đổi chung</h5>
+                                                    <p class="card-value"><fmt:formatNumber value="${stats.conversionRate}" type="percent" maxFractionDigits="1"/></p>
+                                                    <div class="card-change positive">
+                                                        <i class="bi bi-arrow-up"></i> 5% so với tháng trước
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card stat-card bg-primary">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">Đăng ký tài khoản</h5>
+                                                    <p class="card-value"><fmt:formatNumber value="${stats.signupConversion}" type="percent" maxFractionDigits="1"/></p>
+                                                    <div class="card-change positive">
+                                                        <i class="bi bi-arrow-up"></i> 3% so với tháng trước
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card stat-card bg-warning">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">Mua hàng/Đăng ký</h5>
+                                                    <p class="card-value"><fmt:formatNumber value="${stats.purchaseConversion}" type="percent" maxFractionDigits="1"/></p>
+                                                    <div class="card-change negative">
+                                                        <i class="bi bi-arrow-down"></i> 2% so với tháng trước
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <!-- Biểu đồ thống kê truy cập -->
                                 <div class="dashboard-section">
                                     <div class="row">
@@ -842,7 +1120,6 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <!-- Thay thế phần biểu đồ tỉ lệ hoàn thành bằng biểu đồ cột ngang -->
                                         <div class="col-md-6">
                                             <div class="card chart-card">
                                                 <div class="card-header">
@@ -885,7 +1162,8 @@
                                                                         <td>${c.views}</td>
                                                                         <td>
                                                                             <span class="badge bg-success bg-opacity-10 text-success">
-                                                                                <i class="bi bi-arrow-up"></i> ${loop.index * 5 + 10}%
+                                                                                <i class="bi bi-arrow-up"></i> 
+                                                                                <fmt:formatNumber value="${c.growthRate}" pattern="#,##0"/>%
                                                                             </span>
                                                                         </td>
                                                                     </tr>
@@ -925,7 +1203,7 @@
                                                                                 <span>${c.rating}/5</span>
                                                                             </div>
                                                                         </td>
-                                                                        <td>${loop.index * 3 + 15}</td>
+                                                                        <td>${c.enrollments}</td>
                                                                     </tr>
                                                                 </c:forEach>
                                                             </tbody>
@@ -943,7 +1221,7 @@
                                         <div class="card-header d-flex justify-content-between align-items-center">
                                             <span>Thống kê truy cập chi tiết</span>
                                             <div class="btn-group">
-                                                <button class="btn btn-sm btn-outline-primary">Xuất Excel</button>
+                                                <button class="btn btn-sm btn-outline-primary" onclick="exportTableToExcel('statsTable')">Xuất Excel</button>
                                                 <button class="btn btn-sm btn-outline-secondary">Tùy chọn</button>
                                             </div>
                                         </div>
@@ -972,12 +1250,13 @@
                                                                 <td>${d.pageViews}</td>
                                                                 <td>
                                                                     <div class="progress progress-thin">
-                                                                        <div class="progress-bar bg-danger" style="width: ${30 + (d.visits % 20)}%"></div>
+                                                                        <div class="progress-bar bg-danger" style="width: ${d.bounceRate * 100}%"></div>
                                                                     </div>
-                                                                    <small>${30 + (d.visits % 20)}%</small>
+                                                                    <small><fmt:formatNumber value="${d.bounceRate}" type="percent" maxFractionDigits="1"/></small>
                                                                 </td>
                                                             </tr>
                                                         </c:forEach>
+
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -985,288 +1264,6 @@
                                     </div>
                                 </div>
 
-                                <script>
-                                    document.addEventListener('DOMContentLoaded', function () {
-                                        // ==================== BIỂU ĐỒ LƯỢNG TRUY CẬP ====================
-                                        const initTrafficChart = () => {
-                                            const trafficCtx = document.getElementById('trafficChart')?.getContext('2d');
-                                            if (!trafficCtx)
-                                                return null;
-
-                                            return new Chart(trafficCtx, {
-                                                type: 'bar',
-                                                data: {
-                                                    labels: [],
-                                                    datasets: [
-                                                        {
-                                                            label: 'Lượt truy cập',
-                                                            data: [],
-                                                            backgroundColor: 'rgba(67, 97, 238, 0.7)',
-                                                            borderColor: '#4361ee',
-                                                            borderWidth: 1,
-                                                            type: 'bar',
-                                                            order: 1
-                                                        },
-                                                        {
-                                                            label: 'Người dùng',
-                                                            data: [],
-                                                            borderColor: '#4895ef',
-                                                            backgroundColor: 'transparent',
-                                                            borderWidth: 2,
-                                                            type: 'line',
-                                                            tension: 0.3,
-                                                            order: 0
-                                                        }
-                                                    ]
-                                                },
-                                                options: {
-                                                    responsive: true,
-                                                    maintainAspectRatio: false,
-                                                    plugins: {
-                                                        legend: {
-                                                            position: 'top',
-                                                        },
-                                                        tooltip: {
-                                                            mode: 'index',
-                                                            intersect: false
-                                                        }
-                                                    },
-                                                    scales: {
-                                                        x: {
-                                                            grid: {
-                                                                display: false
-                                                            },
-                                                            title: {
-                                                                display: true,
-                                                                text: 'Thời gian'
-                                                            }
-                                                        },
-                                                        y: {
-                                                            grid: {
-                                                                color: 'rgba(0, 0, 0, 0.05)'
-                                                            },
-                                                            title: {
-                                                                display: true,
-                                                                text: 'Số lượng'
-                                                            },
-                                                            beginAtZero: true
-                                                        }
-                                                    }
-                                                }
-                                            });
-                                        };
-
-                                        // Hàm cập nhật biểu đồ traffic
-                                        const updateTrafficChart = (chart, filterType) => {
-                                            let labels = [];
-                                            let visitsData = [];
-                                            let usersData = [];
-                                            let xAxisTitle = 'Thời gian';
-
-                                            // Tạo dữ liệu giả lập tùy theo filter type
-                                            switch (filterType) {
-                                                case 'day':
-                                                    labels = Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`);
-                                                    visitsData = Array.from({length: 24}, () => Math.floor(Math.random() * 100) + 50);
-                                                    usersData = Array.from({length: 24}, () => Math.floor(Math.random() * 80) + 30);
-                                                    xAxisTitle = 'Giờ trong ngày';
-                                                    break;
-
-                                                case 'week':
-                                                    const today = new Date();
-                                                    const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1));
-
-                                                    labels = [];
-                                                    for (let i = 0; i < 4; i++) {
-                                                        const startDate = new Date(firstDayOfWeek);
-                                                        startDate.setDate(startDate.getDate() - (i * 7));
-                                                        const endDate = new Date(startDate);
-                                                        endDate.setDate(endDate.getDate() + 6);
-
-                                                        const startStr = `${startDate.getDate()}/${startDate.getMonth() + 1}`;
-                                                                                const endStr = `${endDate.getDate()}/${endDate.getMonth() + 1}`;
-                                                                                                        labels.push(`Tuần ${4 - i} (${startStr}-${endStr})`);
-                                                                                                    }
-
-                                                                                                    labels.reverse();
-                                                                                                    visitsData = Array.from({length: 4}, () => Math.floor(Math.random() * 1000) + 500);
-                                                                                                    usersData = Array.from({length: 4}, () => Math.floor(Math.random() * 800) + 400);
-                                                                                                    xAxisTitle = 'Tuần';
-                                                                                                    break;
-
-                                                                                                case 'month':
-                                                                                                    const monthToday = new Date();
-                                                                                                    const daysInMonth = new Date(monthToday.getFullYear(), monthToday.getMonth() + 1, 0).getDate();
-                                                                                                    const weekCount = Math.ceil(daysInMonth / 7);
-
-                                                                                                    labels = Array.from({length: weekCount}, (_, i) => `Tuần ${i+1}`);
-                                                                                                    visitsData = Array.from({length: weekCount}, () => Math.floor(Math.random() * 1000) + 500);
-                                                                                                    usersData = Array.from({length: weekCount}, () => Math.floor(Math.random() * 800) + 400);
-                                                                                                    xAxisTitle = 'Tuần trong tháng';
-                                                                                                    break;
-
-                                                                                                case 'year':
-                                                                                                    labels = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
-                                                                                                        'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
-                                                                                                    visitsData = Array.from({length: 12}, () => Math.floor(Math.random() * 3000) + 1500);
-                                                                                                    usersData = Array.from({length: 12}, () => Math.floor(Math.random() * 2500) + 1000);
-                                                                                                    xAxisTitle = 'Tháng trong năm';
-                                                                                                    break;
-                                                                                            }
-
-                                                                                            // Cập nhật dữ liệu và tiêu đề trục x
-                                                                                            chart.data.labels = labels;
-                                                                                            chart.data.datasets[0].data = visitsData;
-                                                                                            chart.data.datasets[1].data = usersData;
-                                                                                            chart.options.scales.x.title.text = xAxisTitle;
-                                                                                            chart.update();
-                                                                                        };
-
-                                                                                        // ==================== BIỂU ĐỒ PHÂN BỐ NGƯỜI DÙNG ====================
-                                                                                        const initUserDistributionChart = () => {
-                                                                                            const userDistCtx = document.getElementById('userDistributionChart')?.getContext('2d');
-                                                                                            if (!userDistCtx)
-                                                                                                return;
-
-                                                                                            new Chart(userDistCtx, {
-                                                                                                type: 'doughnut',
-                                                                                                data: {
-                                                                                                    labels: ['Thường', 'Premium', 'Admin', 'Staff'],
-                                                                                                    datasets: [{
-                                                                                                            data: [
-                                    ${userDistribution.regularUsers != null ? userDistribution.regularUsers : 0},
-                                    ${userDistribution.premiumUsers != null ? userDistribution.premiumUsers : 0},
-                                    ${userDistribution.adminUsers != null ? userDistribution.adminUsers : 0},
-                                    ${userDistribution.staffUsers != null ? userDistribution.staffUsers : 0}
-                                                                                                            ],
-                                                                                                            backgroundColor: [
-                                                                                                                '#4361ee',
-                                                                                                                '#4895ef',
-                                                                                                                '#3f37c9',
-                                                                                                                '#4cc9f0'
-                                                                                                            ],
-                                                                                                            borderWidth: 1
-                                                                                                        }]
-                                                                                                },
-                                                                                                options: {
-                                                                                                    responsive: true,
-                                                                                                    maintainAspectRatio: false,
-                                                                                                    plugins: {
-                                                                                                        legend: {
-                                                                                                            position: 'right',
-                                                                                                        }
-                                                                                                    }
-                                                                                                }
-                                                                                            });
-                                                                                        };
-
-                                                                                        // ==================== BIỂU ĐỒ THỜI GIAN HỌC ====================
-                                                                                        const initLearningTimeChart = () => {
-                                                                                            const learningTimeCtx = document.getElementById('learningTimeChart')?.getContext('2d');
-                                                                                            if (!learningTimeCtx)
-                                                                                                return;
-
-                                                                                            new Chart(learningTimeCtx, {
-                                                                                                type: 'bar',
-                                                                                                data: {
-                                                                                                    labels: ${not empty courseTitles ? courseTitles : '["No Data"]'},
-                                                                                                    datasets: [{
-                                                                                                            label: 'Phút',
-                                                                                                            data: ${not empty avgTimes ? avgTimes : '[0]'},
-                                                                                                            backgroundColor: 'rgba(67, 97, 238, 0.7)',
-                                                                                                            borderColor: '#4361ee',
-                                                                                                            borderWidth: 1
-                                                                                                        }]
-                                                                                                },
-                                                                                                options: {
-                                                                                                    responsive: true,
-                                                                                                    maintainAspectRatio: false,
-                                                                                                    scales: {
-                                                                                                        x: {
-                                                                                                            grid: {
-                                                                                                                display: false
-                                                                                                            }
-                                                                                                        },
-                                                                                                        y: {
-                                                                                                            title: {
-                                                                                                                display: true,
-                                                                                                                text: 'Phút'
-                                                                                                            }
-                                                                                                        }
-                                                                                                    }
-                                                                                                }
-                                                                                            });
-                                                                                        };
-
-                                                                                        // ==================== BIỂU ĐỒ TỈ LỆ HOÀN THÀNH ====================
-                                                                                        const initCompletionRateChart = () => {
-                                                                                            const completionRateCtx = document.getElementById('completionRateChart')?.getContext('2d');
-                                                                                            if (!completionRateCtx)
-                                                                                                return;
-
-                                                                                            new Chart(completionRateCtx, {
-                                                                                                type: 'radar',
-                                                                                                data: {
-                                                                                                    labels: ${not empty completionCourseTitles ? completionCourseTitles : '["No Data"]'},
-                                                                                                    datasets: [{
-                                                                                                            label: 'Tỉ lệ hoàn thành (%)',
-                                                                                                            data: ${not empty completionRates ? completionRates : '[0]'},
-                                                                                                            backgroundColor: 'rgba(72, 149, 239, 0.2)',
-                                                                                                            borderColor: '#4895ef',
-                                                                                                            pointBackgroundColor: '#4895ef',
-                                                                                                            pointBorderColor: '#fff',
-                                                                                                            pointHoverBackgroundColor: '#fff',
-                                                                                                            pointHoverBorderColor: '#4895ef'
-                                                                                                        }]
-                                                                                                },
-                                                                                                options: {
-                                                                                                    responsive: true,
-                                                                                                    maintainAspectRatio: false,
-                                                                                                    scales: {
-                                                                                                        r: {
-                                                                                                            angleLines: {
-                                                                                                                display: true
-                                                                                                            },
-                                                                                                            suggestedMin: 0,
-                                                                                                            suggestedMax: 100,
-                                                                                                            ticks: {
-                                                                                                                stepSize: 20
-                                                                                                            }
-                                                                                                        }
-                                                                                                    }
-                                                                                                }
-                                                                                            });
-                                                                                        };
-
-                                                                                        // ==================== KHỞI TẠO TẤT CẢ BIỂU ĐỒ ====================
-                                                                                        const initAllCharts = () => {
-                                                                                            // Khởi tạo biểu đồ traffic và thiết lập sự kiện
-                                                                                            const trafficChart = initTrafficChart();
-                                                                                            if (trafficChart) {
-                                                                                                // Xử lý sự kiện click cho các nút lọc thời gian
-                                                                                                const timeFilterButtons = document.querySelectorAll('.time-filter .btn');
-                                                                                                timeFilterButtons.forEach(button => {
-                                                                                                    button.addEventListener('click', function () {
-                                                                                                        timeFilterButtons.forEach(btn => btn.classList.remove('active'));
-                                                                                                        this.classList.add('active');
-                                                                                                        updateTrafficChart(trafficChart, this.getAttribute('data-type'));
-                                                                                                    });
-                                                                                                });
-
-                                                                                                // Khởi tạo dữ liệu ban đầu (ngày)
-                                                                                                updateTrafficChart(trafficChart, 'day');
-                                                                                            }
-
-                                                                                            // Khởi tạo các biểu đồ khác
-                                                                                            initUserDistributionChart();
-                                                                                            initLearningTimeChart();
-                                                                                            initCompletionRateChart();
-                                                                                        };
-
-                                                                                        // Chạy khởi tạo tất cả biểu đồ
-                                                                                        initAllCharts();
-                                                                                    });
-                                </script>
                             </c:otherwise>
                         </c:choose>
                     </div>
@@ -1277,5 +1274,222 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+        <script>
+                                                    const dailyLabels = ${dailyLabels};
+                                                    const dailyVisits = ${dailyVisits};
+                                                    const dailyUsers = ${dailyUsers};
+                                                    const ctrLabels = ${ctrLabels};
+                                                    const ctrValues = ${ctrValues};
+                                                    const courseTitles = ${courseTitles};
+                                                    const avgTimes = ${avgTimes};
+                                                    const completionCourseTitles = ${completionCourseTitles};
+                                                    const completionRates = ${completionRates};
+                                                    const trafficSources = ${trafficSourcesJson};
+                                                    const userDistribution = ${userDistributionJson};
+        </script>
+
+
+        <!-- Script chính vẽ biểu đồ -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+                                                    $(document).ready(function () {
+                                                    // Biểu đồ CTR
+                                                    const ctrCtx = document.getElementById('ctrChart').getContext('2d');
+                                                    new Chart(ctrCtx, {
+                                                    type: 'line',
+                                                            data: {
+                                                            labels: ctrLabels,
+                                                                    datasets: [{
+                                                                    label: 'CTR (%)',
+                                                                            data: ctrValues.map(v => v * 100),
+                                                                            borderColor: '#4361ee',
+                                                                            backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                                                                            fill: true,
+                                                                            tension: 0.4
+                                                                    }]
+                                                            },
+                                                            options: {
+                                                            plugins: {
+                                                            tooltip: {
+                                                            callbacks: {
+                                                            label: ctx => ctx.parsed.y.toFixed(1) + '%'
+                                                            }
+                                                            }
+                                                            },
+                                                                    scales: {
+                                                                    y: {
+                                                                    beginAtZero: true,
+                                                                            ticks: {
+                                                                            callback: val => val + '%'
+                                                                            }
+                                                                    }
+                                                                    }
+                                                            }
+                                                    });
+                                                    // Biểu đồ User Type
+                                                    const userTypeCtx = document.getElementById('userTypeChart').getContext('2d');
+                                                    new Chart(userTypeCtx, {
+                                                    type: 'doughnut',
+                                                            data: {
+                                                            labels: ['Người mới', 'Người quay lại'],
+                                                                    datasets: [{
+                                                                    data: [${stats.newUsers}, ${stats.returningUsers}],
+                                                                            backgroundColor: ['#4361ee', '#4895ef']
+                                                                    }]
+                                                            },
+                                                            options: {
+                                                            plugins: {
+                                                            legend: {position: 'bottom'}
+                                                            }
+                                                            }
+                                                    });
+                                                    // Biểu đồ traffic nguồn
+                                                    const trafficCtx = document.getElementById('trafficSourceChart').getContext('2d');
+                                                    new Chart(trafficCtx, {
+                                                    type: 'bar',
+                                                            data: {
+                                                            labels: Object.keys(trafficSources),
+                                                                    datasets: [{
+                                                                    label: 'Nguồn truy cập',
+                                                                            data: Object.values(trafficSources),
+                                                                            backgroundColor: ['#4361ee', '#4895ef', '#4cc9f0', '#f8961e']
+                                                                    }]
+                                                            },
+                                                            options: {
+                                                            scales: {
+                                                            y: {beginAtZero: true}
+                                                            }
+                                                            }
+                                                    });
+                                                    // Biểu đồ truy cập
+                                                    const trafficChartCtx = document.getElementById('trafficChart').getContext('2d');
+                                                    new Chart(trafficChartCtx, {
+                                                    type: 'line',
+                                                            data: {
+                                                            labels: dailyLabels,
+                                                                    datasets: [
+                                                                    {
+                                                                    label: 'Lượt truy cập',
+                                                                            data: dailyVisits,
+                                                                            borderColor: '#4361ee',
+                                                                            fill: true,
+                                                                            backgroundColor: 'rgba(67, 97, 238, 0.1)'
+                                                                    },
+                                                                    {
+                                                                    label: 'Người dùng',
+                                                                            data: dailyUsers,
+                                                                            borderColor: '#4cc9f0',
+                                                                            fill: true,
+                                                                            backgroundColor: 'rgba(76, 201, 240, 0.1)'
+                                                                    }
+                                                                    ]
+                                                            },
+                                                            options: {
+                                                            scales: {
+                                                            y: {beginAtZero: true}
+                                                            }
+                                                            }
+                                                    });
+                                                    // Biểu đồ phân bổ người dùng
+                                                    const userDistCtx = document.getElementById('userDistributionChart').getContext('2d');
+                                                    new Chart(userDistCtx, {
+                                                    type: 'pie',
+                                                            data: {
+                                                            labels: ['Thường', 'Premium', 'Nhân viên', 'Quản trị'],
+                                                                    datasets: [{
+                                                                    data: [
+                                                                            userDistribution.regularUsers || 0,
+                                                                            userDistribution.premiumUsers || 0,
+                                                                            userDistribution.staffUsers || 0,
+                                                                            userDistribution.adminUsers || 0
+                                                                    ],
+                                                                            backgroundColor: ['#4361ee', '#4895ef', '#4cc9f0', '#f8961e']
+                                                                    }]
+                                                            },
+                                                            options: {
+                                                            plugins: {
+                                                            legend: {position: 'bottom'}
+                                                            }
+                                                            }
+                                                    });
+                                                    // Biểu đồ thời gian học
+                                                    const learningTimeCtx = document.getElementById('learningTimeChart').getContext('2d');
+                                                    new Chart(learningTimeCtx, {
+                                                    type: 'bar',
+                                                            data: {
+                                                            labels: courseTitles,
+                                                                    datasets: [{
+                                                                    label: 'Thời gian trung bình (phút)',
+                                                                            data: avgTimes,
+                                                                            backgroundColor: '#4361ee'
+                                                                    }]
+                                                            },
+                                                            options: {
+                                                            scales: {
+                                                            y: {
+                                                            beginAtZero: true,
+                                                                    title: {display: true, text: 'Phút'}
+                                                            }
+                                                            }
+                                                            }
+                                                    });
+                                                    // Biểu đồ tỉ lệ hoàn thành
+                                                    const completionCtx = document.getElementById('completionRateChart').getContext('2d');
+                                                    new Chart(completionCtx, {
+                                                    type: 'bar',
+                                                            data: {
+                                                            labels: completionCourseTitles,
+                                                                    datasets: [{
+                                                                    label: 'Tỉ lệ hoàn thành (%)',
+                                                                            data: completionRates.map(r => r * 100),
+                                                                            backgroundColor: '#4cc9f0'
+                                                                    }]
+                                                            },
+                                                            options: {
+                                                            plugins: {
+                                                            tooltip: {
+                                                            callbacks: {
+                                                            label: ctx => ctx.parsed.y.toFixed(1) + '%'
+                                                            }
+                                                            }
+                                                            },
+                                                                    scales: {
+                                                                    y: {
+                                                                    beginAtZero: true,
+                                                                            max: 100,
+                                                                            ticks: {
+                                                                            callback: val => val + '%'
+                                                                            }
+                                                                    }
+                                                                    }
+                                                            }
+                                                    });
+                                                    });
+        </script>
+
+        <script>
+            const userDistribution = ${not empty userDistributionJson ? userDistributionJson : '{}'};
+            const trafficSources = ${not empty trafficSourcesJson ? trafficSourcesJson : '{}'};
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+        <script>
+            function exportTableToExcel(tableID) {
+            const table = document.getElementById(tableID);
+            const wb = XLSX.utils.table_to_book(table, {sheet: "Thống kê"});
+            const wbout = XLSX.write(wb, {bookType: 'xlsx', type: 'binary'});
+            function s2ab(s) {
+            const buf = new ArrayBuffer(s.length);
+            const view = new Uint8Array(buf);
+            for (let i = 0; i < s.length; i++)
+                    view[i] = s.charCodeAt(i) & 0xFF;
+            return buf;
+            }
+
+            saveAs(new Blob([s2ab(wbout)], {type: "application/octet-stream"}), "ThongKeChiTiet.xlsx");
+            }
+        </script>
+
     </body>
 </html>

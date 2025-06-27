@@ -555,15 +555,16 @@ public class CourseDAO extends DBConnect {
     // Lấy top khóa học xem nhiều nhất
     public List<Map<String, Object>> getMostViewedCourses(int limit) {
         List<Map<String, Object>> courses = new ArrayList<>();
-        String sql = "SELECT TOP (?) c.id, c.title, cs.views, cs.avg_view_duration "
-                + "FROM courses c "
-                + "JOIN ("
-                + "    SELECT course_id, SUM(views) as views, "
-                + "           AVG(avg_view_duration) as avg_view_duration "
-                + "    FROM course_statistics "
-                + "    GROUP BY course_id"
-                + ") cs ON c.id = cs.course_id "
-                + "WHERE c.status = 1 "
+        String sql = "SELECT TOP (?) c.id, c.title, cs.views, cs.avg_view_duration\n"
+                + "FROM courses c\n"
+                + "JOIN (\n"
+                + "    SELECT course_id,\n"
+                + "           SUM(views) AS views,\n"
+                + "           AVG(avg_view_duration) AS avg_view_duration\n"
+                + "    FROM course_statistics\n"
+                + "    GROUP BY course_id\n"
+                + ") cs ON c.id = cs.course_id\n"
+                + "WHERE c.status = 1\n"
                 + "ORDER BY cs.views DESC";
 
         try (PreparedStatement st = connection.prepareStatement(sql)) {
@@ -627,21 +628,20 @@ public class CourseDAO extends DBConnect {
         }
     }
 
-    public List<Map<String, Object>> getAverageLearningTime() {
+    public List<Map<String, Object>> getAverageLearningTime(int limit) {
         List<Map<String, Object>> data = new ArrayList<>();
-        String sql = "SELECT c.title, AVG(l.duration_minutes) as avg_time "
+        String sql = "SELECT c.title, AVG(cs.avg_view_duration) AS avg_time "
                 + "FROM courses c "
-                + "JOIN lessons l ON c.id = l.course_id "
+                + "JOIN course_statistics cs ON c.id = cs.course_id "
                 + "GROUP BY c.id, c.title "
                 + "ORDER BY avg_time DESC "
-                + "LIMIT 5";
+                + "OFFSET 0 ROWS FETCH NEXT " + limit + " ROWS ONLY";  // nối trực tiếp
 
         try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
-
             while (rs.next()) {
                 Map<String, Object> row = new HashMap<>();
                 row.put("title", rs.getString("title"));
-                row.put("avg_time", rs.getInt("avg_time"));
+                row.put("avg_time", rs.getInt("avg_time")); // nếu avg_view_duration là INT
                 data.add(row);
             }
         } catch (SQLException e) {
@@ -650,18 +650,20 @@ public class CourseDAO extends DBConnect {
         return data;
     }
 
-    public List<Map<String, Object>> getCourseCompletionRates() {
+    public List<Map<String, Object>> getCourseCompletionRates(int limit) {
         List<Map<String, Object>> data = new ArrayList<>();
+
+        // Gắn trực tiếp limit vào câu SQL (KHÔNG dùng ? trong FETCH NEXT)
         String sql = "SELECT c.title, "
-                + "ROUND(100.0 * SUM(CASE WHEN ce.completion_status = 1 THEN 1 ELSE 0 END) / COUNT(ce.id), 2) as completion_rate "
+                + "ROUND(AVG(cs.completion_rate), 2) AS completion_rate "
                 + "FROM courses c "
-                + "JOIN course_enrollments ce ON c.id = ce.course_id "
+                + "JOIN course_statistics cs ON c.id = cs.course_id "
                 + "GROUP BY c.id, c.title "
                 + "ORDER BY completion_rate DESC "
-                + "LIMIT 5";
+                + "OFFSET 0 ROWS FETCH NEXT " + limit + " ROWS ONLY";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
-
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Map<String, Object> row = new HashMap<>();
                 row.put("title", rs.getString("title"));
@@ -671,6 +673,7 @@ public class CourseDAO extends DBConnect {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return data;
     }
 

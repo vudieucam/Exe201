@@ -392,14 +392,12 @@ public class UserDAO extends DBConnect {
     }
 
     // Đếm tổng số người dùng
-    public long countAllUsers() {
+    public int countAllUsers() throws SQLException {
         String sql = "SELECT COUNT(*) FROM users";
-        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
-                return rs.getLong(1);
+                return rs.getInt(1);
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
         }
         return 0;
     }
@@ -416,6 +414,7 @@ public class UserDAO extends DBConnect {
         }
         return 0;
     }
+// Trong UserDAO.java
 
     // Đếm số người dùng active (đã đăng nhập trong 30 ngày)
     public int countActiveUsers() {
@@ -431,41 +430,16 @@ public class UserDAO extends DBConnect {
         return 0;
     }
 
-    // Tính phần trăm tăng trưởng người dùng
-    public double calculateUserGrowth() {
-        String sql = "WITH current_month AS ("
-                + "    SELECT COUNT(*) as count FROM users "
-                + "    WHERE created_at >= DATEADD(month, DATEDIFF(month, 0, GETDATE()), 0) "
-                + "), "
-                + "prev_month AS ("
-                + "    SELECT COUNT(*) as count FROM users "
-                + "    WHERE created_at >= DATEADD(month, DATEDIFF(month, 0, GETDATE()) - 1, 0) "
-                + "    AND created_at < DATEADD(month, DATEDIFF(month, 0, GETDATE()), 0)"
-                + ") "
-                + "SELECT CASE WHEN prev_month.count = 0 THEN 100.0 "
-                + "       ELSE (current_month.count - prev_month.count) * 100.0 / prev_month.count "
-                + "       END as growth_rate "
-                + "FROM current_month, prev_month";
-
-        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
-            if (rs.next()) {
-                return rs.getDouble(1);
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-        return 0.0;
-    }
-
     // Lấy thống kê phân bố người dùng
     public Map<String, Integer> getUserDistribution() {
         Map<String, Integer> distribution = new HashMap<>();
-        String sql = "SELECT "
-                + "SUM(CASE WHEN role_id = 1 THEN 1 ELSE 0 END) as regular_users, "
-                + "SUM(CASE WHEN role_id = 2 THEN 1 ELSE 0 END) as staff_users, "
-                + "SUM(CASE WHEN role_id = 3 THEN 1 ELSE 0 END) as admin_users, "
-                + "SUM(CASE WHEN service_package_id IS NOT NULL THEN 1 ELSE 0 END) as premium_users "
-                + "FROM users WHERE status = 1";
+        String sql = "SELECT\n"
+                + "  SUM(CASE WHEN role_id = 1 THEN 1 ELSE 0 END) AS regular_users,\n"
+                + "  SUM(CASE WHEN role_id = 2 THEN 1 ELSE 0 END) AS staff_users,\n"
+                + "  SUM(CASE WHEN role_id = 3 THEN 1 ELSE 0 END) AS admin_users,\n"
+                + "  SUM(CASE WHEN service_package_id IS NOT NULL THEN 1 ELSE 0 END) AS premium_users\n"
+                + "FROM users\n"
+                + "WHERE status = 1";
 
         try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
             if (rs.next()) {
@@ -481,49 +455,115 @@ public class UserDAO extends DBConnect {
     }
 
     // Lấy thống kê theo ngày (7 ngày gần nhất)
-    public List<Map<String, Object>> getDailyStats(int days) {
-        List<Map<String, Object>> stats = new ArrayList<>();
-        String sql = "SELECT TOP (?) date, total_visits, unique_visitors, new_users, "
-                + "avg_session_duration as avg_duration, page_views "
+    public List<Map<String, Object>> getWeeklyStats(int weeks) throws SQLException {
+        String sql = "SELECT DATEADD(WEEK, DATEDIFF(WEEK, 0, date), 0) AS week_start, "
+                + "SUM(total_visits) AS visits, "
+                + "SUM(unique_visitors) AS uniqueVisitors, "
+                + "SUM(new_users) AS newUsers, "
+                + "AVG(avg_session_duration) AS avgSessionDuration, "
+                + "SUM(page_views) AS pageViews, "
+                + "MAX(total_users) AS totalUsers, "
+                + "MAX(active_users) AS activeUsers, "
+                + "SUM(new_registrations) AS newRegistrations, "
+                + "MAX(premium_users) AS premiumUsers "
                 + "FROM daily_statistics "
-                + "ORDER BY date DESC";
+                + "WHERE date >= DATEADD(WEEK, -?, CAST(GETDATE() AS DATE)) "
+                + "GROUP BY DATEADD(WEEK, DATEDIFF(WEEK, 0, date), 0) "
+                + "ORDER BY week_start";
 
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
-            st.setInt(1, days);
-            try (ResultSet rs = st.executeQuery()) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, weeks); // KHÔNG cần dấu trừ vì đã có sẵn -? trong SQL
+            try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    Map<String, Object> dayStat = new HashMap<>();
-                    dayStat.put("date", rs.getDate("date"));
-                    dayStat.put("visits", rs.getInt("total_visits"));
-                    dayStat.put("uniqueVisitors", rs.getInt("unique_visitors"));
-                    dayStat.put("newUsers", rs.getInt("new_users"));
-                    dayStat.put("avgDuration", rs.getInt("avg_duration"));
-                    dayStat.put("pageViews", rs.getInt("page_views"));
-                    stats.add(dayStat);
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("date", rs.getDate("week_start"));
+                    map.put("visits", rs.getInt("visits"));
+                    map.put("uniqueVisitors", rs.getInt("uniqueVisitors"));
+                    map.put("newUsers", rs.getInt("newUsers"));
+                    map.put("avgSessionDuration", rs.getInt("avgSessionDuration"));
+                    map.put("pageViews", rs.getInt("pageViews"));
+                    map.put("totalUsers", rs.getInt("totalUsers"));
+                    map.put("activeUsers", rs.getInt("activeUsers"));
+                    map.put("newRegistrations", rs.getInt("newRegistrations"));
+                    map.put("premiumUsers", rs.getInt("premiumUsers"));
+                    list.add(map);
                 }
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
         }
-        return stats;
+        return list;
+    }
+
+    public List<Map<String, Object>> getMonthlyStats(int months) throws SQLException {
+        String sql = "SELECT DATEFROMPARTS(YEAR(date), MONTH(date), 1) AS month_start, "
+                + "SUM(total_visits) AS visits, "
+                + "SUM(unique_visitors) AS uniqueVisitors, "
+                + "SUM(new_users) AS newUsers, "
+                + "AVG(avg_session_duration) AS avgSessionDuration, "
+                + "SUM(page_views) AS pageViews, "
+                + "MAX(total_users) AS totalUsers, "
+                + "MAX(active_users) AS activeUsers, "
+                + "SUM(new_registrations) AS newRegistrations, "
+                + "MAX(premium_users) AS premiumUsers "
+                + "FROM daily_statistics "
+                + "WHERE date >= DATEADD(MONTH, -?, CAST(GETDATE() AS DATE)) "
+                + "GROUP BY YEAR(date), MONTH(date) "
+                + "ORDER BY month_start";
+
+        List<Map<String, Object>> list = new ArrayList<>();
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, months); // ✅ sửa chỗ này
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("date", rs.getDate("month_start"));
+                    map.put("visits", rs.getInt("visits"));
+                    map.put("uniqueVisitors", rs.getInt("uniqueVisitors"));
+                    list.add(map);
+                }
+            }
+        }
+        return list;
     }
 
     // Lưu thông tin phiên làm việc
     public void saveSessionInfo(Integer userId, String sessionId, String ipAddress,
-            String userAgent, Timestamp loginTime, Timestamp logoutTime,
-            int duration) {
+            String userAgent, String deviceType, String browser, String os,
+            String screenResolution, Timestamp loginTime, Timestamp logoutTime,
+            int duration, boolean isNewUser, boolean isNewSession, int pageViews,
+            boolean bounceStatus, String countryCode, String region, String city,
+            String referrerUrl, String landingPage, String exitPage) {
+
         String sql = "INSERT INTO user_sessions (user_id, session_id, ip_address, "
-                + "user_agent, login_time, logout_time, duration, status) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, 1)";
+                + "user_agent, device_type, browser, os, screen_resolution, "
+                + "login_time, logout_time, duration, is_new_user, is_new_session, "
+                + "page_views, bounce_status, country_code, region, city, "
+                + "referrer_url, landing_page, exit_page) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setObject(1, userId, Types.INTEGER);
             st.setString(2, sessionId);
             st.setString(3, ipAddress);
             st.setString(4, userAgent);
-            st.setTimestamp(5, loginTime);
-            st.setTimestamp(6, logoutTime);
-            st.setInt(7, duration);
+            st.setString(5, deviceType);
+            st.setString(6, browser);
+            st.setString(7, os);
+            st.setString(8, screenResolution);
+            st.setTimestamp(9, loginTime);
+            st.setTimestamp(10, logoutTime);
+            st.setInt(11, duration);
+            st.setBoolean(12, isNewUser);
+            st.setBoolean(13, isNewSession);
+            st.setInt(14, pageViews);
+            st.setBoolean(15, bounceStatus);
+            st.setString(16, countryCode);
+            st.setString(17, region);
+            st.setString(18, city);
+            st.setString(19, referrerUrl);
+            st.setString(20, landingPage);
+            st.setString(21, exitPage);
+
             st.executeUpdate();
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -545,6 +585,287 @@ public class UserDAO extends DBConnect {
         }
         return users;
     }
+    // Tính phần trăm tăng trưởng người dùng
+
+    public double calculateUserGrowth() {
+        String sql = "WITH current_month AS (\n"
+                + "    SELECT COUNT(*) AS count FROM users\n"
+                + "    WHERE created_at >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)\n"
+                + "),\n"
+                + "prev_month AS (\n"
+                + "    SELECT COUNT(*) AS count FROM users\n"
+                + "    WHERE created_at >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0)\n"
+                + "      AND created_at < DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)\n"
+                + ")\n"
+                + "SELECT \n"
+                + "    CASE \n"
+                + "        WHEN prev_month.count = 0 THEN 0.0\n"
+                + "        ELSE (current_month.count - prev_month.count) * 100.0 / prev_month.count\n"
+                + "    END AS growth_rate\n"
+                + "FROM current_month, prev_month;";
+
+        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return 0.0;
+    }
+
+    public List<Map<String, Object>> getDailyStats(int days) throws SQLException {
+        List<Map<String, Object>> stats = new ArrayList<>();
+        String sql = "SELECT date, total_visits AS visits, unique_visitors AS uniqueVisitors "
+                + "FROM daily_statistics "
+                + "WHERE date >= DATEADD(DAY, -?, CAST(GETDATE() AS DATE)) "
+                + "ORDER BY date ASC";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, days);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("date", rs.getDate("date"));
+                    map.put("visits", rs.getInt("visits"));
+                    map.put("uniqueVisitors", rs.getInt("uniqueVisitors"));
+                    stats.add(map);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // TODO: Logging hoặc xử lý lỗi chi tiết
+        }
+        return stats;
+    }
+
+    public Map<String, Object> getTechnicalPerformanceMetrics() {
+        Map<String, Object> metrics = new HashMap<>();
+        String sql = "SELECT\n"
+                + "  AVG(page_load_time) AS avg_page_load_time,\n"
+                + "  AVG(server_response_time) AS avg_server_response_time,\n"
+                + "  (SUM(error_count) * 1.0 / NULLIF(SUM(page_views), 0)) AS error_rate\n"
+                + "FROM performance_metrics\n"
+                + "WHERE [date] >= DATEADD(DAY, -30, GETDATE())";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                metrics.put("avg_page_load_time", rs.getDouble("avg_page_load_time"));
+                metrics.put("avg_server_response_time", rs.getDouble("avg_server_response_time"));
+                metrics.put("error_rate", rs.getDouble("error_rate"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            metrics.put("avg_page_load_time", 0.0);
+            metrics.put("avg_server_response_time", 0.0);
+            metrics.put("error_rate", 0.0);
+        }
+        return metrics;
+    }
+
+    public Map<String, Object> getUserBehaviorMetrics() {
+        Map<String, Object> metrics = new HashMap<>();
+        String sql = "SELECT\n"
+                + "  AVG(bounce_rate) AS bounce_rate,\n"
+                + "  AVG(session_duration) AS avg_session_duration,\n"
+                + "  AVG(pages_per_session) AS pages_per_session,\n"
+                + "  AVG(scroll_depth) AS avg_scroll_depth\n"
+                + "FROM user_behavior_metrics\n"
+                + "WHERE [date] >= DATEADD(DAY, -30, CAST(GETDATE() AS DATE))";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                metrics.put("bounce_rate", rs.getObject("bounce_rate") != null ? rs.getDouble("bounce_rate") : 0.0);
+                metrics.put("avg_session_duration", rs.getObject("avg_session_duration") != null ? rs.getInt("avg_session_duration") : 0);
+                metrics.put("pages_per_session", rs.getObject("pages_per_session") != null ? rs.getDouble("pages_per_session") : 0.0);
+                metrics.put("avg_scroll_depth", rs.getObject("avg_scroll_depth") != null ? rs.getDouble("avg_scroll_depth") : 0.0);
+            } else {
+                metrics.put("bounce_rate", 0.0);
+                metrics.put("avg_session_duration", 0);
+                metrics.put("pages_per_session", 0.0);
+                metrics.put("avg_scroll_depth", 0.0);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            metrics.put("bounce_rate", 0.0);
+            metrics.put("avg_session_duration", 0);
+            metrics.put("pages_per_session", 0.0);
+            metrics.put("avg_scroll_depth", 0.0);
+        }
+
+        return metrics;
+    }
+
+    public Map<String, Object> getTrafficMetrics() {
+        Map<String, Object> metrics = new HashMap<>();
+
+        String userSql = "SELECT\n"
+                + "  SUM(CASE WHEN is_new_user = 1 THEN 1 ELSE 0 END) AS new_users,\n"
+                + "  SUM(CASE WHEN is_new_user = 0 THEN 1 ELSE 0 END) AS returning_users\n"
+                + "FROM user_sessions\n"
+                + "WHERE login_time >= DATEADD(DAY, -30, GETDATE());";
+
+        String sourceSql = "SELECT traffic_source, COUNT(*) AS count\n"
+                + "FROM traffic_sources\n"
+                + "WHERE visit_date >= DATEADD(DAY, -30, CAST(GETDATE() AS DATE))\n"
+                + "GROUP BY traffic_source;";
+
+        try {
+            try (PreparedStatement stmt = connection.prepareStatement(userSql); ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    metrics.put("new_users", rs.getInt("new_users"));
+                    metrics.put("returning_users", rs.getInt("returning_users"));
+                }
+            }
+
+            Map<String, Integer> sources = new HashMap<>();
+            try (PreparedStatement stmt = connection.prepareStatement(sourceSql); ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    sources.put(rs.getString("traffic_source"), rs.getInt("count"));
+                }
+            }
+            metrics.put("traffic_sources", sources);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            metrics.put("new_users", 0);
+            metrics.put("returning_users", 0);
+            metrics.put("traffic_sources", new HashMap<>());
+        }
+
+        return metrics;
+    }
+
+    public Map<String, Object> getConversionMetrics() {
+        Map<String, Object> metrics = new HashMap<>();
+        String sql = "SELECT "
+                + "(COUNT(DISTINCT CASE WHEN converted = 1 THEN user_id END) / COUNT(DISTINCT user_id)) AS conversion_rate, "
+                + "(COUNT(DISTINCT CASE WHEN signed_up = 1 THEN user_id END) / COUNT(DISTINCT user_id)) AS signup_conversion, "
+                + "(COUNT(DISTINCT CASE WHEN purchased = 1 THEN user_id END) / COUNT(DISTINCT user_id)) AS purchase_conversion "
+                + "FROM conversion_metrics "
+                + "WHERE date >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                metrics.put("conversion_rate", rs.getDouble("conversion_rate"));
+                metrics.put("signup_conversion", rs.getDouble("signup_conversion"));
+                metrics.put("purchase_conversion", rs.getDouble("purchase_conversion"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            metrics.put("conversion_rate", 0.0);
+            metrics.put("signup_conversion", 0.0);
+            metrics.put("purchase_conversion", 0.0);
+        }
+        return metrics;
+    }
+
+    public double getClickThroughRate() {
+        String sql = "SELECT \n"
+                + "    SUM(clicks) AS total_clicks, \n"
+                + "    SUM(impressions) AS total_impressions\n"
+                + "FROM user_behavior_metrics\n"
+                + "WHERE [date] >= DATEADD(DAY, -30, CAST(GETDATE() AS DATE));";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                int clicks = rs.getInt("total_clicks");
+                int impressions = rs.getInt("total_impressions");
+                if (impressions == 0) {
+                    return 0.0;
+                }
+                return (double) clicks / impressions;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
+
+    public List<Map<String, Object>> getDailyCTRStats(int days) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        String sql = "SELECT CAST(date AS DATE) AS day, SUM(clicks) AS total_clicks, SUM(impressions) AS total_impressions "
+                + "FROM user_behavior_metrics "
+                + "WHERE date >= DATEADD(DAY, -?, GETDATE()) "
+                + "GROUP BY CAST(date AS DATE) "
+                + "ORDER BY day ASC";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, days);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> row = new HashMap<>();
+                    Date date = rs.getDate("day");
+                    int clicks = rs.getInt("total_clicks");
+                    int impressions = rs.getInt("total_impressions");
+                    double ctr = (impressions == 0) ? 0.0 : (double) clicks / impressions;
+                    row.put("date", date);
+                    row.put("ctr", ctr);
+                    list.add(row);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+// Trong UserDAO.java
+
+    public List<Map<String, Object>> getCTRStats(String type, int limit) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        String sql = "";
+
+        switch (type) {
+            case "month":
+                sql = "SELECT DATEADD(month, DATEDIFF(month, 0, date), 0) AS date, "
+                        + "       CASE WHEN SUM(impressions) = 0 THEN 0 "
+                        + "            ELSE CAST(SUM(clicks) * 100.0 / SUM(impressions) AS DECIMAL(5,2)) "
+                        + "       END AS ctr "
+                        + "FROM user_behavior_metrics "
+                        + "WHERE date >= DATEADD(month, -?, GETDATE()) "
+                        + "GROUP BY DATEADD(month, DATEDIFF(month, 0, date), 0) "
+                        + "ORDER BY date ASC";
+                break;
+            case "week":
+                sql = "SELECT DATEADD(week, DATEDIFF(week, 0, date), 0) AS date, "
+                        + "       CASE WHEN SUM(impressions) = 0 THEN 0 "
+                        + "            ELSE CAST(SUM(clicks) * 100.0 / SUM(impressions) AS DECIMAL(5,2)) "
+                        + "       END AS ctr "
+                        + "FROM user_behavior_metrics "
+                        + "WHERE date >= DATEADD(week, -?, GETDATE()) "
+                        + "GROUP BY DATEADD(week, DATEDIFF(week, 0, date), 0) "
+                        + "ORDER BY date ASC";
+                break;
+            default: // day
+                sql = "SELECT CAST(date AS DATE) AS date, "
+                        + "       CASE WHEN SUM(impressions) = 0 THEN 0 "
+                        + "            ELSE CAST(SUM(clicks) * 100.0 / SUM(impressions) AS DECIMAL(5,2)) "
+                        + "       END AS ctr "
+                        + "FROM user_behavior_metrics "
+                        + "WHERE date >= DATEADD(day, -?, GETDATE()) "
+                        + "GROUP BY CAST(date AS DATE) "
+                        + "ORDER BY date ASC";
+        }
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, limit);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> row = new HashMap<>();
+                    row.put("date", rs.getDate("date"));
+                    row.put("ctr", rs.getDouble("ctr"));
+                    list.add(row);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 
     // Helper method to map ResultSet to User object
     private User mapResultSetToUser(ResultSet resultSet) throws SQLException {
@@ -557,12 +878,24 @@ public class UserDAO extends DBConnect {
         user.setAddress(resultSet.getString("address"));
         user.setRoleId(resultSet.getInt("role_id"));
         user.setStatus(resultSet.getBoolean("status"));
-        user.setCreatedAt(resultSet.getDate("created_at"));
+
+        // Xử lý ngày tháng
+        Timestamp createdAt = resultSet.getTimestamp("created_at");
+        if (createdAt != null) {
+            user.setCreatedAt(new Date(createdAt.getTime()));
+        }
+
         user.setVerificationToken(resultSet.getString("verification_token"));
         user.setServicePackageId(resultSet.getInt("service_package_id"));
         user.setIsActive(resultSet.getBoolean("is_active"));
         user.setActivationToken(resultSet.getString("activation_token"));
-        user.setTokenExpiry(resultSet.getDate("token_expiry"));
+
+        // Xử lý ngày hết hạn token
+        Timestamp tokenExpiry = resultSet.getTimestamp("token_expiry");
+        if (tokenExpiry != null) {
+            user.setTokenExpiry(new Date(tokenExpiry.getTime()));
+        }
+
         return user;
     }
 

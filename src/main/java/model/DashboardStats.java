@@ -13,6 +13,7 @@ import java.util.Map;
  * @author FPT
  */
 public class DashboardStats {
+
     private int onlineUsers;
     private int totalUsers;
     private int activeUsers;
@@ -26,7 +27,7 @@ public class DashboardStats {
     private UserActivity userActivity;
     private List<CourseStat> mostViewedCourses;
     private List<CourseStat> highestRatedCourses;
-    
+
     private Map<String, Object> dailyTraffic;
     private Map<String, Object> weeklyTraffic;
     private Map<String, Object> monthlyTraffic;
@@ -38,11 +39,33 @@ public class DashboardStats {
     private Map<String, Object> currentWeekStats;
     private Map<String, Object> currentMonthStats;
 
-    
+    // Chỉ số hiệu suất kỹ thuật
+    private double pageLoadTime; // giây
+    private double serverResponseTime; // ms
+    private double errorRate; // tỉ lệ
+
+// Chỉ số tương tác người dùng
+    private double bounceRate; // tỉ lệ
+    private int avgSessionDuration; // giây
+    private double pagesPerSession;
+    private double scrollDepth; // tỉ lệ
+
+// Chỉ số lưu lượng truy cập
+    private int newUsers;
+    private int returningUsers;
+    private Map<String, Integer> trafficSources;
+
+// Chỉ số chuyển đổi
+    private double conversionRate;
+    private double signupConversion;
+    private double purchaseConversion;
+
+    private double clickThroughRate;
+
     public DashboardStats() {
     }
 
-    public DashboardStats(int onlineUsers, int totalUsers, int activeUsers, double userGrowth, int totalCourses, int activeCourses, BigDecimal monthlyRevenue, BigDecimal totalRevenue, List<DailyStat> dailyStats, UserActivity userActivity, List<CourseStat> mostViewedCourses, List<CourseStat> highestRatedCourses, Map<String, Object> dailyTraffic, Map<String, Object> weeklyTraffic, Map<String, Object> monthlyTraffic, Map<String, Object> yearlyTraffic, Map<String, Object> userDistribution, Map<String, Object> learningTimeStats, Map<String, Object> completionRateStats, Map<String, Object> currentDayStats, Map<String, Object> currentWeekStats, Map<String, Object> currentMonthStats) {
+    public DashboardStats(int onlineUsers, int totalUsers, int activeUsers, double userGrowth, int totalCourses, int activeCourses, BigDecimal monthlyRevenue, BigDecimal totalRevenue, List<DailyStat> dailyStats, UserActivity userActivity, List<CourseStat> mostViewedCourses, List<CourseStat> highestRatedCourses, Map<String, Object> dailyTraffic, Map<String, Object> weeklyTraffic, Map<String, Object> monthlyTraffic, Map<String, Object> yearlyTraffic, Map<String, Object> userDistribution, Map<String, Object> learningTimeStats, Map<String, Object> completionRateStats, Map<String, Object> currentDayStats, Map<String, Object> currentWeekStats, Map<String, Object> currentMonthStats, double pageLoadTime, double serverResponseTime, double errorRate, double bounceRate, int avgSessionDuration, double pagesPerSession, double scrollDepth, int newUsers, int returningUsers, Map<String, Integer> trafficSources, double conversionRate, double signupConversion, double purchaseConversion, double clickThroughRate) {
         this.onlineUsers = onlineUsers;
         this.totalUsers = totalUsers;
         this.activeUsers = activeUsers;
@@ -65,6 +88,20 @@ public class DashboardStats {
         this.currentDayStats = currentDayStats;
         this.currentWeekStats = currentWeekStats;
         this.currentMonthStats = currentMonthStats;
+        this.pageLoadTime = pageLoadTime;
+        this.serverResponseTime = serverResponseTime;
+        this.errorRate = errorRate;
+        this.bounceRate = bounceRate;
+        this.avgSessionDuration = avgSessionDuration;
+        this.pagesPerSession = pagesPerSession;
+        this.scrollDepth = scrollDepth;
+        this.newUsers = newUsers;
+        this.returningUsers = returningUsers;
+        this.trafficSources = trafficSources;
+        this.conversionRate = conversionRate;
+        this.signupConversion = signupConversion;
+        this.purchaseConversion = purchaseConversion;
+        this.clickThroughRate = clickThroughRate;
     }
 
     public int getOnlineUsers() {
@@ -243,36 +280,116 @@ public class DashboardStats {
         this.currentMonthStats = currentMonthStats;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("DashboardStats{");
-        sb.append("onlineUsers=").append(onlineUsers);
-        sb.append(", totalUsers=").append(totalUsers);
-        sb.append(", activeUsers=").append(activeUsers);
-        sb.append(", userGrowth=").append(userGrowth);
-        sb.append(", totalCourses=").append(totalCourses);
-        sb.append(", activeCourses=").append(activeCourses);
-        sb.append(", monthlyRevenue=").append(monthlyRevenue);
-        sb.append(", totalRevenue=").append(totalRevenue);
-        sb.append(", dailyStats=").append(dailyStats);
-        sb.append(", userActivity=").append(userActivity);
-        sb.append(", mostViewedCourses=").append(mostViewedCourses);
-        sb.append(", highestRatedCourses=").append(highestRatedCourses);
-        sb.append(", dailyTraffic=").append(dailyTraffic);
-        sb.append(", weeklyTraffic=").append(weeklyTraffic);
-        sb.append(", monthlyTraffic=").append(monthlyTraffic);
-        sb.append(", yearlyTraffic=").append(yearlyTraffic);
-        sb.append(", userDistribution=").append(userDistribution);
-        sb.append(", learningTimeStats=").append(learningTimeStats);
-        sb.append(", completionRateStats=").append(completionRateStats);
-        sb.append(", currentDayStats=").append(currentDayStats);
-        sb.append(", currentWeekStats=").append(currentWeekStats);
-        sb.append(", currentMonthStats=").append(currentMonthStats);
-        sb.append('}');
-        return sb.toString();
+    public double getPageLoadTime() {
+        return pageLoadTime;
     }
 
+    public void setPageLoadTime(double pageLoadTime) {
+        this.pageLoadTime = pageLoadTime;
+    }
 
-    
+    public double getServerResponseTime() {
+        return serverResponseTime;
+    }
+
+    public void setServerResponseTime(double serverResponseTime) {
+        this.serverResponseTime = serverResponseTime;
+    }
+
+    public double getErrorRate() {
+        return errorRate;
+    }
+
+    public void setErrorRate(double errorRate) {
+        this.errorRate = errorRate;
+    }
+
+    public double getBounceRate() {
+        return bounceRate;
+    }
+
+    public void setBounceRate(double bounceRate) {
+        this.bounceRate = bounceRate;
+    }
+
+    public int getAvgSessionDuration() {
+        return avgSessionDuration;
+    }
+
+    public void setAvgSessionDuration(int avgSessionDuration) {
+        this.avgSessionDuration = avgSessionDuration;
+    }
+
+    public double getPagesPerSession() {
+        return pagesPerSession;
+    }
+
+    public void setPagesPerSession(double pagesPerSession) {
+        this.pagesPerSession = pagesPerSession;
+    }
+
+    public double getScrollDepth() {
+        return scrollDepth;
+    }
+
+    public void setScrollDepth(double scrollDepth) {
+        this.scrollDepth = scrollDepth;
+    }
+
+    public int getNewUsers() {
+        return newUsers;
+    }
+
+    public void setNewUsers(int newUsers) {
+        this.newUsers = newUsers;
+    }
+
+    public int getReturningUsers() {
+        return returningUsers;
+    }
+
+    public void setReturningUsers(int returningUsers) {
+        this.returningUsers = returningUsers;
+    }
+
+    public Map<String, Integer> getTrafficSources() {
+        return trafficSources;
+    }
+
+    public void setTrafficSources(Map<String, Integer> trafficSources) {
+        this.trafficSources = trafficSources;
+    }
+
+    public double getConversionRate() {
+        return conversionRate;
+    }
+
+    public void setConversionRate(double conversionRate) {
+        this.conversionRate = conversionRate;
+    }
+
+    public double getSignupConversion() {
+        return signupConversion;
+    }
+
+    public void setSignupConversion(double signupConversion) {
+        this.signupConversion = signupConversion;
+    }
+
+    public double getPurchaseConversion() {
+        return purchaseConversion;
+    }
+
+    public void setPurchaseConversion(double purchaseConversion) {
+        this.purchaseConversion = purchaseConversion;
+    }
+
+    public double getClickThroughRate() {
+        return clickThroughRate;
+    }
+
+    public void setClickThroughRate(double clickThroughRate) {
+        this.clickThroughRate = clickThroughRate;
+    }
+
 }

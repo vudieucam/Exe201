@@ -80,10 +80,25 @@ public class SessionTrackingListener implements HttpSessionListener {
                     se.getSession().getId(),
                     ip,
                     ua,
+                    "desktop", // deviceType
+                    "Chrome", // browser
+                    "Windows", // os
+                    "1920x1080", // screenResolution
                     new Timestamp(startTime),
                     new Timestamp(System.currentTimeMillis()),
-                    (int) duration
+                    (int) duration,
+                    true, // isNewUser
+                    true, // isNewSession
+                    1, // pageViews
+                    false, // bounceStatus
+                    "VN", // countryCode
+                    "Hanoi", // region
+                    "Hanoi", // city
+                    "https://google.com", // referrerUrl
+                    "/home", // landingPage
+                    "/logout" // exitPage
             );
+
         } catch (Exception e) {
             e.printStackTrace();
         }

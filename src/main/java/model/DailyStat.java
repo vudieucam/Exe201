@@ -11,25 +11,29 @@ import java.util.Date;
  * @author FPT
  */
 public class DailyStat {
+
     private Date date;
     private int visits;
     private int uniqueVisitors;
     private int newUsers;
     private int avgDuration; // in seconds
     private int pageViews;
+    private double bounceRate;
 
-    public DailyStat() {
-    }
-
-    public DailyStat(Date date, int visits, int uniqueVisitors, int newUsers, int avgDuration, int pageViews) {
+    public DailyStat(Date date, int visits, int uniqueVisitors, int newUsers, int avgDuration, int pageViews, double bounceRate) {
         this.date = date;
         this.visits = visits;
         this.uniqueVisitors = uniqueVisitors;
         this.newUsers = newUsers;
         this.avgDuration = avgDuration;
         this.pageViews = pageViews;
+        this.bounceRate = bounceRate;
     }
 
+    public DailyStat() {
+    }
+
+    // Getters and setters
     public Date getDate() {
         return date;
     }
@@ -78,19 +82,11 @@ public class DailyStat {
         this.pageViews = pageViews;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("DailyStat{");
-        sb.append("date=").append(date);
-        sb.append(", visits=").append(visits);
-        sb.append(", uniqueVisitors=").append(uniqueVisitors);
-        sb.append(", newUsers=").append(newUsers);
-        sb.append(", avgDuration=").append(avgDuration);
-        sb.append(", pageViews=").append(pageViews);
-        sb.append('}');
-        return sb.toString();
+    public double getBounceRate() {
+        return bounceRate;
     }
-    
-    
+
+    public void setBounceRate(double bounceRate) {
+        this.bounceRate = bounceRate;
+    }
 }

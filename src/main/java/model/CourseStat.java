@@ -15,6 +15,19 @@ public class CourseStat {
     private int avgViewDuration;
     private double rating;
     private int enrollments;
+    private double growthRate;
+
+    public double getGrowthRate() {
+        return growthRate;
+    }
+
+    public void setGrowthRate(double growthRate) {
+        this.growthRate = growthRate;
+    }
+
+    public CourseStat(double growthRate) {
+        this.growthRate = growthRate;
+    }
 
     public CourseStat() {
     }

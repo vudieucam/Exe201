@@ -1,38 +1,30 @@
 package controller.Admin;
 
+import com.opencsv.CSVWriter;
 import dal.CourseDAO;
 import dal.PaymentDAO;
 import dal.UserDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
+import model.CourseStat;
+import model.DashboardStats;
+import model.User;
+import model.UserActivity;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import model.*;
+import model.DailyStat;
 
 public class AdminServlet extends HttpServlet {
 
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet CourseDetailAdminServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet CourseDetailAdminServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
     private CourseDAO courseDAO;
     private PaymentDAO paymentDAO;
     private UserDAO userDAO;
+
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    private static final SimpleDateFormat ctrSdf = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
     public void init() throws ServletException {
@@ -41,66 +33,105 @@ public class AdminServlet extends HttpServlet {
         userDAO = new UserDAO();
     }
 
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
 
-        HttpSession session = request.getSession(false); // ❗ Không tự tạo mới
-        if (session == null) {
-            System.out.println("❌ Session null trong AdminServlet");
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
             response.sendRedirect("authen?action=login");
             return;
         }
 
         User user = (User) session.getAttribute("user");
-        if (user == null) {
-            System.out.println("❌ Không có user trong session trong AdminServlet");
-            response.sendRedirect("authen?action=login");
-            return;
-        }
-
         if (user.getRoleId() != 2 && user.getRoleId() != 3) {
-            System.out.println("❌ Không có quyền truy cập admin: " + user.getFullname());
             response.sendRedirect("authen?action=login");
             return;
         }
 
-        System.out.println("✅ Truy cập Admin với: " + user.getFullname() + " | Vai trò: " + user.getRoleId());
+        String action = request.getParameter("action");
+        if ("download".equals(action)) {
+            handleDownload(request, response);
+            return;
+        }
 
         try {
             DashboardStats stats = new DashboardStats();
+            String type = request.getParameter("type");
+            if (type == null) {
+                type = "day";
+            }
 
-            // Users
-            stats.setTotalUsers((int) userDAO.countAllUsers());
+            // Technical performance
+            Map<String, Object> techMetrics = userDAO.getTechnicalPerformanceMetrics();
+            stats.setPageLoadTime(getDoubleOrDefault(techMetrics.get("avg_page_load_time"), 0.0));
+            stats.setServerResponseTime(getDoubleOrDefault(techMetrics.get("avg_server_response_time"), 0.0));
+            stats.setErrorRate(getDoubleOrDefault(techMetrics.get("error_rate"), 0.0));
+
+            // User behavior
+            Map<String, Object> behaviorMetrics = userDAO.getUserBehaviorMetrics();
+            stats.setClickThroughRate(userDAO.getClickThroughRate());
+            stats.setBounceRate(getDoubleOrDefault(behaviorMetrics.get("bounce_rate"), 0.0));
+            stats.setAvgSessionDuration(getIntOrDefault(behaviorMetrics.get("avg_session_duration"), 0));
+            stats.setPagesPerSession(getDoubleOrDefault(behaviorMetrics.get("pages_per_session"), 0.0));
+            stats.setScrollDepth(getDoubleOrDefault(behaviorMetrics.get("avg_scroll_depth"), 0.0));
+
+            // Traffic
+            Map<String, Object> trafficMetrics = userDAO.getTrafficMetrics();
+            stats.setNewUsers(getIntOrDefault(trafficMetrics.get("new_users"), 0));
+            stats.setReturningUsers(getIntOrDefault(trafficMetrics.get("returning_users"), 0));
+            Map<String, Object> rawSources = (Map<String, Object>) trafficMetrics.getOrDefault("traffic_sources", new HashMap<>());
+            Map<String, Integer> trafficSources = new HashMap<>();
+
+            for (Map.Entry<String, Object> entry : rawSources.entrySet()) {
+                try {
+                    trafficSources.put(entry.getKey(), ((Number) entry.getValue()).intValue());
+                } catch (Exception e) {
+                    trafficSources.put(entry.getKey(), 0); // fallback if parsing fails
+                }
+            }
+
+            stats.setTrafficSources(trafficSources);
+
+            // Conversion
+            Map<String, Object> conversionMetrics = userDAO.getConversionMetrics();
+            stats.setConversionRate(getDoubleOrDefault(conversionMetrics.get("conversion_rate"), 0.0));
+            stats.setSignupConversion(getDoubleOrDefault(conversionMetrics.get("signup_conversion"), 0.0));
+            stats.setPurchaseConversion(getDoubleOrDefault(conversionMetrics.get("purchase_conversion"), 0.0));
+
+            stats.setTotalUsers(userDAO.countAllUsers());
             stats.setActiveUsers(userDAO.countActiveUsers());
             stats.setOnlineUsers(userDAO.countOnlineUsers());
             stats.setUserGrowth(userDAO.calculateUserGrowth());
 
-            // User Distribution
-            Map<String, Integer> userActivity = userDAO.getUserDistribution();
+            Map<String, Integer> userActivityMap = userDAO.getUserDistribution();  // ⬅️ Phải có dòng này
             UserActivity ua = new UserActivity(
-                    userActivity.getOrDefault("regularUsers", 0),
-                    userActivity.getOrDefault("premiumUsers", 0),
-                    userActivity.getOrDefault("adminUsers", 0),
-                    userActivity.getOrDefault("staffUsers", 0)
+                    getIntOrDefault(userActivityMap.get("regularUsers"), 0),
+                    getIntOrDefault(userActivityMap.get("premiumUsers"), 0),
+                    getIntOrDefault(userActivityMap.get("adminUsers"), 0),
+                    getIntOrDefault(userActivityMap.get("staffUsers"), 0)
             );
+
             stats.setUserActivity(ua);
 
-            // Revenue
             stats.setMonthlyRevenue(BigDecimal.valueOf(paymentDAO.getMonthlyRevenue()));
             stats.setTotalRevenue(BigDecimal.valueOf(paymentDAO.getTotalRevenue()));
 
             // Most Viewed Courses
             List<Map<String, Object>> viewedRaw = courseDAO.getMostViewedCourses(5);
+            int maxViews = viewedRaw.stream().mapToInt(v -> getIntOrDefault(v.get("views"), 1)).max().orElse(1);
             List<CourseStat> mostViewed = new ArrayList<>();
             for (Map<String, Object> row : viewedRaw) {
-                mostViewed.add(new CourseStat(
-                        (String) row.get("title"),
-                        ((Number) row.get("views")).intValue(),
-                        ((Number) row.get("avgViewDuration")).intValue()
-                ));
+                String title = (String) row.getOrDefault("title", "Unknown");
+                int views = getIntOrDefault(row.get("views"), 0);
+                int avg = getIntOrDefault(row.get("avgViewDuration"), 0);
+                double growth = views * 100.0 / maxViews;
+                CourseStat c = new CourseStat(title, views, avg);
+                c.setGrowthRate(growth);
+                mostViewed.add(c);
             }
             stats.setMostViewedCourses(mostViewed);
 
@@ -109,110 +140,214 @@ public class AdminServlet extends HttpServlet {
             List<CourseStat> highestRated = new ArrayList<>();
             for (Map<String, Object> row : ratedRaw) {
                 highestRated.add(new CourseStat(
-                        (String) row.get("title"),
-                        ((Number) row.get("rating")).doubleValue(),
-                        ((Number) row.get("enrollments")).intValue()
+                        (String) row.getOrDefault("title", "Unknown"),
+                        getDoubleOrDefault(row.get("rating"), 0.0),
+                        getIntOrDefault(row.get("enrollments"), 0)
                 ));
             }
             stats.setHighestRatedCourses(highestRated);
 
-            // Daily Stats
-            List<Map<String, Object>> dailyRaw = userDAO.getDailyStats(30);
-            List<DailyStat> dailyStats = new ArrayList<>();
-            for (Map<String, Object> row : dailyRaw) {
+            // Daily/Weekly/Monthly stats
+            List<Map<String, Object>> statsRaw = userDAO.getDailyStats(30);
+            List<DailyStat> dailyStatsList = new ArrayList<>();
+            for (Map<String, Object> row : statsRaw) {
                 DailyStat d = new DailyStat();
                 d.setDate((Date) row.get("date"));
-                d.setVisits(((Number) row.get("visits")).intValue());
-                d.setUniqueVisitors(((Number) row.get("uniqueVisitors")).intValue());
-                d.setNewUsers(((Number) row.get("newUsers")).intValue());
-                d.setAvgDuration(((Number) row.get("avgDuration")).intValue());
-                d.setPageViews(((Number) row.get("pageViews")).intValue());
-                dailyStats.add(d);
+                d.setVisits(getIntOrDefault(row.get("visits"), 0));
+                d.setUniqueVisitors(getIntOrDefault(row.get("uniqueVisitors"), 0));
+                d.setNewUsers(getIntOrDefault(row.get("newUsers"), 0));
+                d.setAvgDuration(getIntOrDefault(row.get("avgDuration"), 0));
+                d.setPageViews(getIntOrDefault(row.get("pageViews"), 0));
+                d.setBounceRate(getDoubleOrDefault(row.get("bounceRate"), 0.0));
+                dailyStatsList.add(d);
             }
-            stats.setDailyStats(dailyStats);
+            stats.setDailyStats(dailyStatsList);
 
-            // Dữ liệu cho biểu đồ truy cập (30 ngày gần nhất)
-            List<Map<String, Object>> dailyStatsRaw = userDAO.getDailyStats(30);
+            switch (type) {
+                case "month":
+                    statsRaw = userDAO.getMonthlyStats(12);
+                    break;
+                case "week":
+                    statsRaw = userDAO.getWeeklyStats(8);
+                    break;
+                default:
+                    statsRaw = userDAO.getDailyStats(30);
+                    break;
+            }
+            List<String> dailyLabels = new ArrayList<>();
             List<Integer> dailyVisits = new ArrayList<>();
             List<Integer> dailyUsers = new ArrayList<>();
-            List<String> dailyLabels = new ArrayList<>();
-
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM");
-            Calendar cal = Calendar.getInstance();
-            for (int i = 29; i >= 0; i--) {
-                cal.setTime(new Date());
-                cal.add(Calendar.DATE, -i);
-                Date date = cal.getTime();
-                String dateStr = sdf.format(date);
-                dailyLabels.add(dateStr);
-
-                boolean found = false;
-                for (Map<String, Object> row : dailyStatsRaw) {
-                    Date rowDate = (Date) row.get("date");
-                    if (sdf.format(rowDate).equals(dateStr)) {
-                        dailyVisits.add(((Number) row.get("visits")).intValue());
-                        dailyUsers.add(((Number) row.get("uniqueVisitors")).intValue());
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (!found) {
-                    dailyVisits.add(0);
-                    dailyUsers.add(0);
-                }
+            for (Map<String, Object> row : statsRaw) {
+                dailyLabels.add(sdf.format((Date) row.getOrDefault("date", new Date())));
+                dailyVisits.add(getIntOrDefault(row.get("visits"), 0));
+                dailyUsers.add(getIntOrDefault(row.get("uniqueVisitors"), 0));
             }
 
-            // Dữ liệu phân bổ người dùng
-            Map<String, Integer> userDistribution = userDAO.getUserDistribution();
+            // CTR
+            List<Map<String, Object>> dailyCTR = userDAO.getCTRStats(type, 30);
+            List<String> ctrLabels = new ArrayList<>();
+            List<Double> ctrValues = new ArrayList<>();
+            for (Map<String, Object> row : dailyCTR) {
+                ctrLabels.add(ctrSdf.format((Date) row.getOrDefault("date", new Date())));
+                ctrValues.add(getDoubleOrDefault(row.get("ctr"), 0.0));
+            }
 
-            // Dữ liệu thời gian học tập trung bình
-            List<Map<String, Object>> learningTimeData = courseDAO.getAverageLearningTime();
+            // Learning Time
+            List<Map<String, Object>> learningTimeData = courseDAO.getAverageLearningTime(10);
             List<String> courseTitles = new ArrayList<>();
             List<Integer> avgTimes = new ArrayList<>();
-
             for (Map<String, Object> row : learningTimeData) {
-                courseTitles.add((String) row.get("title"));
-                avgTimes.add(((Number) row.get("avg_time")).intValue());
+                courseTitles.add((String) row.getOrDefault("title", "Unknown"));
+                avgTimes.add(getIntOrDefault(row.get("avg_time"), 0));
             }
 
-            // Dữ liệu tỉ lệ hoàn thành
-            List<Map<String, Object>> completionRates = courseDAO.getCourseCompletionRates();
+            // Completion Rate
+            int limit = 20; // ví dụ
+            List<Map<String, Object>> completionRates = courseDAO.getCourseCompletionRates(limit);
             List<String> completionCourseTitles = new ArrayList<>();
             List<Double> completionRatesList = new ArrayList<>();
-
             for (Map<String, Object> row : completionRates) {
-                completionCourseTitles.add((String) row.get("title"));
-                completionRatesList.add(((Number) row.get("completion_rate")).doubleValue());
+                completionCourseTitles.add((String) row.getOrDefault("title", "Unknown"));
+                completionRatesList.add(getDoubleOrDefault(row.get("completion_rate"), 0.0));
+            }
+            Map<String, Object> userActivityJsonMap = new HashMap<>();
+            for (Map.Entry<String, Integer> entry : userActivityMap.entrySet()) {
+                userActivityJsonMap.put(entry.getKey(), entry.getValue());
             }
 
-            // Truyền dữ liệu về JSP
-            request.setAttribute("dailyLabels", dailyLabels);
-            request.setAttribute("dailyVisits", dailyVisits);
-            request.setAttribute("dailyUsers", dailyUsers);
-            request.setAttribute("userDistribution", userDistribution);
-            request.setAttribute("courseTitles", courseTitles);
-            request.setAttribute("avgTimes", avgTimes);
-            request.setAttribute("completionCourseTitles", completionCourseTitles);
-            request.setAttribute("completionRates", completionRatesList);
+            Map<String, Object> trafficSourcesJsonMap = new HashMap<>();
+            for (Map.Entry<String, Integer> entry : stats.getTrafficSources().entrySet()) {
+                trafficSourcesJsonMap.put(entry.getKey(), entry.getValue());
+            }
 
-            // Truyền về JSP
+            request.setAttribute("dailyLabels", toJsonArray(dailyLabels));
+            request.setAttribute("dailyVisits", toJsonArrayInt(dailyVisits));
+            request.setAttribute("dailyUsers", toJsonArrayInt(dailyUsers));
+            request.setAttribute("ctrLabels", toJsonArray(ctrLabels));
+            request.setAttribute("ctrValues", toJsonArrayDouble(ctrValues));
+            request.setAttribute("courseTitles", toJsonArray(courseTitles));
+            request.setAttribute("avgTimes", toJsonArrayInt(avgTimes));
+            request.setAttribute("completionCourseTitles", toJsonArray(completionCourseTitles));
+            request.setAttribute("completionRates", toJsonArrayDouble(completionRatesList));
+            request.setAttribute("userDistribution", ua);
             request.setAttribute("stats", stats);
-
+            request.setAttribute("userDistributionJson", toJsonMap(userActivityJsonMap));
+            request.setAttribute("trafficSourcesJson", toJsonMap(trafficSourcesJsonMap));
             request.getRequestDispatcher("/Admin.jsp").forward(request, response);
-
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "Không thể tải dữ liệu thống kê");
+            request.setAttribute("error", "Lỗi tải dữ liệu: " + e.getMessage());
             request.getRequestDispatcher("/Admin.jsp").forward(request, response);
         }
     }
 
-    // Hàm thủ công để chuyển dữ liệu về JSON string (không cần thư viện ngoài)
-    public String toJsonArray(List<String> values) {
+    private void handleDownload(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String type = request.getParameter("dataType");
+        response.setContentType("text/csv;charset=UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=" + type + "_data.csv");
+
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return;
+        }
+
+        try (StringWriter sw = new StringWriter(); CSVWriter csvWriter = new CSVWriter(sw)) {
+            switch (type) {
+                case "dailyStats":
+                    List<String> dailyLabels = (List<String>) session.getAttribute("dailyLabels");
+                    List<Integer> dailyVisits = (List<Integer>) session.getAttribute("dailyVisits");
+                    List<Integer> dailyUsers = (List<Integer>) session.getAttribute("dailyUsers");
+                    csvWriter.writeNext(new String[]{"Date", "Visits", "Unique Visitors"});
+                    for (int i = 0; i < dailyLabels.size(); i++) {
+                        csvWriter.writeNext(new String[]{
+                            dailyLabels.get(i),
+                            dailyVisits.get(i).toString(),
+                            dailyUsers.get(i).toString()
+                        });
+                    }
+                    break;
+                case "mostViewedCourses":
+                    List<CourseStat> mostViewed = ((DashboardStats) session.getAttribute("stats")).getMostViewedCourses();
+                    csvWriter.writeNext(new String[]{"Title", "Views", "Avg View Duration", "Growth Rate"});
+                    for (CourseStat c : mostViewed) {
+                        csvWriter.writeNext(new String[]{
+                            c.getTitle(),
+                            String.valueOf(c.getViews()),
+                            String.valueOf(c.getAvgViewDuration()),
+                            String.format("%.2f", c.getGrowthRate())
+                        });
+                    }
+                    break;
+                case "highestRatedCourses":
+                    List<CourseStat> highestRated = ((DashboardStats) session.getAttribute("stats")).getHighestRatedCourses();
+                    csvWriter.writeNext(new String[]{"Title", "Rating", "Enrollments"});
+                    for (CourseStat c : highestRated) {
+                        csvWriter.writeNext(new String[]{
+                            c.getTitle(),
+                            String.format("%.2f", c.getRating()),
+                            String.valueOf(c.getEnrollments())
+                        });
+                    }
+                    break;
+                case "conversionRates":
+                    DashboardStats stats = (DashboardStats) session.getAttribute("stats");
+                    csvWriter.writeNext(new String[]{"Loại", "Tỉ lệ (%)"});
+                    csvWriter.writeNext(new String[]{"Tổng", String.format("%.2f", stats.getConversionRate() * 100)});
+                    csvWriter.writeNext(new String[]{"Đăng ký", String.format("%.2f", stats.getSignupConversion() * 100)});
+                    csvWriter.writeNext(new String[]{"Mua hàng", String.format("%.2f", stats.getPurchaseConversion() * 100)});
+                    break;
+
+            }
+            response.getWriter().write(sw.toString());
+        }
+    }
+
+    private double getDoubleOrDefault(Object value, double defaultValue) {
+        if (value == null) {
+            return defaultValue;
+        }
+        try {
+            return ((Number) value).doubleValue();
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
+    private int getIntOrDefault(Object value, int defaultValue) {
+        if (value == null) {
+            return defaultValue;
+        }
+        try {
+            return ((Number) value).intValue();
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
+    private String toJsonMap(Map<String, Object> map) {
+        StringBuilder sb = new StringBuilder("{");
+        int i = 0;
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            sb.append("\"").append(entry.getKey()).append("\":");
+            Object value = entry.getValue();
+            if (value instanceof String) {
+                sb.append("\"").append(value.toString().replace("\"", "\\\"")).append("\"");
+            } else {
+                sb.append(value);
+            }
+            if (i < map.size() - 1) {
+                sb.append(",");
+            }
+            i++;
+        }
+        sb.append("}");
+        return sb.toString();
+    }
+
+    private String toJsonArray(List<String> values) {
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < values.size(); i++) {
-            sb.append("\"").append(values.get(i)).append("\"");
+            sb.append("\"").append(values.get(i).replace("\"", "\\\"")).append("\"");
             if (i < values.size() - 1) {
                 sb.append(",");
             }
@@ -221,59 +356,17 @@ public class AdminServlet extends HttpServlet {
         return sb.toString();
     }
 
-    public String toJsonArrayInt(List<Integer> values) {
-        return values.toString(); // Tự động ra chuỗi [1,2,3]
+    private String toJsonArrayInt(List<Integer> values) {
+        return "[" + String.join(",", values.stream().map(String::valueOf).toArray(String[]::new)) + "]";
     }
 
-    public String getDailyStatsJson(List<DailyStat> stats) {
-        List<String> labels = Arrays.asList("00:00", "03:00", "06:00", "09:00", "12:00", "15:00", "18:00", "21:00");
-        List<Integer> visits = new ArrayList<>();
-        List<Integer> users = new ArrayList<>();
-
-        for (DailyStat stat : stats) {
-            visits.add(stat.getVisits() / 8);
-            users.add(stat.getUniqueVisitors() / 8);
-        }
-
-        return "{"
-                + "\"dayLabels\":" + toJsonArray(labels) + ","
-                + "\"dayVisits\":" + toJsonArrayInt(visits) + ","
-                + "\"dayUsers\":" + toJsonArrayInt(users)
-                + "}";
-    }
-
-    public String getCourseTitlesJson(List<CourseStat> courses) {
-        List<String> titles = new ArrayList<>();
-        for (CourseStat c : courses) {
-            titles.add(c.getTitle());
-        }
-        return toJsonArray(titles);
-    }
-
-    public String getAvgDurationsJson(List<CourseStat> courses) {
-        List<Integer> durations = new ArrayList<>();
-        for (CourseStat c : courses) {
-            durations.add(c.getAvgViewDuration());
-        }
-        return toJsonArrayInt(durations);
-    }
-
-    public String getCompletionRatesJson(List<CourseStat> courses) {
-
-        Random rand = new Random();
-        List<Integer> rates = new ArrayList<>();
-        for (int i = 0; i < courses.size(); i++) {
-            rates.add(60 + rand.nextInt(31)); // 60 -> 90
-        }
-        return toJsonArrayInt(rates);
+    private String toJsonArrayDouble(List<Double> values) {
+        return "[" + String.join(",", values.stream().map(v -> String.format("%.2f", v)).toArray(String[]::new)) + "]";
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("text/html;charset=UTF-8");
         doGet(request, response);
     }
 }
