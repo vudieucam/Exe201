@@ -175,6 +175,7 @@ svg {
 table {
   border-collapse: collapse; }
 
+
 caption {
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
@@ -9797,3 +9798,11 @@ textarea.form-control {
   100% {
     stroke-dasharray: 89, 200;
     stroke-dashoffset: -136px; } }
+@media (max-width: 991.98px) {
+  .navbar-collapse {
+    display: none;
+  }
+  .navbar-collapse.show {
+    display: block;
+  }
+}

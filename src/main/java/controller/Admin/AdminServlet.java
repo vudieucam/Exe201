@@ -73,9 +73,9 @@ public class AdminServlet extends HttpServlet {
 
             // User behavior
             Map<String, Object> behaviorMetrics = userDAO.getUserBehaviorMetrics();
-            stats.setClickThroughRate(userDAO.getClickThroughRate());
-            stats.setBounceRate(getDoubleOrDefault(behaviorMetrics.get("bounce_rate"), 0.0));
-            stats.setAvgSessionDuration(getIntOrDefault(behaviorMetrics.get("avg_session_duration"), 0));
+//            stats.setClickThroughRate(userDAO.getClickThroughRate());
+//            stats.setBounceRate(getDoubleOrDefault(behaviorMetrics.get("bounce_rate"), 0.0));
+//            stats.setAvgSessionDuration(getIntOrDefault(behaviorMetrics.get("avg_session_duration"), 0));
             stats.setPagesPerSession(getDoubleOrDefault(behaviorMetrics.get("pages_per_session"), 0.0));
             stats.setScrollDepth(getDoubleOrDefault(behaviorMetrics.get("avg_scroll_depth"), 0.0));
 

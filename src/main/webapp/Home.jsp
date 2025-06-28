@@ -21,13 +21,25 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
     <head>
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-3BE5RLS31D"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+            gtag('js', new Date());
+
+            gtag('config', 'G-3BE5RLS31D');
+        </script>
         <title>PetTech</title>
         <meta charset="utf-8">
         <!-- Trong thẻ <head> của file JSP -->
         <link rel="icon" type="image/png" href="images/logo_pettech.jpg">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        
+
         <link href="https://fonts.googleapis.com/css?family=Montserrat:200,300,400,500,600,700,800&display=swap" rel="stylesheet">
 
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -1024,8 +1036,6 @@
                 text-decoration: underline;
             }
         </style>
-
-
     </head>
     <body>
 
@@ -1082,11 +1092,17 @@
                 <div class="collapse navbar-collapse" id="ftco-nav">
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item active"><a href="home" class="nav-link">Trang chủ</a></li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="course" id="coursesDropdown" role="button" data-toggle="dropdown">
-                                Khóa học
+                        <li class="nav-item dropdown position-relative">
+                            <!-- Dòng chính link -->
+                            <a class="nav-link" href="course" style="padding-right: 10px;">Khóa học</a>
+
+                            <!-- Nút xổ dropdown -->
+                            <a class="nav-link dropdown-toggle dropdown-toggle-split" href="#" id="courseDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding-left: 0;">
+                                <span class="sr-only">Toggle Dropdown</span>
                             </a>
-                            <div class="dropdown-menu" aria-labelledby="coursesDropdown">
+
+                            <!-- Menu xổ xuống -->
+                            <div class="dropdown-menu" aria-labelledby="courseDropdown">
                                 <div class="dropdown-header">
                                     <i class="fa fa-book mr-2"></i>Danh mục khóa học
                                 </div>
@@ -1101,14 +1117,17 @@
                                 </a>
                             </div>
                         </li>
+
                         <li class="nav-item"><a href="expert" class="nav-link">Chuyên gia</a></li>
                         <li class="nav-item"><a href="product" class="nav-link">Sản phẩm</a></li>
                         <li class="nav-item"><a href="pet" class="nav-link">Thú cưng</a></li>
                         <li class="nav-item"><a href="package" class="nav-link">Gói dịch vụ</a></li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="blog" id="blogDropdown" role="button" data-toggle="dropdown">
-                                Tin tức
+                        <li class="nav-item dropdown position-relative">
+                            <a class="nav-link" href="blog" style="padding-right: 10px;">Tin tức</a>
+                            <a class="nav-link dropdown-toggle dropdown-toggle-split" href="#" id="blogDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding-left: 0;">
+                                <span class="sr-only">Toggle Dropdown</span>
                             </a>
+
                             <div class="dropdown-menu blog-dropdown" aria-labelledby="blogDropdown">
                                 <c:forEach items="${featuredCategories}" var="category">
                                     <a class="dropdown-item" href="blog?category=${category.categoryId}">
@@ -1121,6 +1140,7 @@
                                 </a>
                             </div>
                         </li>
+
                         <li class="nav-item"><a href="contact" class="nav-link">Liên hệ</a></li>
                     </ul>
                 </div>
@@ -1416,7 +1436,7 @@
 
 
 
-        <!-- Loader -->
+
         <div id="ftco-loader" class="show fullscreen">
             <svg class="circular" width="48px" height="48px">
             <circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/>
@@ -1424,10 +1444,10 @@
             </svg>
         </div>
 
-        <script src="js/jquery.min.js"></script>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="js/jquery-migrate-3.0.1.min.js"></script>
-        <script src="js/popper.min.js"></script>
-        <script src="js/bootstrap.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
         <script src="js/jquery.easing.1.3.js"></script>
         <script src="js/jquery.waypoints.min.js"></script>
         <script src="js/jquery.stellar.min.js"></script>
@@ -1441,7 +1461,6 @@
         <script src="js/google-map.js"></script>
         <script src="js/main.js"></script>
 
-
         <!-- Custom JavaScript -->
         <script>
                                 $(document).ready(function () {
@@ -1453,17 +1472,16 @@
                                             $('.back-to-top').fadeOut('slow');
                                         }
                                     });
-
                                     $('.back-to-top').click(function (e) {
                                         e.preventDefault();
                                         $('html, body').animate({scrollTop: 0}, 500);
                                         return false;
                                     });
-
                                     $('#userDropdown').on('click', function (e) {
                                         e.preventDefault();
                                         console.log("Click ok");
                                     });
+
 
             <c:if test="${not empty errorMessage}">
                                     alert("${errorMessage}");

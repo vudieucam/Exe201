@@ -432,8 +432,8 @@ public class PackageServlet extends HttpServlet {
                     SendMailOK.send(
                             "smtp.gmail.com",
                             pendingUser.getEmail(),
-                            "vdc120403@gmail.com",
-                            "ednn nwbo zbyq gahs",
+                            "pettech2495@gmail.com",
+                            "ntjj uyia dvxk atta",
                             "Xác minh tài khoản PetTech",
                             emailBody
                     );
@@ -605,7 +605,7 @@ public class PackageServlet extends HttpServlet {
                 + "<div class='footer'>"
                 + "<strong>📞 Hỗ trợ:</strong><br>"
                 + "SĐT: <a href='tel:0352138596'>0352 138 596</a><br>"
-                + "Email: <a href='mailto:vdc120403@gmail.com'>vdc120403@gmail.com</a><br>"
+                + "Email: <a href='mailto:pecttech2495@gmail.com'>pettech2495@gmail.com</a><br>"
                 + "Địa chỉ: Khu Công nghệ cao Hòa Lạc, Thạch Thất, Hà Nội<br><br>"
                 + "<strong>❤️ PetTech Team</strong>"
                 + "</div>"
@@ -617,8 +617,8 @@ public class PackageServlet extends HttpServlet {
             SendMailOK.send(
                     "smtp.gmail.com",
                     user.getEmail(),
-                    "vdc120403@gmail.com",
-                    "ednn nwbo zbyq gahs",
+                    "pettech2495@gmail.com",
+                    "ntjj uyia dvxk atta",
                     "🔔 Xác nhận thanh toán PetTech",
                     emailBody
             );

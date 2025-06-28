@@ -406,8 +406,8 @@ public class AuthenServlet extends HttpServlet {
             SendMailOK.send(
                     "smtp.gmail.com",
                     email,
-                    "vdc120403@gmail.com",
-                    "ednn nwbo zbyq gahs",
+                    "pettech2495@gmail.com",
+                    "ntjj uyia dvxk atta",
                     "Đặt lại mật khẩu PetTech",
                     emailBody
             );

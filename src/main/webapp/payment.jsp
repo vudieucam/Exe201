@@ -8,7 +8,19 @@
 <c:set var="fromRegistration" value="${fromRegistration}" />
 <!DOCTYPE html>
 <html>
+
     <head>
+        <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3BE5RLS31D"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'G-3BE5RLS31D');
+    </script>
         <title>Thanh Toán Nâng Cấp Gói - PetTech</title>
         <link rel="icon" type="image/png" href="images/logo_pettech.jpg">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
