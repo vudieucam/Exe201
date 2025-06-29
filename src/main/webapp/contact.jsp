@@ -12,16 +12,16 @@
 
     <head>
         <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3BE5RLS31D"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() {
-            dataLayer.push(arguments);
-        }
-        gtag('js', new Date());
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-3BE5RLS31D"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+            gtag('js', new Date());
 
-        gtag('config', 'G-3BE5RLS31D');
-    </script>
+            gtag('config', 'G-3BE5RLS31D');
+        </script>
         <title>Liên hệ - PetTech</title>
         <link rel="icon" type="image/png" href="images/logo_pettech.jpg">
         <meta charset="utf-8">
@@ -212,13 +212,7 @@
             a:hover {
                 color: #D99863;
             }
-            .footer {
-                background-color: #8B5E3C;
-                color: white;
-            }
-            .footer .footer-heading {
-                color: #FFDAB5;
-            }
+
             .text-muted {
                 color: #A97457 !important;
             }
@@ -369,7 +363,29 @@
                 color: #888;
                 font-style: italic;
             }
+            /* Hover: nâu cam sáng + hiệu ứng nhún */
+            .ftco-footer-social a:hover span {
+                color: #D99863 !important;
+                transform: scale(1.2);
+            }
+            .footer-heading {
+                position: relative;
+                display: inline-block;
+                padding-bottom: 10px;
+                font-weight: 700;
+                font-size: 1.2rem;
+                color: #8B5E3C !important; /* Ghi đè màu xanh */
+            }
 
+            .footer-heading::after {
+                content: "";
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 50px;
+                height: 3px;
+                background: linear-gradient(90deg, #8B5E3C, #D99863) !important;
+            }
 
         </style>
     </head>
@@ -417,25 +433,29 @@
         </div>
 
         <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark ftco-navbar-light" id="ftco-navbar">
             <div class="container">
-                <a class="navbar-brand" href="home"><span class="flaticon-pawprint-1 mr-2"></span>PetTech</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand" href="home">
+                    <span class="flaticon-pawprint-1 mr-2"></span>PetTech
+                </a>
+
+                <!-- Nút menu mobile -->
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav"
+                        aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="fa fa-bars"></span> Menu
                 </button>
+
+                <!-- Menu chính -->
                 <div class="collapse navbar-collapse" id="ftco-nav">
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item active"><a href="home" class="nav-link">Trang chủ</a></li>
-                        <li class="nav-item dropdown position-relative">
-                            <!-- Dòng chính link -->
-                            <a class="nav-link" href="course" style="padding-right: 10px;">Khóa học</a>
 
-                            <!-- Nút xổ dropdown -->
-                            <a class="nav-link dropdown-toggle dropdown-toggle-split" href="#" id="courseDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding-left: 0;">
-                                <span class="sr-only">Toggle Dropdown</span>
+                        <!-- Khóa học Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="courseDropdown" role="button"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Khóa học
                             </a>
-
-                            <!-- Menu xổ xuống -->
                             <div class="dropdown-menu" aria-labelledby="courseDropdown">
                                 <div class="dropdown-header">
                                     <i class="fa fa-book mr-2"></i>Danh mục khóa học
@@ -446,7 +466,7 @@
                                     </a>
                                 </c:forEach>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item text-center view-all-btn" href="course">
+                                <a class="dropdown-item text-center" href="course">
                                     <i class="fa fa-arrow-right mr-2"></i>Xem tất cả
                                 </a>
                             </div>
@@ -456,20 +476,21 @@
                         <li class="nav-item"><a href="product" class="nav-link">Sản phẩm</a></li>
                         <li class="nav-item"><a href="pet" class="nav-link">Thú cưng</a></li>
                         <li class="nav-item"><a href="package" class="nav-link">Gói dịch vụ</a></li>
-                        <li class="nav-item dropdown position-relative">
-                            <a class="nav-link" href="blog" style="padding-right: 10px;">Tin tức</a>
-                            <a class="nav-link dropdown-toggle dropdown-toggle-split" href="#" id="blogDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding-left: 0;">
-                                <span class="sr-only">Toggle Dropdown</span>
-                            </a>
 
-                            <div class="dropdown-menu blog-dropdown" aria-labelledby="blogDropdown">
+                        <!-- Tin tức Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="blogDropdown" role="button"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Tin tức
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="blogDropdown">
                                 <c:forEach items="${featuredCategories}" var="category">
                                     <a class="dropdown-item" href="blog?category=${category.categoryId}">
                                         <i class="fa fa-paw mr-2"></i>${category.categoryName}
                                     </a>
                                 </c:forEach>
                                 <div class="dropdown-divider"></div>
-                                <a class="view-all" href="blog">
+                                <a class="dropdown-item text-center" href="blog">
                                     <i class="fa fa-arrow-right mr-2"></i>Xem tất cả
                                 </a>
                             </div>
@@ -481,6 +502,7 @@
             </div>
         </nav>
         <!-- END nav -->
+
         <!-- About Section -->
         <section class="about-section">
             <div class="container">

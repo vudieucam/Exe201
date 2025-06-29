@@ -437,7 +437,23 @@
                                 <i class="bi bi-newspaper"></i>Gói dịch vụ
                             </a>
                         </li>
-                        <li class="nav-item" hidden="">
+                        <li class="nav-item">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/paymentadmin">
+                                <i class="bi bi-credit-card"></i>Thanh toán
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/partneradmin">
+                                <i class="bi bi-building"></i>Đối tác
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/petadmin">
+                                <i class="bi bi-building"></i>Thú cưng
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="${pageContext.request.contextPath}/productsAdmin.jsp">
                                 <i class="bi bi-cart"></i>Sản phẩm
                             </a>
@@ -447,18 +463,7 @@
                                 <i class="bi bi-receipt"></i>Đơn hàng
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="${pageContext.request.contextPath}/paymentadmin">
-                                <i class="bi bi-credit-card"></i>Thanh toán
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link" href="${pageContext.request.contextPath}/partnersAdmin.jsp">
-                                <i class="bi bi-building"></i>Đối tác
-                            </a>
-                        </li>
-                        <li class="nav-item" hidden="">
+                        <li class="nav-item" >
                             <a class="nav-link" href="${pageContext.request.contextPath}/reports.jsp">
                                 <i class="bi bi-graph-up"></i>Báo cáo
                             </a>

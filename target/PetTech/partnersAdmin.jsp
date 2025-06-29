@@ -355,7 +355,7 @@
                 .navbar-toggler {
                     display: block;
                 }
-                
+
                 .admin-profile {
                     margin-top: 20px;
                 }
@@ -397,7 +397,23 @@
                                 <i class="bi bi-newspaper"></i>Gói dịch vụ
                             </a>
                         </li>
-                        <li class="nav-item" hidden="">
+                        <li class="nav-item">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/paymentadmin">
+                                <i class="bi bi-credit-card"></i>Thanh toán
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/partneradmin">
+                                <i class="bi bi-building"></i>Đối tác
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="${pageContext.request.contextPath}/petadmin">
+                                <i class="bi bi-building"></i>Thú cưng
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="${pageContext.request.contextPath}/productsAdmin.jsp">
                                 <i class="bi bi-cart"></i>Sản phẩm
                             </a>
@@ -407,18 +423,7 @@
                                 <i class="bi bi-receipt"></i>Đơn hàng
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="${pageContext.request.contextPath}/paymentadmin">
-                                <i class="bi bi-credit-card"></i>Thanh toán
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link" href="${pageContext.request.contextPath}/partnersAdmin.jsp">
-                                <i class="bi bi-building"></i>Đối tác
-                            </a>
-                        </li>
-                        <li class="nav-item" hidden="">
+                        <li class="nav-item" >
                             <a class="nav-link" href="${pageContext.request.contextPath}/reports.jsp">
                                 <i class="bi bi-graph-up"></i>Báo cáo
                             </a>
@@ -471,6 +476,10 @@
 
                 <!-- Main Content -->
                 <div class="col-md-10 p-4">
+                    <c:if test="${not empty error}">
+                        <div class="alert alert-danger">${error}</div>
+                    </c:if>
+
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h2>Quản Lý Đối Tác</h2>
                     </div>
@@ -478,16 +487,26 @@
                     <!-- Filter Section -->
                     <div class="filter-section">
                         <div class="row">
+                            <!-- Loại đối tác -->
                             <div class="col-md-3">
                                 <label class="form-label filter-title">Loại đối tác</label>
                                 <select class="form-select" id="partner-type-filter">
                                     <option value="all">Tất cả loại</option>
-                                    <option value="education">Giáo dục</option>
-                                    <option value="technology">Công nghệ</option>
-                                    <option value="business">Kinh doanh</option>
-                                    <option value="other">Khác</option>
+                                    <c:forEach var="t" items="${types}">
+                                        <option value="${t}">
+                                            <c:choose>
+                                                <c:when test="${t eq 'Giáo Dục'}">Giáo Dục</c:when>
+                                                <c:when test="${t eq 'Công Nghệ'}">Công Nghệ</c:when>
+                                                <c:when test="${t eq 'Kinh doanh'}">Kinh doanh</c:when>
+                                                <c:when test="${t eq 'Chuyên Gia'}">Chuyên Gia</c:when>
+                                                <c:otherwise>Khác</c:otherwise>
+                                            </c:choose>
+                                        </option>
+                                    </c:forEach>
                                 </select>
                             </div>
+
+                            <!-- Trạng thái -->
                             <div class="col-md-3">
                                 <label class="form-label filter-title">Trạng thái</label>
                                 <select class="form-select" id="partner-status-filter">
@@ -496,26 +515,29 @@
                                     <option value="inactive">Ngừng hợp tác</option>
                                 </select>
                             </div>
+
+                            <!-- Quốc gia -->
                             <div class="col-md-3">
                                 <label class="form-label filter-title">Quốc gia</label>
                                 <select class="form-select" id="partner-country-filter">
                                     <option value="all">Tất cả quốc gia</option>
-                                    <option value="vn">Việt Nam</option>
-                                    <option value="us">Mỹ</option>
-                                    <option value="uk">Anh</option>
-                                    <option value="jp">Nhật Bản</option>
+                                    <c:forEach var="c" items="${countries}">
+                                        <option value="${c}">${c}</option>
+                                    </c:forEach>
                                 </select>
                             </div>
+
+                            <!-- Tìm kiếm -->
                             <div class="col-md-3">
-                                <label class="form-label filter-title">Tìm kiếm</label> 
-                                <div class="input-group"> 
-                                    <input type="text" class="form-control" id="partner-search" placeholder="Tên đối tác..."> 
-                                    <button class="btn btn-primary" type="button" id="partner-search-btn"> 
-                                        <i class="bi bi-search"></i> 
-                                    </button> 
-                                </div> 
-                            </div> 
-                        </div> 
+                                <label class="form-label filter-title">Tìm kiếm</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="partner-search" placeholder="Tên đối tác...">
+                                    <button class="btn btn-primary" type="button" id="partner-search-btn">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Partners Table -->
@@ -525,15 +547,16 @@
                                 <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addPartnerModal"> 
                                     <i class="bi bi-plus-circle me-1"></i> Thêm đối tác 
                                 </button> 
-                                <button class="btn btn-outline-secondary"> 
-                                    <i class="bi bi-download me-1"></i> Xuất Excel 
-                                </button> 
+                                <a href="ExportPartnerExcelServlet" class="btn btn-outline-secondary">
+                                    <i class="bi bi-download me-1"></i> Xuất Excel
+                                </a>
+
                             </div> 
                             <div> 
                                 <div class="btn-group"> 
-                                    <button class="btn btn-sm btn-outline-secondary active">Tất cả (24)</button> 
-                                    <button class="btn btn-sm btn-outline-secondary">Đang hợp tác (18)</button> 
-                                    <button class="btn btn-sm btn-outline-secondary">Ngừng hợp tác (6)</button> 
+                                    <button class="btn btn-sm btn-outline-secondary active">Tất cả (${totalPartners})</button> 
+                                    <button class="btn btn-sm btn-outline-secondary">Đang hợp tác (${activePartners})</button> 
+                                    <button class="btn btn-sm btn-outline-secondary">Ngừng hợp tác (${inactivePartners})</button> 
                                 </div> 
                             </div> 
                         </div> 
@@ -549,275 +572,509 @@
                                             <th>Ngày hợp tác</th> 
                                             <th>Dự án</th> 
                                             <th>Trạng thái</th> 
-                                            <th style="width: 120px">Hành động</th> 
+                                            <th style="width: 160px">Hành động</th> 
                                         </tr> 
                                     </thead> 
-                                    <tbody> 
-                                        <tr> 
-                                            <td>1</td> 
-                                            <td> 
-                                                <div class="d-flex align-items-center"> 
-                                                    <img src="https://via.placeholder.com/40" class="rounded me-2" width="40" height="40"> 
-                                                    <div> 
-                                                        <h6 class="mb-0">Công ty ABC Tech</h6> 
-                                                        <small class="text-muted">contact@abctech.com</small> 
-                                                    </div> 
-                                                </div> 
-                                            </td> 
-                                            <td><span class="badge bg-primary">Công nghệ</span></td> 
-                                            <td>Việt Nam</td> 
-                                            <td>15/05/2022</td> 
-                                            <td>5</td> 
-                                            <td><span class="status-badge status-active">Đang hợp tác</span></td> 
-                                            <td> 
-                                                <button class="btn btn-sm btn-outline-primary action-btn"> 
-                                                    <i class="bi bi-eye"></i> 
-                                                </button> 
-                                                <button class="btn btn-sm btn-outline-success action-btn"> 
-                                                    <i class="bi bi-pencil"></i> 
-                                                </button> 
-                                                <button class="btn btn-sm btn-outline-danger action-btn"> 
-                                                    <i class="bi bi-trash"></i> 
-                                                </button> 
-                                            </td> 
-                                        </tr> 
-                                        <tr> 
-                                            <td>2</td> 
-                                            <td> 
-                                                <div class="d-flex align-items-center"> 
-                                                    <img src="https://via.placeholder.com/40" class="rounded me-2" width="40" height="40"> 
-                                                    <div> 
-                                                        <h6 class="mb-0">Đại học XYZ</h6> 
-                                                        <small class="text-muted">info@xyz.edu.vn</small> 
-                                                    </div> 
-                                                </div> 
-                                            </td> 
-                                            <td><span class="badge bg-info">Giáo dục</span></td> 
-                                            <td>Mỹ</td> 
-                                            <td>22/08/2021</td> 
-                                            <td>3</td> 
-                                            <td><span class="status-badge status-active">Đang hợp tác</span></td> 
-                                            <td> 
-                                                <button class="btn btn-sm btn-outline-primary action-btn"> 
-                                                    <i class="bi bi-eye"></i> 
-                                                </button> 
-                                                <button class="btn btn-sm btn-outline-success action-btn"> 
-                                                    <i class="bi bi-pencil"></i> 
-                                                </button> 
-                                                <button class="btn btn-sm btn-outline-danger action-btn"> 
-                                                    <i class="bi bi-trash"></i> 
-                                                </button> 
-                                            </td> 
-                                        </tr> 
-                                        <tr> 
-                                            <td>3</td> 
-                                            <td> 
-                                                <div class="d-flex align-items-center"> 
-                                                    <img src="https://via.placeholder.com/40" class="rounded me-2" width="40" height="40"> 
-                                                    <div> 
-                                                        <h6 class="mb-0">Tập đoàn DEF</h6> 
-                                                        <small class="text-muted">partner@defgroup.com</small> 
-                                                    </div> 
-                                                </div> 
-                                            </td> 
-                                            <td><span class="badge bg-success">Kinh doanh</span></td> 
-                                            <td>Nhật Bản</td> 
-                                            <td>10/03/2020</td> 
-                                            <td>7</td> 
-                                            <td><span class="status-badge status-inactive">Ngừng hợp tác</span></td> 
-                                            <td> 
-                                                <button class="btn btn-sm btn-outline-primary action-btn"> 
-                                                    <i class="bi bi-eye"></i> 
-                                                </button> 
-                                                <button class="btn btn-sm btn-outline-success action-btn"> 
-                                                    <i class="bi bi-pencil"></i> 
-                                                </button> 
-                                                <button class="btn btn-sm btn-outline-danger action-btn"> 
-                                                    <i class="bi bi-trash"></i> 
-                                                </button> 
-                                            </td> 
-                                        </tr> 
-                                        <tr> 
-                                            <td>4</td> 
-                                            <td> 
-                                                <div class="d-flex align-items-center"> 
-                                                    <img src="https://via.placeholder.com/40" class="rounded me-2" width="40" height="40"> 
-                                                    <div> 
-                                                        <h6 class="mb-0">Công ty GHI Solutions</h6> 
-                                                        <small class="text-muted">support@ghisolutions.com</small> 
-                                                    </div> 
-                                                </div> 
-                                            </td> 
-                                            <td><span class="badge bg-warning">Khác</span></td> 
-                                            <td>Anh</td> 
-                                            <td>05/12/2022</td> 
-                                            <td>2</td> 
-                                            <td><span class="status-badge status-active">Đang hợp tác</span></td> 
-                                            <td> 
-                                                <button class="btn btn-sm btn-outline-primary action-btn"> 
-                                                    <i class="bi bi-eye"></i> 
-                                                </button> 
-                                                <button class="btn btn-sm btn-outline-success action-btn"> 
-                                                    <i class="bi bi-pencil"></i> 
-                                                </button> 
-                                                <button class="btn btn-sm btn-outline-danger action-btn"> 
-                                                    <i class="bi bi-trash"></i> 
-                                                </button> 
-                                            </td> 
-                                        </tr> 
-                                    </tbody> 
+                                    <tbody>
+                                        <c:forEach var="p" items="${partners}" varStatus="loop">
+                                            <tr>
+                                                <td>${loop.index + 1}</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <img src="${p.logoUrl}" class="rounded me-2" width="40" height="40">
+                                                        <div>
+                                                            <h6 class="mb-0">${p.name}</h6>
+                                                            <small class="text-muted">${p.email}</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge
+                                                          <c:choose>
+                                                              <c:when test="${p.partnerType eq 'Giáo Dục'}">bg-info</c:when>
+                                                              <c:when test="${p.partnerType eq 'Công Nghệ'}">bg-primary</c:when>
+                                                              <c:when test="${p.partnerType eq 'Kinh doanh'}">bg-success</c:when>
+                                                              <c:when test="${p.partnerType eq 'Chuyên Gia'}">bg-dark</c:when>
+                                                              <c:otherwise>bg-warning</c:otherwise>
+                                                          </c:choose>">
+                                                        ${p.partnerType}
+                                                    </span>
+                                                </td>
+
+                                                <td>${p.country}</td>
+                                                <td><fmt:formatDate value="${p.partnershipDate}" pattern="dd/MM/yyyy"/></td>
+                                                <td>${p.projectCount}</td>
+                                                <td>
+                                                    <span class="status-badge
+                                                          ${p.status ? 'status-active' : 'status-inactive'}">
+                                                        ${p.status ? 'Đang hợp tác' : 'Ngừng hợp tác'}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <!-- Sửa -->
+                                                    <button class="btn btn-sm btn-outline-warning action-btn me-1" title="Sửa" 
+                                                            data-bs-toggle="modal" data-bs-target="#editPartnerModal"
+                                                            data-id="${p.id}" data-name="${p.name}" data-email="${p.email}"
+                                                            data-phone="${p.phone}" data-address="${p.address}"
+                                                            data-description="${p.description}" data-country="${p.country}"
+                                                            data-type="${p.partnerType}" data-date="${p.partnershipDate}"
+                                                            data-count="${p.projectCount}" data-logo="${p.logoUrl}"
+                                                            data-website="${p.website}" data-status="${p.status}">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+
+                                                    <!-- Ẩn/Hiện -->
+                                                    <form method="post" action="partneradmin" style="display:inline-block;">
+                                                        <input type="hidden" name="action" value="toggle"/>
+                                                        <input type="hidden" name="id" value="${p.id}"/>
+                                                        <input type="hidden" name="status" value="${not p.status}"/>
+                                                        <button class="btn btn-sm btn-outline-primary action-btn" title="Ẩn/Hiện">
+                                                            <i class="bi ${p.status ? 'bi-eye-slash' : 'bi-eye'}"></i>
+                                                        </button>
+                                                    </form>
+
+                                                    <!-- Xóa -->
+                                                    <form method="post" action="partneradmin" style="display:inline-block;">
+                                                        <input type="hidden" name="action" value="delete"/>
+                                                        <input type="hidden" name="id" value="${p.id}"/>
+                                                        <button class="btn btn-sm btn-outline-danger action-btn" onclick="return confirm('Xóa đối tác này?')" title="Xóa">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </tbody>
+
                                 </table> 
                             </div>
 
                             <!-- Pagination -->
                             <nav aria-label="Page navigation" class="mt-3">
                                 <ul class="pagination justify-content-center">
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
-                                            <i class="bi bi-chevron-left"></i>
-                                        </a>
-                                    </li>
-                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="#">
-                                            <i class="bi bi-chevron-right"></i>
-                                        </a>
-                                    </li>
+                                    <c:if test="${currentPage > 1}">
+                                        <li class="page-item">
+                                            <a class="page-link" href="partneradmin?page=${currentPage - 1}">
+                                                <i class="bi bi-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                    </c:if>
+
+                                    <c:forEach var="i" begin="1" end="${totalPages}">
+                                        <li class="page-item ${i == currentPage ? 'active' : ''}">
+                                            <a class="page-link" href="partneradmin?page=${i}">${i}</a>
+                                        </li>
+                                    </c:forEach>
+
+                                    <c:if test="${currentPage < totalPages}">
+                                        <li class="page-item">
+                                            <a class="page-link" href="partneradmin?page=${currentPage + 1}">
+                                                <i class="bi bi-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    </c:if>
                                 </ul>
                             </nav>
                         </div>
                     </div>
+
+
+                    <div class="card mt-5">
+                        <div class="card-header d-flex justify-content-between align-items-center"> 
+                            <h5 class="mb-0">Danh sách Chuyên Gia</h5>
+                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editExpertModal">
+                                <i class="bi bi-plus-circle me-1"></i> Thêm Chuyên Gia
+                            </button>
+                            <a href="ExportExpertExcelServlet" class="btn btn-outline-secondary ms-2">
+                                <i class="bi bi-download me-1"></i> Xuất Chuyên Gia
+                            </a>
+
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light text-center">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Họ tên</th>
+                                            <th>Vị trí</th>
+                                            <th>Đối tác</th>
+                                            <th>Email</th>
+                                            <th>Facebook</th>
+                                            <th>Trạng thái</th>
+                                            <th class="text-nowrap">Hành động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <c:forEach var="e" items="${experts}" varStatus="loop">
+                                            <c:if test="${e.partner.partnerType eq 'Chuyên Gia'}">
+                                                <tr class="${!e.status ? 'table-secondary' : ''}">
+                                                    <td class="text-center">${loop.index + 1}</td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <img src="${e.imageUrl}" class="rounded-circle me-2" width="40" height="40">
+                                                            <div>
+                                                                <strong>${e.fullName}</strong><br/>
+                                                                <small class="text-muted">${e.position}</small>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>${e.position}</td>
+                                                    <td>${e.partner.name}</td>
+                                                    <td>${e.partner.email}</td>
+                                                    <td class="text-center">
+                                                        <c:if test="${not empty e.facebookUrl}">
+                                                            <a href="${e.facebookUrl}" target="_blank" class="text-primary fs-5">
+                                                                <i class="bi bi-facebook"></i>
+                                                            </a>
+                                                        </c:if>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge ${e.status ? 'bg-success' : 'bg-secondary'}">
+                                                            ${e.status ? 'Hiển thị' : 'Đã ẩn'}
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-center text-nowrap">
+                                                        <div class="d-flex justify-content-center gap-1">
+                                                            <!-- Sửa -->
+                                                            <button class="btn btn-sm btn-outline-primary"
+                                                                    data-bs-toggle="modal" data-bs-target="#editExpertModal"
+                                                                    data-id="${e.id}"
+                                                                    data-fullname="${e.fullName}"
+                                                                    data-position="${e.position}"
+                                                                    data-bio="${e.bio}"
+                                                                    data-image="${e.imageUrl}"
+                                                                    data-facebook="${e.facebookUrl}"
+                                                                    data-twitter="${e.twitterUrl}"
+                                                                    data-instagram="${e.instagramUrl}"
+                                                                    data-google="${e.googleUrl}"
+                                                                    data-partner="${e.partner.id}">
+                                                                <i class="bi bi-pencil"></i>
+                                                            </button>
+
+                                                            <!-- Ẩn / Hiện -->
+                                                            <form action="partneradmin" method="post">
+                                                                <input type="hidden" name="action" value="toggleExpertStatus"/>
+                                                                <input type="hidden" name="id" value="${e.id}"/>
+                                                                <input type="hidden" name="status" value="${not e.status}"/>
+                                                                <button class="btn btn-sm btn-outline-secondary" title="Ẩn/Hiện">
+                                                                    <i class="bi ${e.status ? 'bi-eye-slash' : 'bi-eye'}"></i>
+                                                                </button>
+                                                            </form>
+
+                                                            <!-- Xóa -->
+                                                            <form action="partneradmin" method="post"
+                                                                  onsubmit="return confirm('Bạn chắc chắn muốn xóa chuyên gia này?')">
+                                                                <input type="hidden" name="action" value="deleteExpert"/>
+                                                                <input type="hidden" name="id" value="${e.id}"/>
+                                                                <button class="btn btn-sm btn-outline-danger" title="Xóa">
+                                                                    <i class="bi bi-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </c:if>
+                                        </c:forEach>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+
                 </div>
             </div>
         </div>
 
-        <!-- Add Partner Modal -->
-        <div class="modal fade" id="addPartnerModal" tabindex="-1" aria-labelledby="addPartnerModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addPartnerModalLabel">Thêm đối tác mới</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+        <!-- Modal thêm đối tác -->
+        <div class="modal fade" id="addPartnerModal" tabindex="-1" role="dialog" aria-labelledby="addPartnerModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <form method="post" action="partneradmin">
+                    <input type="hidden" name="action" value="add"/>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Thêm đối tác</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>Tên đối tác</label>
+                                <input type="text" name="name" class="form-control" required/>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" name="email" class="form-control" required/>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Số điện thoại</label>
+                                <input type="text" name="phone" class="form-control" required/>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Địa chỉ</label>
+                                <input type="text" name="address" class="form-control" required/>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Mô tả</label>
+                                <textarea name="description" class="form-control"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Phân loại đối tác</label>
+                                <select id="edit-type" name="partner_type" class="form-control" required>
+                                    <option value="Giáo Dục">Giáo Dục</option>
+                                    <option value="Công Nghệ">Công Nghệ</option>
+                                    <option value="Kinh doanh">Kinh doanh</option>
+                                    <option value="Chuyên Gia">Chuyên Gia</option>
+                                    <option value="Khác">Khác</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Quốc gia</label>
+                                <input type="text" name="country" class="form-control"/>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Ngày hợp tác</label>
+                                <input type="date" name="partnership_date" class="form-control" required/>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Số dự án hợp tác</label>
+                                <input type="number" name="project_count" class="form-control" value="0" min="0"/>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Link logo (URL)</label>
+                                <input type="text" name="logo_url" class="form-control"/>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Website</label>
+                                <input type="text" name="website" class="form-control"/>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Trạng thái</label>
+                                <select name="status" class="form-control">
+                                    <option value="active">Hiển thị</option>
+                                    <option value="inactive">Ẩn</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success">Thêm mới</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                        </div>
                     </div>
-                    <div class="modal-body">
-                        <form>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="partner-name" class="form-label">Tên đối tác</label>
-                                    <input type="text" class="form-control" id="partner-name" placeholder="Nhập tên đối tác">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="partner-email" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="partner-email" placeholder="Nhập email đối tác">
-                                </div>
-                            </div>
-                            
-                            <div class="row mb-3">
-                                <div class="col-md-4">
-                                    <label for="partner-type" class="form-label">Loại đối tác</label>
-                                    <select class="form-select" id="partner-type">
-                                        <option value="education">Giáo dục</option>
-                                        <option value="technology">Công nghệ</option>
-                                        <option value="business">Kinh doanh</option>
-                                        <option value="other">Khác</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="partner-country" class="form-label">Quốc gia</label>
-                                    <select class="form-select" id="partner-country">
-                                        <option value="vn">Việt Nam</option>
-                                        <option value="us">Mỹ</option>
-                                        <option value="uk">Anh</option>
-                                        <option value="jp">Nhật Bản</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="partner-status" class="form-label">Trạng thái</label>
-                                    <select class="form-select" id="partner-status">
-                                        <option value="active">Đang hợp tác</option>
-                                        <option value="inactive">Ngừng hợp tác</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="partner-date" class="form-label">Ngày hợp tác</label>
-                                    <input type="date" class="form-control" id="partner-date">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="partner-projects" class="form-label">Số dự án hợp tác</label>
-                                    <input type="number" class="form-control" id="partner-projects" placeholder="Nhập số dự án">
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="partner-logo" class="form-label">Logo đối tác</label>
-                                <input class="form-control" type="file" id="partner-logo">
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="partner-description" class="form-label">Mô tả đối tác</label>
-                                <textarea class="form-control" id="partner-description" rows="5" placeholder="Nhập mô tả về đối tác..."></textarea>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="partner-website" class="form-label">Website</label>
-                                <input type="url" class="form-control" id="partner-website" placeholder="https://example.com">
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button type="button" class="btn btn-primary">Lưu lại</button>
-                    </div>
-                </div>
+                </form>
             </div>
         </div>
+        <!-- Modal Sửa -->
+        <div class="modal fade" id="editPartnerModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <form method="post" action="partneradmin">
+                    <input type="hidden" name="action" value="edit"/>
+                    <input type="hidden" name="id" id="edit-id"/>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Cập nhật đối tác</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label>Tên đối tác</label>
+                                <input type="text" id="edit-name" name="name" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Email</label>
+                                <input type="email" id="edit-email" name="email" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Số điện thoại</label>
+                                <input type="text" id="edit-phone" name="phone" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Địa chỉ</label>
+                                <input type="text" id="edit-address" name="address" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Mô tả</label>
+                                <textarea id="edit-description" name="description" class="form-control"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label>Phân loại đối tác</label>
+                                <select id="edit-type" name="partner_type" class="form-control" required>
+                                    <option value="Giáo Dục">Giáo Dục</option>
+                                    <option value="Công Nghệ">Công Nghệ</option>
+                                    <option value="Kinh doanh">Kinh doanh</option>
+                                    <option value="Chuyên Gia">Chuyên Gia</option>
+                                    <option value="Khác">Khác</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label>Quốc gia</label>
+                                <input type="text" id="edit-country" name="country" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label>Ngày hợp tác</label>
+                                <input type="date" id="edit-date" name="partnership_date" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Số dự án hợp tác</label>
+                                <input type="number" id="edit-count" name="project_count" class="form-control" min="0" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Link logo (URL)</label>
+                                <input type="text" id="edit-logo" name="logo_url" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label>Website</label>
+                                <input type="text" id="edit-website" name="website" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label>Trạng thái</label>
+                                <select id="edit-status" name="status" class="form-control">
+                                    <option value="active">Hiển thị</option>
+                                    <option value="inactive">Ẩn</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-success" type="submit">Lưu</button>
+                            <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Hủy</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- Modal Thêm / Sửa Chuyên Gia -->
+        <div class="modal fade" id="editExpertModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <form method="post" action="partneradmin" class="modal-content">
+                    <input type="hidden" name="action" value="editExpert" id="expert-action" />
+                    <input type="hidden" name="id" id="expert-id" />
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">Cập nhật chuyên gia</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body row g-3">
+                        <div class="col-md-6">
+                            <label>Họ tên</label>
+                            <input type="text" name="full_name" id="expert-fullname" class="form-control" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label>Vị trí</label>
+                            <input type="text" name="position" id="expert-position" class="form-control" />
+                        </div>
+
+                        <div class="col-12">
+                            <label>Tiểu sử</label>
+                            <textarea name="bio" id="expert-bio" rows="3" class="form-control"></textarea>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label>Ảnh đại diện (URL)</label>
+                            <input type="text" name="image_url" id="expert-image" class="form-control" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label>Đối tác liên kết</label>
+                            <select name="partner_id" id="expert-partner" class="form-select">
+                                <c:forEach var="p" items="${partners}">
+                                    <c:if test="${p.partnerType eq 'Chuyên Gia'}">
+                                        <option value="${p.id}">${p.name}</option>
+                                    </c:if>
+                                </c:forEach>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label>Facebook</label>
+                            <input type="text" name="facebook_url" id="expert-facebook" class="form-control" />
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Lưu</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-            // Filter functionality
-            document.getElementById('partner-search-btn').addEventListener('click', function() {
-                const searchText = document.getElementById('partner-search').value.toLowerCase();
-                const typeFilter = document.getElementById('partner-type-filter').value;
-                const statusFilter = document.getElementById('partner-status-filter').value;
-                const countryFilter = document.getElementById('partner-country-filter').value;
-                
-                const rows = document.querySelectorAll('#partners-table tbody tr');
-                
-                rows.forEach(row => {
-                    const name = row.querySelector('td:nth-child(2) h6').textContent.toLowerCase();
-                    const type = row.querySelector('td:nth-child(3) span').textContent;
-                    const country = row.querySelector('td:nth-child(4)').textContent;
-                    const status = row.querySelector('td:nth-child(7) span').textContent;
-                    
-                    const matchSearch = name.includes(searchText);
-                    const matchType = typeFilter === 'all' || 
-                        (typeFilter === 'education' && type === 'Giáo dục') ||
-                        (typeFilter === 'technology' && type === 'Công nghệ') ||
-                        (typeFilter === 'business' && type === 'Kinh doanh') ||
-                        (typeFilter === 'other' && type === 'Khác');
-                    
-                    const matchStatus = statusFilter === 'all' || 
-                        (statusFilter === 'active' && status === 'Đang hợp tác') ||
-                        (statusFilter === 'inactive' && status === 'Ngừng hợp tác');
-                    
-                    const matchCountry = countryFilter === 'all' || 
-                        (countryFilter === 'vn' && country === 'Việt Nam') ||
-                        (countryFilter === 'us' && country === 'Mỹ') ||
-                        (countryFilter === 'uk' && country === 'Anh') ||
-                        (countryFilter === 'jp' && country === 'Nhật Bản');
-                    
-                    if (matchSearch && matchType && matchStatus && matchCountry) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
+                                                                      // Filter functionality
+                                                                      document.getElementById('partner-search-btn').addEventListener('click', function () {
+                                                                          const searchText = document.getElementById('partner-search').value.toLowerCase();
+                                                                          const typeFilter = document.getElementById('partner-type-filter').value;
+                                                                          const statusFilter = document.getElementById('partner-status-filter').value;
+                                                                          const countryFilter = document.getElementById('partner-country-filter').value;
+
+                                                                          const rows = document.querySelectorAll('#partners-table tbody tr');
+
+                                                                          rows.forEach(row => {
+                                                                              const name = row.querySelector('td:nth-child(2) h6').textContent.toLowerCase();
+                                                                              const type = row.querySelector('td:nth-child(3) span').textContent;
+                                                                              const country = row.querySelector('td:nth-child(4)').textContent;
+                                                                              const status = row.querySelector('td:nth-child(7) span').textContent;
+
+                                                                              const matchSearch = name.includes(searchText);
+                                                                              const matchType = typeFilter === 'all' ||
+                                                                                      (typeFilter === 'Giáo Dục' && type === 'Giáo Dục') ||
+                                                                                      (typeFilter === 'Công Nghệ' && type === 'Công Nghệ') ||
+                                                                                      (typeFilter === 'Kinh doanh' && type === 'Kinh doanh') ||
+                                                                                      (typeFilter === 'Chuyên Gia' && type === 'Chuyên Gia') ||
+                                                                                      (typeFilter === 'Khác' && type === 'Khác');
+
+
+                                                                              const matchStatus = statusFilter === 'all' ||
+                                                                                      (statusFilter === 'active' && status === 'Đang hợp tác') ||
+                                                                                      (statusFilter === 'inactive' && status === 'Ngừng hợp tác');
+
+                                                                              const matchCountry = countryFilter === 'all' ||
+                                                                                      (countryFilter === 'vn' && country === 'Việt Nam') ||
+                                                                                      (countryFilter === 'us' && country === 'Mỹ') ||
+                                                                                      (countryFilter === 'uk' && country === 'Anh') ||
+                                                                                      (countryFilter === 'jp' && country === 'Nhật Bản');
+
+                                                                              if (matchSearch && matchType && matchStatus && matchCountry) {
+                                                                                  row.style.display = '';
+                                                                              } else {
+                                                                                  row.style.display = 'none';
+                                                                              }
+                                                                          });
+                                                                      });
+        </script>
+        <script>
+            /* fill edit modal */
+            document.getElementById('editPartnerModal').addEventListener('show.bs.modal', e => {
+                const b = e.relatedTarget;                // nút pencil
+                ['id', 'name', 'email', 'phone', 'address', 'description',
+                    'country', 'type', 'date', 'count', 'logo', 'website', 'status']
+                        .forEach(k => {
+                            const inp = document.getElementById('edit-' + k);
+                            if (inp)
+                                inp.value = b.dataset[k] ?? '';
+                        });
             });
         </script>
+
     </body>
 </html>

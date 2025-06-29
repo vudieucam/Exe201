@@ -41,7 +41,7 @@
         <link href="https://fonts.googleapis.com/css?family=Montserrat:200,300,400,500,600,700,800&display=swap" rel="stylesheet">
 
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <link rel="stylesheet" href="css/animate.css">
 
         <link rel="stylesheet" href="css/owl.carousel.min.css">
@@ -921,25 +921,29 @@
         </div>
 
         <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark ftco-navbar-light" id="ftco-navbar">
             <div class="container">
-                <a class="navbar-brand" href="home"><span class="flaticon-pawprint-1 mr-2"></span>PetTech</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand" href="home">
+                    <span class="flaticon-pawprint-1 mr-2"></span>PetTech
+                </a>
+
+                <!-- Nút menu mobile -->
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav"
+                        aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="fa fa-bars"></span> Menu
                 </button>
+
+                <!-- Menu chính -->
                 <div class="collapse navbar-collapse" id="ftco-nav">
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item active"><a href="home" class="nav-link">Trang chủ</a></li>
-                        <li class="nav-item dropdown position-relative">
-                            <!-- Dòng chính link -->
-                            <a class="nav-link" href="course" style="padding-right: 10px;">Khóa học</a>
 
-                            <!-- Nút xổ dropdown -->
-                            <a class="nav-link dropdown-toggle dropdown-toggle-split" href="#" id="courseDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding-left: 0;">
-                                <span class="sr-only">Toggle Dropdown</span>
+                        <!-- Khóa học Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="courseDropdown" role="button"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Khóa học
                             </a>
-
-                            <!-- Menu xổ xuống -->
                             <div class="dropdown-menu" aria-labelledby="courseDropdown">
                                 <div class="dropdown-header">
                                     <i class="fa fa-book mr-2"></i>Danh mục khóa học
@@ -950,7 +954,7 @@
                                     </a>
                                 </c:forEach>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item text-center view-all-btn" href="course">
+                                <a class="dropdown-item text-center" href="course">
                                     <i class="fa fa-arrow-right mr-2"></i>Xem tất cả
                                 </a>
                             </div>
@@ -960,20 +964,21 @@
                         <li class="nav-item"><a href="product" class="nav-link">Sản phẩm</a></li>
                         <li class="nav-item"><a href="pet" class="nav-link">Thú cưng</a></li>
                         <li class="nav-item"><a href="package" class="nav-link">Gói dịch vụ</a></li>
-                        <li class="nav-item dropdown position-relative">
-                            <a class="nav-link" href="blog" style="padding-right: 10px;">Tin tức</a>
-                            <a class="nav-link dropdown-toggle dropdown-toggle-split" href="#" id="blogDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding-left: 0;">
-                                <span class="sr-only">Toggle Dropdown</span>
-                            </a>
 
-                            <div class="dropdown-menu blog-dropdown" aria-labelledby="blogDropdown">
+                        <!-- Tin tức Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="blogDropdown" role="button"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Tin tức
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="blogDropdown">
                                 <c:forEach items="${featuredCategories}" var="category">
                                     <a class="dropdown-item" href="blog?category=${category.categoryId}">
                                         <i class="fa fa-paw mr-2"></i>${category.categoryName}
                                     </a>
                                 </c:forEach>
                                 <div class="dropdown-divider"></div>
-                                <a class="view-all" href="blog">
+                                <a class="dropdown-item text-center" href="blog">
                                     <i class="fa fa-arrow-right mr-2"></i>Xem tất cả
                                 </a>
                             </div>

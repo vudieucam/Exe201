@@ -30,6 +30,7 @@
         <link href="https://fonts.googleapis.com/css?family=Montserrat:200,300,400,500,600,700,800&display=swap" rel="stylesheet">
 
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
         <link rel="stylesheet" href="css/animate.css">
 
@@ -630,6 +631,19 @@
             .navbar-nav .dropdown-menu.blog-dropdown .view-all:hover {
                 text-decoration: underline;
             }
+
+            .ftco-social a span {
+                font-size: 20px;
+                display: inline-block;
+                transition: transform 0.3s ease, color 0.3s ease;
+            }
+
+            /* Khi hover thì phóng to icon */
+            .ftco-social a:hover span {
+                transform: scale(1.5);
+                color: #007bff; /* hoặc giữ nguyên màu bằng `inherit` */
+            }
+
         </style>
     </head>
     <body>
@@ -677,25 +691,29 @@
         </div>
 
         <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark ftco-navbar-light" id="ftco-navbar">
             <div class="container">
-                <a class="navbar-brand" href="home"><span class="flaticon-pawprint-1 mr-2"></span>PetTech</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand" href="home">
+                    <span class="flaticon-pawprint-1 mr-2"></span>PetTech
+                </a>
+
+                <!-- Nút menu mobile -->
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav"
+                        aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="fa fa-bars"></span> Menu
                 </button>
+
+                <!-- Menu chính -->
                 <div class="collapse navbar-collapse" id="ftco-nav">
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item active"><a href="home" class="nav-link">Trang chủ</a></li>
-                        <li class="nav-item dropdown position-relative">
-                            <!-- Dòng chính link -->
-                            <a class="nav-link" href="course" style="padding-right: 10px;">Khóa học</a>
 
-                            <!-- Nút xổ dropdown -->
-                            <a class="nav-link dropdown-toggle dropdown-toggle-split" href="#" id="courseDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding-left: 0;">
-                                <span class="sr-only">Toggle Dropdown</span>
+                        <!-- Khóa học Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="courseDropdown" role="button"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Khóa học
                             </a>
-
-                            <!-- Menu xổ xuống -->
                             <div class="dropdown-menu" aria-labelledby="courseDropdown">
                                 <div class="dropdown-header">
                                     <i class="fa fa-book mr-2"></i>Danh mục khóa học
@@ -706,7 +724,7 @@
                                     </a>
                                 </c:forEach>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item text-center view-all-btn" href="course">
+                                <a class="dropdown-item text-center" href="course">
                                     <i class="fa fa-arrow-right mr-2"></i>Xem tất cả
                                 </a>
                             </div>
@@ -716,20 +734,21 @@
                         <li class="nav-item"><a href="product" class="nav-link">Sản phẩm</a></li>
                         <li class="nav-item"><a href="pet" class="nav-link">Thú cưng</a></li>
                         <li class="nav-item"><a href="package" class="nav-link">Gói dịch vụ</a></li>
-                        <li class="nav-item dropdown position-relative">
-                            <a class="nav-link" href="blog" style="padding-right: 10px;">Tin tức</a>
-                            <a class="nav-link dropdown-toggle dropdown-toggle-split" href="#" id="blogDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding-left: 0;">
-                                <span class="sr-only">Toggle Dropdown</span>
-                            </a>
 
-                            <div class="dropdown-menu blog-dropdown" aria-labelledby="blogDropdown">
+                        <!-- Tin tức Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="blogDropdown" role="button"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Tin tức
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="blogDropdown">
                                 <c:forEach items="${featuredCategories}" var="category">
                                     <a class="dropdown-item" href="blog?category=${category.categoryId}">
                                         <i class="fa fa-paw mr-2"></i>${category.categoryName}
                                     </a>
                                 </c:forEach>
                                 <div class="dropdown-divider"></div>
-                                <a class="view-all" href="blog">
+                                <a class="dropdown-item text-center" href="blog">
                                     <i class="fa fa-arrow-right mr-2"></i>Xem tất cả
                                 </a>
                             </div>
@@ -743,105 +762,64 @@
         <!-- END nav -->
 
 
+
         <section class="ftco-section bg-light">
             <div class="container">
-                <div class="row">
-                    <!-- Nhân sự 1 -->
-                    <div class="col-md-6 col-lg-3 ftco-animate">
-                        <div class="staff">
-                            <div class="img-wrap d-flex align-items-stretch">
-                                <div class="img align-self-stretch" style="background-image: url(images/staff-1.jpg);"></div>
-                            </div>
-                            <div class="text pt-3 px-3 pb-4 text-center">
-                                <h3>Lloyd Wilson</h3>
-                                <span class="position mb-2">Huấn luyện viên sức khỏe</span>
-                                <div class="faded">
-                                    <p>Tôi là một người tham vọng và chăm chỉ, ngoài ra cũng khá giản dị.</p>
-                                    <ul class="ftco-social text-center">
-                                        <li class="ftco-animate"><a href="#"><span class="fa fa-twitter"></span></a></li>
-                                        <li class="ftco-animate"><a href="#"><span class="fa fa-facebook"></span></a></li>
-                                        <li class="ftco-animate"><a href="#"><span class="fa fa-google"></span></a></li>
-                                        <li class="ftco-animate"><a href="#"><span class="fa fa-instagram"></span></a></li>
-                                    </ul>
+                <c:forEach var="e" items="${experts}" varStatus="status">
+                    <c:if test="${status.index % 3 == 0}">
+                        <div class="row mb-4">
+                        </c:if>
+
+                        <div class="col-md-4 ftco-animate">
+                            <div class="staff shadow-sm rounded">
+                                <div class="img-wrap d-flex align-items-stretch">
+                                    <div class="img align-self-stretch"
+                                         style="background-image: url(${e.imageUrl}); height: 250px; background-size: cover; background-position: center;"></div>
+                                </div>
+                                <div class="text pt-3 px-3 pb-4 text-center">
+                                    <h3 class="text-dark font-weight-bold">${e.fullName}</h3>
+                                    <span class="position mb-2 text-muted">${e.position}</span>
+                                    <div class="faded mt-2">
+                                        <p>${e.bio}</p>
+
+                                        <!-- Thông tin đối tác -->
+                                        <c:if test="${not empty e.partner}">
+                                            <div class="partner-info mt-3 border-top pt-2">
+                                                <h6 class="text-primary mb-1">Đối tác:</h6>
+                                                <p class="mb-1"><strong>${e.partner.name}</strong></p>
+                                                <p class="mb-1 text-muted">${e.partner.partnerType} - ${e.partner.country}</p>
+
+                                                <c:if test="${not empty e.partner.website}">
+                                                    <a href="${e.partner.website}" target="_blank" class="btn btn-sm btn-outline-primary mt-1">
+                                                        Trang web đối tác
+                                                    </a>
+                                                </c:if>
+                                            </div>
+                                        </c:if>
+
+                                        <!-- Mạng xã hội (chỉ Facebook) -->
+                                        <ul class="ftco-social text-center mt-3 list-unstyled d-flex justify-content-center">
+                                            <c:if test="${not empty e.facebookUrl}">
+                                                <li class="mx-2">
+                                                    <a href="${e.facebookUrl}" class="text-primary">
+                                                        <span class="fa fa-facebook"></span>
+                                                    </a>
+                                                </li>
+                                            </c:if>
+                                        </ul>
+
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Nhân sự 2 -->
-                    <div class="col-md-6 col-lg-3 ftco-animate">
-                        <div class="staff">
-                            <div class="img-wrap d-flex align-items-stretch">
-                                <div class="img align-self-stretch" style="background-image: url(images/staff-2.jpg);"></div>
-                            </div>
-                            <div class="text pt-3 px-3 pb-4 text-center">
-                                <h3>Rachel Parker</h3>
-                                <span class="position mb-2">Huấn luyện viên cuộc sống & kinh doanh</span>
-                                <div class="faded">
-                                    <p>Tôi là một người tham vọng và chăm chỉ, ngoài ra cũng khá giản dị.</p>
-                                    <ul class="ftco-social text-center">
-                                        <li class="ftco-animate"><a href="#"><span class="fa fa-twitter"></span></a></li>
-                                        <li class="ftco-animate"><a href="#"><span class="fa fa-facebook"></span></a></li>
-                                        <li class="ftco-animate"><a href="#"><span class="fa fa-google"></span></a></li>
-                                        <li class="ftco-animate"><a href="#"><span class="fa fa-instagram"></span></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Các nhân sự còn lại -->
-                    <!-- Bạn có thể copy đoạn trên và thay đổi tên, vị trí, hình ảnh nếu muốn -->
-                    <!-- Ví dụ với nhân sự 3 -->
-                    <div class="col-md-6 col-lg-3 ftco-animate">
-                        <div class="staff">
-                            <div class="img-wrap d-flex align-items-stretch">
-                                <div class="img align-self-stretch" style="background-image: url(images/staff-3.jpg);"></div>
-                            </div>
-                            <div class="text pt-3 px-3 pb-4 text-center">
-                                <h3>Ian Smith</h3>
-                                <span class="position mb-2">Huấn luyện viên điều hành</span>
-                                <div class="faded">
-                                    <p>Tôi là một người tham vọng và chăm chỉ, ngoài ra cũng khá giản dị.</p>
-                                    <ul class="ftco-social text-center">
-                                        <li class="ftco-animate"><a href="#"><span class="fa fa-twitter"></span></a></li>
-                                        <li class="ftco-animate"><a href="#"><span class="fa fa-facebook"></span></a></li>
-                                        <li class="ftco-animate"><a href="#"><span class="fa fa-google"></span></a></li>
-                                        <li class="ftco-animate"><a href="#"><span class="fa fa-instagram"></span></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Nhân sự 9 -->
-                    <div class="col-md-6 col-lg-3 ftco-animate">
-                        <div class="staff">
-                            <div class="img-wrap d-flex align-items-stretch">
-                                <div class="img align-self-stretch" style="background-image: url(images/staff-10.jpg);"></div>
-                            </div>
-                            <div class="text pt-3 px-3 pb-4 text-center">
-                                <h3>Minh Nguyễn</h3>
-                                <span class="position mb-2">Huấn luyện viên thú cưng</span>
-                                <div class="faded">
-                                    <p>Tôi luôn yêu thương động vật và mong muốn mang đến những dịch vụ tốt nhất cho thú cưng.</p>
-                                    <ul class="ftco-social text-center">
-                                        <li class="ftco-animate"><a href="#"><span class="fa fa-twitter"></span></a></li>
-                                        <li class="ftco-animate"><a href="#"><span class="fa fa-facebook"></span></a></li>
-                                        <li class="ftco-animate"><a href="#"><span class="fa fa-google"></span></a></li>
-                                        <li class="ftco-animate"><a href="#"><span class="fa fa-instagram"></span></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-
-                    <!-- Lặp lại tương tự với các nhân viên còn lại: Alicia, Fred, v.v... -->
-                </div>
+                        <c:if test="${status.index % 3 == 2 || status.last}">
+                        </div> <!-- kết thúc row -->
+                    </c:if>
+                </c:forEach>
             </div>
-        </section>
 
+        </section>
 
 
         <!-- Footer -->

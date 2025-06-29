@@ -30,7 +30,7 @@
         <link href="https://fonts.googleapis.com/css?family=Montserrat:200,300,400,500,600,700,800&display=swap" rel="stylesheet">
 
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <link rel="stylesheet" href="css/animate.css">
 
         <link rel="stylesheet" href="css/owl.carousel.min.css">
@@ -632,6 +632,37 @@
             .navbar-nav .dropdown-menu.blog-dropdown .view-all:hover {
                 text-decoration: underline;
             }
+
+
+            .popup-detail {
+                background: #fff;
+                padding: 30px 40px;
+                max-width: 1200px;       /* 👉 tăng chiều rộng lên */
+                margin: 50px auto;
+                border-radius: 16px;
+                box-shadow: 0 0 20px rgba(0,0,0,0.2); /* thêm bóng */
+                font-size: 1.1rem;       /* tăng cỡ chữ */
+            }
+
+            .popup-detail img {
+                max-width: 100%;
+                border-radius: 12px;
+                box-shadow: 0 0 8px rgba(0,0,0,0.15); /* thêm bóng nhẹ cho ảnh */
+            }
+
+            .popup-detail h3 {
+                color: #8B5E3C;
+                font-weight: 700;
+                font-size: 1.6rem;       /* to hơn nữa */
+                margin-bottom: 20px;
+            }
+
+            .popup-detail p {
+                margin-bottom: 12px;
+                line-height: 1.6;
+            }
+
+
         </style>
     </head>
     <body>
@@ -679,25 +710,29 @@
         </div>
 
         <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark ftco-navbar-light" id="ftco-navbar">
             <div class="container">
-                <a class="navbar-brand" href="home"><span class="flaticon-pawprint-1 mr-2"></span>PetTech</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand" href="home">
+                    <span class="flaticon-pawprint-1 mr-2"></span>PetTech
+                </a>
+
+                <!-- Nút menu mobile -->
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav"
+                        aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="fa fa-bars"></span> Menu
                 </button>
+
+                <!-- Menu chính -->
                 <div class="collapse navbar-collapse" id="ftco-nav">
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item active"><a href="home" class="nav-link">Trang chủ</a></li>
-                        <li class="nav-item dropdown position-relative">
-                            <!-- Dòng chính link -->
-                            <a class="nav-link" href="course" style="padding-right: 10px;">Khóa học</a>
 
-                            <!-- Nút xổ dropdown -->
-                            <a class="nav-link dropdown-toggle dropdown-toggle-split" href="#" id="courseDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding-left: 0;">
-                                <span class="sr-only">Toggle Dropdown</span>
+                        <!-- Khóa học Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="courseDropdown" role="button"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Khóa học
                             </a>
-
-                            <!-- Menu xổ xuống -->
                             <div class="dropdown-menu" aria-labelledby="courseDropdown">
                                 <div class="dropdown-header">
                                     <i class="fa fa-book mr-2"></i>Danh mục khóa học
@@ -708,7 +743,7 @@
                                     </a>
                                 </c:forEach>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item text-center view-all-btn" href="course">
+                                <a class="dropdown-item text-center" href="course">
                                     <i class="fa fa-arrow-right mr-2"></i>Xem tất cả
                                 </a>
                             </div>
@@ -718,20 +753,21 @@
                         <li class="nav-item"><a href="product" class="nav-link">Sản phẩm</a></li>
                         <li class="nav-item"><a href="pet" class="nav-link">Thú cưng</a></li>
                         <li class="nav-item"><a href="package" class="nav-link">Gói dịch vụ</a></li>
-                        <li class="nav-item dropdown position-relative">
-                            <a class="nav-link" href="blog" style="padding-right: 10px;">Tin tức</a>
-                            <a class="nav-link dropdown-toggle dropdown-toggle-split" href="#" id="blogDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding-left: 0;">
-                                <span class="sr-only">Toggle Dropdown</span>
-                            </a>
 
-                            <div class="dropdown-menu blog-dropdown" aria-labelledby="blogDropdown">
+                        <!-- Tin tức Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="blogDropdown" role="button"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Tin tức
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="blogDropdown">
                                 <c:forEach items="${featuredCategories}" var="category">
                                     <a class="dropdown-item" href="blog?category=${category.categoryId}">
                                         <i class="fa fa-paw mr-2"></i>${category.categoryName}
                                     </a>
                                 </c:forEach>
                                 <div class="dropdown-divider"></div>
-                                <a class="view-all" href="blog">
+                                <a class="dropdown-item text-center" href="blog">
                                     <i class="fa fa-arrow-right mr-2"></i>Xem tất cả
                                 </a>
                             </div>
@@ -747,138 +783,70 @@
         <section class="ftco-section">
             <div class="container">
                 <div class="row">
-                    <div class="col-md-4 ftco-animate">
-                        <div class="work mb-4 img d-flex align-items-end" style="background-image: url(images/gallery-1.jpg);">
-                            <a href="images/gallery-1.jpg" class="icon image-popup d-flex justify-content-center align-items-center">
-                                <span class="fa fa-expand"></span>
-                            </a>
-                            <div class="desc w-100 px-4">
-                                <div class="text w-100 mb-3">
-                                    <span>Mèo</span>
-                                    <h2><a href="work-single.html">Mèo Ba Tư</a></h2>
+                    <c:forEach var="pet" items="${pets}">
+                        <div class="col-md-4 ftco-animate">
+                            <div class="work mb-4 img d-flex align-items-end" 
+                                 style="background-image: url('${pet.primaryImage}');">
+                                <a href="#popup-${pet.id}" class="icon open-popup-link d-flex justify-content-center align-items-center">
+                                    <span class="fa fa-expand"></span>
+                                </a>
+                                <div class="desc w-100 px-4">
+                                    <div class="text w-100 mb-3">
+                                        <span>${pet.categoryName}</span>
+                                        <h2><a href="#">${pet.name}</a></h2>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-4 ftco-animate">
-                        <div class="work mb-4 img d-flex align-items-end" style="background-image: url(images/gallery-2.jpg);">
-                            <a href="images/gallery-2.jpg" class="icon image-popup d-flex justify-content-center align-items-center">
-                                <span class="fa fa-expand"></span>
-                            </a>
-                            <div class="desc w-100 px-4">
-                                <div class="text w-100 mb-3">
-                                    <span>Chó</span>
-                                    <h2><a href="work-single.html">Chó Pomeranian</a></h2>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 ftco-animate">
-                        <div class="work mb-4 img d-flex align-items-end" style="background-image: url(images/gallery-3.jpg);">
-                            <a href="images/gallery-3.jpg" class="icon image-popup d-flex justify-content-center align-items-center">
-                                <span class="fa fa-expand"></span>
-                            </a>
-                            <div class="desc w-100 px-4">
-                                <div class="text w-100 mb-3">
-                                    <span>Mèo</span>
-                                    <h2><a href="work-single.html">Mèo Sphynx</a></h2>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="col-md-4 ftco-animate">
-                        <div class="work mb-4 img d-flex align-items-end" style="background-image: url(images/gallery-4.jpg);">
-                            <a href="images/gallery-4.jpg" class="icon image-popup d-flex justify-content-center align-items-center">
-                                <span class="fa fa-expand"></span>
-                            </a>
-                            <div class="desc w-100 px-4">
-                                <div class="text w-100 mb-3">
-                                    <span>Mèo</span>
-                                    <h2><a href="work-single.html">Mèo Anh Lông Ngắn</a></h2>
+                        <!-- ✅ Popup thông tin chi tiết -->
+                        <div id="popup-${pet.id}" class="mfp-hide white-popup-block popup-detail">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <img src="${pet.primaryImage}" alt="${pet.name}" class="img-fluid rounded">
+                                </div>
+                                <div class="col-md-6">
+                                    <h3>${pet.name}</h3>
+                                    <p><strong>Loài:</strong> ${pet.categoryName}</p>
+                                    <p><strong>Giống:</strong> ${pet.breed}</p>
+                                    <p><strong>Giới tính:</strong> ${pet.gender}</p>
+                                    <p><strong>Tuổi:</strong> ${pet.age} năm</p>
+                                    <p><strong>Màu lông:</strong> ${pet.color}</p>
+                                    <p><strong>Cân nặng:</strong> ${pet.weight} kg</p>
+                                    <p><strong>Miêu tả:</strong><br>${pet.description}</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-4 ftco-animate">
-                        <div class="work mb-4 img d-flex align-items-end" style="background-image: url(images/gallery-5.jpg);">
-                            <a href="images/gallery-5.jpg" class="icon image-popup d-flex justify-content-center align-items-center">
-                                <span class="fa fa-expand"></span>
-                            </a>
-                            <div class="desc w-100 px-4">
-                                <div class="text w-100 mb-3">
-                                    <span>Chó</span>
-                                    <h2><a href="work-single.html">Chó Beagle</a></h2>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 ftco-animate">
-                        <div class="work mb-4 img d-flex align-items-end" style="background-image: url(images/gallery-6.jpg);">
-                            <a href="images/gallery-6.jpg" class="icon image-popup d-flex justify-content-center align-items-center">
-                                <span class="fa fa-expand"></span>
-                            </a>
-                            <div class="desc w-100 px-4">
-                                <div class="text w-100 mb-3">
-                                    <span>Chó</span>
-                                    <h2><a href="work-single.html">Chó Pug</a></h2>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    </c:forEach>
 
-                    <div class="col-md-4 ftco-animate">
-                        <div class="work mb-4 img d-flex align-items-end" style="background-image: url(images/gallery-7.jpg);">
-                            <a href="images/gallery-7.jpg" class="icon image-popup d-flex justify-content-center align-items-center">
-                                <span class="fa fa-expand"></span>
-                            </a>
-                            <div class="desc w-100 px-4">
-                                <div class="text w-100 mb-3">
-                                    <span>Mèo</span>
-                                    <h2><a href="work-single.html">Mèo Anh Lông Ngắn</a></h2>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 ftco-animate">
-                        <div class="work mb-4 img d-flex align-items-end" style="background-image: url(images/gallery-8.jpg);">
-                            <a href="images/gallery-8.jpg" class="icon image-popup d-flex justify-content-center align-items-center">
-                                <span class="fa fa-expand"></span>
-                            </a>
-                            <div class="desc w-100 px-4">
-                                <div class="text w-100 mb-3">
-                                    <span>Chó</span>
-                                    <h2><a href="work-single.html">Chó Beagle</a></h2>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 ftco-animate">
-                        <div class="work mb-4 img d-flex align-items-end" style="background-image: url(images/gallery-9.jpg);">
-                            <a href="images/gallery-9.jpg" class="icon image-popup d-flex justify-content-center align-items-center">
-                                <span class="fa fa-expand"></span>
-                            </a>
-                            <div class="desc w-100 px-4">
-                                <div class="text w-100 mb-3">
-                                    <span>Chó</span>
-                                    <h2><a href="work-single.html">Chó Pug</a></h2>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
+
                 <div class="row mt-5">
                     <div class="col text-center">
                         <div class="block-27">
                             <ul>
-                                <li><a href="#">&lt;</a></li>
-                                <li class="active"><span>1</span></li>
-                                <li><a href="#">2</a></li>
-                                <li><a href="#">3</a></li>
-                                <li><a href="#">4</a></li>
-                                <li><a href="#">5</a></li>
-                                <li><a href="#">&gt;</a></li>
+                                <c:if test="${currentPage > 1}">
+                                    <li><a href="pet?page=${currentPage - 1}">&lt;</a></li>
+                                    </c:if>
+
+                                <c:forEach var="i" begin="1" end="${totalPages}">
+                                    <li class="${i == currentPage ? 'active' : ''}">
+                                        <c:choose>
+                                            <c:when test="${i == currentPage}">
+                                                <span>${i}</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <a href="pet?page=${i}">${i}</a>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </li>
+                                </c:forEach>
+
+                                <c:if test="${currentPage < totalPages}">
+                                    <li><a href="pet?page=${currentPage + 1}">&gt;</a></li>
+                                    </c:if>
                             </ul>
+
                         </div>
                     </div>
                 </div>
@@ -977,6 +945,16 @@
                                 e.preventDefault();
                                         console.log("Click ok");
                                 });
+        </script>
+        <script>
+                    $(document).ready(function () {
+            $('.open-popup-link').magnificPopup({
+            type: 'inline',
+                    midClick: true,
+                    closeBtnInside: true,
+                    mainClass: 'mfp-zoom-in'
+            });
+            });
         </script>
 
     </body>

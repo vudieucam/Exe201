@@ -4,33 +4,45 @@
  */
 package model;
 
-import java.util.Date;
+import java.sql.Date;
+import java.sql.Timestamp;
 
 /**
  *
  * @author FPT
  */
 public class Partner {
-
     private int id;
     private String name;
     private String email;
     private String phone;
     private String address;
     private String description;
-    private boolean status; // true: active, false: inactive
-    private Date createdAt;
+    private String partnerType;
+    private String country;
+    private Date partnershipDate;
+    private int projectCount;
+    private String logoUrl;
+    private String website;
+    private boolean status;
+    private Timestamp createdAt;
 
     public Partner() {
     }
 
-    public Partner(int id, String name, String email, String phone, String address, String description, boolean status, Date createdAt) {
+    public Partner(int id, String name, String email, String phone, String address, String description, String partnerType, String country, Date partnershipDate, int projectCount, String logoUrl, String website, boolean status, Timestamp createdAt) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.phone = phone;
         this.address = address;
         this.description = description;
+        this.partnerType = partnerType;
+        this.country = country;
+        this.partnershipDate = partnershipDate;
+        this.projectCount = projectCount;
+        this.logoUrl = logoUrl;
+        this.website = website;
         this.status = status;
         this.createdAt = createdAt;
     }
@@ -83,6 +95,54 @@ public class Partner {
         this.description = description;
     }
 
+    public String getPartnerType() {
+        return partnerType;
+    }
+
+    public void setPartnerType(String partnerType) {
+        this.partnerType = partnerType;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public Date getPartnershipDate() {
+        return partnershipDate;
+    }
+
+    public void setPartnershipDate(Date partnershipDate) {
+        this.partnershipDate = partnershipDate;
+    }
+
+    public int getProjectCount() {
+        return projectCount;
+    }
+
+    public void setProjectCount(int projectCount) {
+        this.projectCount = projectCount;
+    }
+
+    public String getLogoUrl() {
+        return logoUrl;
+    }
+
+    public void setLogoUrl(String logoUrl) {
+        this.logoUrl = logoUrl;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
+
     public boolean isStatus() {
         return status;
     }
@@ -91,28 +151,14 @@ public class Partner {
         this.status = status;
     }
 
-    public Date getCreatedAt() {
+    public Timestamp getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Partner{");
-        sb.append("id=").append(id);
-        sb.append(", name=").append(name);
-        sb.append(", email=").append(email);
-        sb.append(", phone=").append(phone);
-        sb.append(", address=").append(address);
-        sb.append(", description=").append(description);
-        sb.append(", status=").append(status);
-        sb.append(", createdAt=").append(createdAt);
-        sb.append('}');
-        return sb.toString();
-    }
-
+    
+    
 }

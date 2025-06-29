@@ -3638,7 +3638,6 @@ input[type="button"].btn-block {
     .navbar-expand-lg .navbar-collapse {
       display: -webkit-box !important;
       display: -ms-flexbox !important;
-      display: flex !important;
       -ms-flex-preferred-size: auto;
       flex-basis: auto; }
     .navbar-expand-lg .navbar-toggler {
@@ -9798,11 +9797,3 @@ textarea.form-control {
   100% {
     stroke-dasharray: 89, 200;
     stroke-dashoffset: -136px; } }
-@media (max-width: 991.98px) {
-  .navbar-collapse {
-    display: none;
-  }
-  .navbar-collapse.show {
-    display: block;
-  }
-}
