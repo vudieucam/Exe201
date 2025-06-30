@@ -18,12 +18,15 @@ import model.Pet;
 public class PetDAO extends DBConnect {
 
     public List<Pet> getAllActivePets() throws SQLException {
-        String sql = "SELECT p.id, p.name, p.gender, p.age, p.color, p.weight, "
-                + "p.breed, p.description, c.name AS category_name, i.image_url "
-                + "FROM pets p "
-                + "JOIN pet_categories c ON p.category_id = c.id "
-                + "LEFT JOIN pet_images i ON p.id = i.pet_id AND i.is_primary = 1 "
-                + "WHERE p.status = 1";
+        String sql = "SELECT \n"
+                + "    p.id, p.name, p.gender, p.age, p.color, p.weight,\n"
+                + "    p.breed, p.description,\n"
+                + "    c.name AS category_name,\n"
+                + "    i.image_url\n"
+                + "FROM [PetTech].[dbo].[pets] p\n"
+                + "JOIN [PetTech].[dbo].pet_categories c ON p.category_id = c.id\n"
+                + "LEFT JOIN [PetTech].[dbo].pet_images i ON p.id = i.pet_id AND i.is_primary = 1\n"
+                + "WHERE p.status = 1;";
 
         List<Pet> list = new ArrayList<>();
         try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
@@ -46,11 +49,14 @@ public class PetDAO extends DBConnect {
     }
 
     public List<Pet> getAllActivePetsAdmin() throws SQLException {
-        String sql = "SELECT p.id, p.name, p.gender, p.age, p.color, p.weight, "
-                + "p.breed, p.description, c.name AS category_name, i.image_url "
-                + "FROM pets p "
-                + "JOIN pet_categories c ON p.category_id = c.id "
-                + "LEFT JOIN pet_images i ON p.id = i.pet_id AND i.is_primary = 1 ";
+        String sql = "SELECT \n"
+                + "    p.id, p.name, p.gender, p.age, p.color, p.weight,\n"
+                + "    p.breed, p.description,\n"
+                + "    c.name AS category_name,\n"
+                + "    i.image_url\n"
+                + "FROM [PetTech].[dbo].[pets] p\n"
+                + "JOIN [PetTech].[dbo].pet_categories c ON p.category_id = c.id\n"
+                + "LEFT JOIN [PetTech].[dbo].pet_images i ON p.id = i.pet_id AND i.is_primary = 1\n";
 
         List<Pet> list = new ArrayList<>();
         try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {

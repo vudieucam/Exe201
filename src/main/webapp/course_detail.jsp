@@ -28,16 +28,14 @@ if (course == null) {
 
     <head>
         <!-- Google tag (gtag.js) -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-3BE5RLS31D"></script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-J33JSNL2QG"></script>
         <script>
             window.dataLayer = window.dataLayer || [];
             function gtag() {
                 dataLayer.push(arguments);
             }
             gtag('js', new Date());
-
-            gtag('config', 'G-3BE5RLS31D');
-        </script>
+            gtag('config', 'G-J33JSNL2QG');</script>
         <title>Lỗi - Không tìm thấy khóa học | PetTech</title>
         <meta charset="UTF-8">
         <link rel="icon" type="image/png" href="images/logo_pettech.jpg">

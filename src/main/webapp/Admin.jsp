@@ -8,6 +8,7 @@
 <!DOCTYPE html>
 <html lang="vi">
     <head>
+
         <meta charset="UTF-8">
         <link rel="icon" type="image/png" href="images/logo_pettech.jpg">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1067,196 +1068,196 @@
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
         <script>
-                                                    const dailyLabels = ${dailyLabels};
-                                                    const dailyVisits = ${dailyVisits};
-                                                    const dailyUsers = ${dailyUsers};
-                                                    const ctrLabels = ${ctrLabels};
-                                                    const ctrValues = ${ctrValues};
-                                                    const courseTitles = ${courseTitles};
-                                                    const avgTimes = ${avgTimes};
-                                                    const completionCourseTitles = ${completionCourseTitles};
-                                                    const completionRates = ${completionRates};
-                                                    const trafficSources = ${trafficSourcesJson};
-                                                    const userDistribution = ${userDistributionJson};
+    const dailyLabels = ${dailyLabels};
+    const dailyVisits = ${dailyVisits};
+    const dailyUsers = ${dailyUsers};
+    const ctrLabels = ${ctrLabels};
+    const ctrValues = ${ctrValues};
+    const courseTitles = ${courseTitles};
+    const avgTimes = ${avgTimes};
+    const completionCourseTitles = ${completionCourseTitles};
+    const completionRates = ${completionRates};
+    const trafficSources = ${trafficSourcesJson};
+    const userDistribution = ${userDistributionJson};
         </script>
 
 
         <!-- Script chính vẽ biểu đồ -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
-                                                    $(document).ready(function () {
-                                                    // Biểu đồ CTR
-                                                    const ctrCtx = document.getElementById('ctrChart').getContext('2d');
-                                                    new Chart(ctrCtx, {
-                                                    type: 'line',
-                                                            data: {
-                                                            labels: ctrLabels,
-                                                                    datasets: [{
-                                                                    label: 'CTR (%)',
-                                                                            data: ctrValues.map(v => v * 100),
-                                                                            borderColor: '#4361ee',
-                                                                            backgroundColor: 'rgba(67, 97, 238, 0.1)',
-                                                                            fill: true,
-                                                                            tension: 0.4
-                                                                    }]
-                                                            },
-                                                            options: {
-                                                            plugins: {
-                                                            tooltip: {
-                                                            callbacks: {
-                                                            label: ctx => ctx.parsed.y.toFixed(1) + '%'
-                                                            }
-                                                            }
-                                                            },
-                                                                    scales: {
-                                                                    y: {
-                                                                    beginAtZero: true,
-                                                                            ticks: {
-                                                                            callback: val => val + '%'
-                                                                            }
-                                                                    }
-                                                                    }
-                                                            }
-                                                    });
-                                                    // Biểu đồ User Type
-                                                    const userTypeCtx = document.getElementById('userTypeChart').getContext('2d');
-                                                    new Chart(userTypeCtx, {
-                                                    type: 'doughnut',
-                                                            data: {
-                                                            labels: ['Người mới', 'Người quay lại'],
-                                                                    datasets: [{
-                                                                    data: [${stats.newUsers}, ${stats.returningUsers}],
-                                                                            backgroundColor: ['#4361ee', '#4895ef']
-                                                                    }]
-                                                            },
-                                                            options: {
-                                                            plugins: {
-                                                            legend: {position: 'bottom'}
-                                                            }
-                                                            }
-                                                    });
-                                                    // Biểu đồ traffic nguồn
-                                                    const trafficCtx = document.getElementById('trafficSourceChart').getContext('2d');
-                                                    new Chart(trafficCtx, {
-                                                    type: 'bar',
-                                                            data: {
-                                                            labels: Object.keys(trafficSources),
-                                                                    datasets: [{
-                                                                    label: 'Nguồn truy cập',
-                                                                            data: Object.values(trafficSources),
-                                                                            backgroundColor: ['#4361ee', '#4895ef', '#4cc9f0', '#f8961e']
-                                                                    }]
-                                                            },
-                                                            options: {
-                                                            scales: {
-                                                            y: {beginAtZero: true}
-                                                            }
-                                                            }
-                                                    });
-                                                    // Biểu đồ truy cập
-                                                    const trafficChartCtx = document.getElementById('trafficChart').getContext('2d');
-                                                    new Chart(trafficChartCtx, {
-                                                    type: 'line',
-                                                            data: {
-                                                            labels: dailyLabels,
-                                                                    datasets: [
-                                                                    {
-                                                                    label: 'Lượt truy cập',
-                                                                            data: dailyVisits,
-                                                                            borderColor: '#4361ee',
-                                                                            fill: true,
-                                                                            backgroundColor: 'rgba(67, 97, 238, 0.1)'
-                                                                    },
-                                                                    {
-                                                                    label: 'Người dùng',
-                                                                            data: dailyUsers,
-                                                                            borderColor: '#4cc9f0',
-                                                                            fill: true,
-                                                                            backgroundColor: 'rgba(76, 201, 240, 0.1)'
-                                                                    }
-                                                                    ]
-                                                            },
-                                                            options: {
-                                                            scales: {
-                                                            y: {beginAtZero: true}
-                                                            }
-                                                            }
-                                                    });
-                                                    // Biểu đồ phân bổ người dùng
-                                                    const userDistCtx = document.getElementById('userDistributionChart').getContext('2d');
-                                                    new Chart(userDistCtx, {
-                                                    type: 'pie',
-                                                            data: {
-                                                            labels: ['Thường', 'Premium', 'Nhân viên', 'Quản trị'],
-                                                                    datasets: [{
-                                                                    data: [
-                                                                            userDistribution.regularUsers || 0,
-                                                                            userDistribution.premiumUsers || 0,
-                                                                            userDistribution.staffUsers || 0,
-                                                                            userDistribution.adminUsers || 0
-                                                                    ],
-                                                                            backgroundColor: ['#4361ee', '#4895ef', '#4cc9f0', '#f8961e']
-                                                                    }]
-                                                            },
-                                                            options: {
-                                                            plugins: {
-                                                            legend: {position: 'bottom'}
-                                                            }
-                                                            }
-                                                    });
-                                                    // Biểu đồ thời gian học
-                                                    const learningTimeCtx = document.getElementById('learningTimeChart').getContext('2d');
-                                                    new Chart(learningTimeCtx, {
-                                                    type: 'bar',
-                                                            data: {
-                                                            labels: courseTitles,
-                                                                    datasets: [{
-                                                                    label: 'Thời gian trung bình (phút)',
-                                                                            data: avgTimes,
-                                                                            backgroundColor: '#4361ee'
-                                                                    }]
-                                                            },
-                                                            options: {
-                                                            scales: {
-                                                            y: {
-                                                            beginAtZero: true,
-                                                                    title: {display: true, text: 'Phút'}
-                                                            }
-                                                            }
-                                                            }
-                                                    });
-                                                    // Biểu đồ tỉ lệ hoàn thành
-                                                    const completionCtx = document.getElementById('completionRateChart').getContext('2d');
-                                                    new Chart(completionCtx, {
-                                                    type: 'bar',
-                                                            data: {
-                                                            labels: completionCourseTitles,
-                                                                    datasets: [{
-                                                                    label: 'Tỉ lệ hoàn thành (%)',
-                                                                            data: completionRates.map(r => r * 100),
-                                                                            backgroundColor: '#4cc9f0'
-                                                                    }]
-                                                            },
-                                                            options: {
-                                                            plugins: {
-                                                            tooltip: {
-                                                            callbacks: {
-                                                            label: ctx => ctx.parsed.y.toFixed(1) + '%'
-                                                            }
-                                                            }
-                                                            },
-                                                                    scales: {
-                                                                    y: {
-                                                                    beginAtZero: true,
-                                                                            max: 100,
-                                                                            ticks: {
-                                                                            callback: val => val + '%'
-                                                                            }
-                                                                    }
-                                                                    }
-                                                            }
-                                                    });
-                                                    });
+    $(document).ready(function () {
+    // Biểu đồ CTR
+    const ctrCtx = document.getElementById('ctrChart').getContext('2d');
+    new Chart(ctrCtx, {
+    type: 'line',
+            data: {
+            labels: ctrLabels,
+                    datasets: [{
+                    label: 'CTR (%)',
+                            data: ctrValues.map(v => v * 100),
+                            borderColor: '#4361ee',
+                            backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                    }]
+            },
+            options: {
+            plugins: {
+            tooltip: {
+            callbacks: {
+            label: ctx => ctx.parsed.y.toFixed(1) + '%'
+            }
+            }
+            },
+                    scales: {
+                    y: {
+                    beginAtZero: true,
+                            ticks: {
+                            callback: val => val + '%'
+                            }
+                    }
+                    }
+            }
+    });
+    // Biểu đồ User Type
+    const userTypeCtx = document.getElementById('userTypeChart').getContext('2d');
+    new Chart(userTypeCtx, {
+    type: 'doughnut',
+            data: {
+            labels: ['Người mới', 'Người quay lại'],
+                    datasets: [{
+                    data: [${stats.newUsers}, ${stats.returningUsers}],
+                            backgroundColor: ['#4361ee', '#4895ef']
+                    }]
+            },
+            options: {
+            plugins: {
+            legend: {position: 'bottom'}
+            }
+            }
+    });
+    // Biểu đồ traffic nguồn
+    const trafficCtx = document.getElementById('trafficSourceChart').getContext('2d');
+    new Chart(trafficCtx, {
+    type: 'bar',
+            data: {
+            labels: Object.keys(trafficSources),
+                    datasets: [{
+                    label: 'Nguồn truy cập',
+                            data: Object.values(trafficSources),
+                            backgroundColor: ['#4361ee', '#4895ef', '#4cc9f0', '#f8961e']
+                    }]
+            },
+            options: {
+            scales: {
+            y: {beginAtZero: true}
+            }
+            }
+    });
+    // Biểu đồ truy cập
+    const trafficChartCtx = document.getElementById('trafficChart').getContext('2d');
+    new Chart(trafficChartCtx, {
+    type: 'line',
+            data: {
+            labels: dailyLabels,
+                    datasets: [
+                    {
+                    label: 'Lượt truy cập',
+                            data: dailyVisits,
+                            borderColor: '#4361ee',
+                            fill: true,
+                            backgroundColor: 'rgba(67, 97, 238, 0.1)'
+                    },
+                    {
+                    label: 'Người dùng',
+                            data: dailyUsers,
+                            borderColor: '#4cc9f0',
+                            fill: true,
+                            backgroundColor: 'rgba(76, 201, 240, 0.1)'
+                    }
+                    ]
+            },
+            options: {
+            scales: {
+            y: {beginAtZero: true}
+            }
+            }
+    });
+    // Biểu đồ phân bổ người dùng
+    const userDistCtx = document.getElementById('userDistributionChart').getContext('2d');
+    new Chart(userDistCtx, {
+    type: 'pie',
+            data: {
+            labels: ['Thường', 'Premium', 'Nhân viên', 'Quản trị'],
+                    datasets: [{
+                    data: [
+                            userDistribution.regularUsers || 0,
+                            userDistribution.premiumUsers || 0,
+                            userDistribution.staffUsers || 0,
+                            userDistribution.adminUsers || 0
+                    ],
+                            backgroundColor: ['#4361ee', '#4895ef', '#4cc9f0', '#f8961e']
+                    }]
+            },
+            options: {
+            plugins: {
+            legend: {position: 'bottom'}
+            }
+            }
+    });
+    // Biểu đồ thời gian học
+    const learningTimeCtx = document.getElementById('learningTimeChart').getContext('2d');
+    new Chart(learningTimeCtx, {
+    type: 'bar',
+            data: {
+            labels: courseTitles,
+                    datasets: [{
+                    label: 'Thời gian trung bình (phút)',
+                            data: avgTimes,
+                            backgroundColor: '#4361ee'
+                    }]
+            },
+            options: {
+            scales: {
+            y: {
+            beginAtZero: true,
+                    title: {display: true, text: 'Phút'}
+            }
+            }
+            }
+    });
+    // Biểu đồ tỉ lệ hoàn thành
+    const completionCtx = document.getElementById('completionRateChart').getContext('2d');
+    new Chart(completionCtx, {
+    type: 'bar',
+            data: {
+            labels: completionCourseTitles,
+                    datasets: [{
+                    label: 'Tỉ lệ hoàn thành (%)',
+                            data: completionRates.map(r => r * 100),
+                            backgroundColor: '#4cc9f0'
+                    }]
+            },
+            options: {
+            plugins: {
+            tooltip: {
+            callbacks: {
+            label: ctx => ctx.parsed.y.toFixed(1) + '%'
+            }
+            }
+            },
+                    scales: {
+                    y: {
+                    beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                            callback: val => val + '%'
+                            }
+                    }
+                    }
+            }
+    });
+    });
         </script>
 
         <script>
