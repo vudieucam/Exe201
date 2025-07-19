@@ -689,6 +689,21 @@
                     height: 250px;
                 }
             }
+            .status-badge {
+                padding: 4px 8px;
+                border-radius: 6px;
+                font-size: 0.85rem;
+                font-weight: 500;
+            }
+            .status-active {
+                background-color: #d1e7dd;
+                color: #0f5132;
+            }
+            .status-inactive {
+                background-color: #f8d7da;
+                color: #842029;
+            }
+
         </style>
     </head>
     <body>
@@ -814,474 +829,184 @@
                                 </div>
                             </c:when>
                             <c:otherwise>
-                                <h1 class="mb-4">Dashboard Quản Trị</h1>
+                                <h1 class="mb-4">Quản lý Hệ thống</h1>
 
-                                <!-- Thống kê tổng quan -->
-                                <div class="dashboard-section">
-                                    <h4 class="section-title">Tổng quan hệ thống</h4>
-                                    <div class="row">
-                                        <div class="col-md-3">
-                                            <div class="card stat-card bg-primary">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">Người dùng Online</h5>
-                                                    <p class="card-value">${stats.onlineUsers}</p>
-                                                    <div class="card-change ${stats.userGrowth >= 0 ? 'positive' : 'negative'}">
-                                                        <i class="bi bi-arrow-${stats.userGrowth >= 0 ? 'up' : 'down'}"></i> 
-                                                        <fmt:formatNumber value="${Math.abs(stats.userGrowth)}" pattern="#,##0.0"/>% so với tháng trước
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="card stat-card bg-success">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">Tổng người dùng</h5>
-                                                    <p class="card-value">${stats.totalUsers}</p>
-                                                    <div class="card-change ${stats.userGrowth >= 0 ? 'positive' : 'negative'}">
-                                                        <i class="bi bi-arrow-${stats.userGrowth >= 0 ? 'up' : 'down'}"></i> 
-                                                        <fmt:formatNumber value="${Math.abs(stats.userGrowth)}" pattern="#,##0.0"/>% so với tháng trước
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="card stat-card bg-info">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">Người dùng hoạt động</h5>
-                                                    <p class="card-value">${stats.activeUsers}</p>
-                                                    <div class="card-change ${stats.userGrowth >= 0 ? 'positive' : 'negative'}">
-                                                        <i class="bi bi-arrow-${stats.userGrowth >= 0 ? 'up' : 'down'}"></i> 
-                                                        <fmt:formatNumber value="${Math.abs(stats.userGrowth)}" pattern="#,##0.0"/>% so với tháng trước
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="card stat-card bg-warning">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">Doanh thu tháng</h5>
-                                                    <p class="card-value"><fmt:formatNumber value="${stats.monthlyRevenue}" type="currency" currencySymbol="₫"/></p>
-                                                    <div class="card-change positive">
-                                                        <i class="bi bi-arrow-up"></i> 
-                                                        <fmt:formatNumber value="${stats.monthlyRevenue.doubleValue() / stats.totalRevenue.doubleValue() * 100}" pattern="#,##0.0"/>% tổng doanh thu
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <div class="container-fluid mt-4">
 
-                                <!-- Chỉ số hiệu suất kỹ thuật -->
-                                <div class="dashboard-section">
-                                    <h4 class="section-title">Hiệu suất kỹ thuật</h4>
-                                    <div class="row">
-                                        <div class="col-md-3">
-                                            <div class="card stat-card bg-info">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">Thời gian tải trang (s)</h5>
-                                                    <p class="card-value"><fmt:formatNumber value="${stats.pageLoadTime}" maxFractionDigits="2"/></p>
-                                                    <div class="progress progress-thin mt-2">
-                                                        <div class="progress-bar bg-white" 
-                                                             style="width: ${100 - (stats.pageLoadTime * 20)}%"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="card stat-card bg-primary">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">Phản hồi máy chủ (ms)</h5>
-                                                    <p class="card-value"><fmt:formatNumber value="${stats.serverResponseTime}" maxFractionDigits="0"/></p>
-                                                    <div class="progress progress-thin mt-2">
-                                                        <div class="progress-bar bg-white" 
-                                                             style="width: ${100 - (stats.serverResponseTime / 10)}%"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="card stat-card bg-warning">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">Tỉ lệ lỗi</h5>
-                                                    <p class="card-value"><fmt:formatNumber value="${stats.errorRate}" type="percent" maxFractionDigits="1"/></p>
-                                                    <div class="progress progress-thin mt-2">
-                                                        <div class="progress-bar bg-white" 
-                                                             style="width: ${stats.errorRate * 100}%"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="card stat-card bg-danger">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">Tỉ lệ thoát</h5>
-                                                    <p class="card-value"><fmt:formatNumber value="${stats.bounceRate}" type="percent" maxFractionDigits="1"/></p>
-                                                    <div class="progress progress-thin mt-2">
-                                                        <div class="progress-bar bg-white" 
-                                                             style="width: ${stats.bounceRate * 100}%"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                    <!-- ====== USERS ====== -->
+                                    <h2 class="mb-3">
+                                        👥 <a href="${pageContext.request.contextPath}/useradmin" class="text-decoration-none text-dark">
+                                            Người dùng
+                                        </a> (Tổng: ${fn:length(users)})
+                                    </h2>
 
 
-                                <!-- Top khóa học -->
-                                <div class="dashboard-section">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="card table-card">
-                                                <div class="card-header">
-                                                    Top khóa học xem nhiều
-                                                </div>
-                                                <div class="card-body">
-                                                    <div class="table-responsive">
-                                                        <table class="table table-hover">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>#</th>
-                                                                    <th>Tên khóa học</th>
-                                                                    <th>Lượt xem</th>
-                                                                    <th>Tăng trưởng</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                <c:forEach items="${stats.mostViewedCourses}" var="c" varStatus="loop">
-                                                                    <tr>
-                                                                        <td>${loop.index + 1}</td>
-                                                                        <td>${c.title}</td>
-                                                                        <td>${c.views}</td>
-                                                                        <td>
-                                                                            <span class="badge bg-success bg-opacity-10 text-success">
-                                                                                <i class="bi bi-arrow-up"></i> 
-                                                                                <fmt:formatNumber value="${c.growthRate}" pattern="#,##0"/>%
-                                                                            </span>
-                                                                        </td>
-                                                                    </tr>
-                                                                </c:forEach>
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="card table-card">
-                                                <div class="card-header">
-                                                    Top khóa học đánh giá cao
-                                                </div>
-                                                <div class="card-body">
-                                                    <div class="table-responsive">
-                                                        <table class="table table-hover">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>#</th>
-                                                                    <th>Tên khóa học</th>
-                                                                    <th>Đánh giá</th>
-                                                                    <th>Số lượt</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                <c:forEach items="${stats.highestRatedCourses}" var="c" varStatus="loop">
-                                                                    <tr>
-                                                                        <td>${loop.index + 1}</td>
-                                                                        <td>${c.title}</td>
-                                                                        <td>
-                                                                            <div class="d-flex align-items-center">
-                                                                                <div class="progress progress-thin w-100 me-2">
-                                                                                    <div class="progress-bar bg-warning" style="width: ${c.rating * 20}%"></div>
-                                                                                </div>
-                                                                                <span>${c.rating}/5</span>
-                                                                            </div>
-                                                                        </td>
-                                                                        <td>${c.enrollments}</td>
-                                                                    </tr>
-                                                                </c:forEach>
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Thống kê chi tiết -->
-                                <div class="dashboard-section">
-                                    <div class="card table-card">
-                                        <div class="card-header d-flex justify-content-between align-items-center">
-                                            <span>Thống kê truy cập chi tiết</span>
-                                            <div class="btn-group">
-                                                <button class="btn btn-sm btn-outline-primary" onclick="exportTableToExcel('statsTable')">Xuất Excel</button>
-                                                <button class="btn btn-sm btn-outline-secondary">Tùy chọn</button>
-                                            </div>
-                                        </div>
-                                        <div class="card-body">
+                                    <div class="card mb-5">
+                                        <div class="card-body p-0">
                                             <div class="table-responsive">
-                                                <table class="table table-hover">
-                                                    <thead>
+                                                <table class="table table-hover mb-0">
+                                                    <thead class="table-light">
                                                         <tr>
-                                                            <th>Ngày</th>
-                                                            <th>Lượt truy cập</th>
-                                                            <th>Người dùng</th>
-                                                            <th>Người dùng mới</th>
-                                                            <th>Thời gian TB</th>
-                                                            <th>Lượt xem trang</th>
-                                                            <th>Tỉ lệ thoát</th>
+                                                            <th>ID</th>
+                                                            <th>Thông tin</th>
+                                                            <th>Vai trò</th>
+                                                            <th>Địa chỉ</th>
+                                                            <th>Trạng thái</th>
+                                                            <th>Ngày tạo</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        <c:forEach items="${stats.dailyStats}" var="d">
-                                                            <tr>
-                                                                <td><fmt:formatDate value="${d.date}" pattern="dd/MM/yyyy"/></td>
-                                                                <td>${d.visits}</td>
-                                                                <td>${d.uniqueVisitors}</td>
-                                                                <td>${d.newUsers}</td>
-                                                                <td><fmt:formatNumber value="${d.avgDuration / 60}" maxFractionDigits="1"/> phút</td>
-                                                                <td>${d.pageViews}</td>
-                                                                <td>
-                                                                    <div class="progress progress-thin">
-                                                                        <div class="progress-bar bg-danger" style="width: ${d.bounceRate * 100}%"></div>
-                                                                    </div>
-                                                                    <small><fmt:formatNumber value="${d.bounceRate}" type="percent" maxFractionDigits="1"/></small>
-                                                                </td>
-                                                            </tr>
+                                                        <c:forEach var="user" items="${users}" varStatus="loop">
+                                                            <c:if test="${loop.index < 10}">
+                                                                <tr>
+                                                                    <td>${user.id}</td>
+                                                                    <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <img src="https://ui-avatars.com/api/?name=${user.fullname}&background=random" class="user-avatar me-2">
+                                                                            <div>
+                                                                                <h6 class="mb-0">${user.fullname}</h6>
+                                                                                <small class="text-muted">${user.email}</small>
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <c:choose>
+                                                                            <c:when test="${user.roleId == 1}">
+                                                                                <span class="badge bg-primary">Khách hàng</span>
+                                                                            </c:when>
+                                                                            <c:when test="${user.roleId == 2}">
+                                                                                <span class="badge bg-warning text-dark">Nhân viên</span>
+                                                                            </c:when>
+                                                                            <c:otherwise>
+                                                                                <span class="badge bg-danger">Admin</span>
+                                                                            </c:otherwise>
+                                                                        </c:choose>
+                                                                    </td>
+                                                                    <td>${user.address}</td>
+                                                                    <td>
+                                                                        <span class="status-badge ${user.status ? 'status-active' : 'status-inactive'}">
+                                                                            ${user.status ? 'Hoạt động' : 'Không hoạt động'}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>${user.createdAt}</td>
+                                                                </tr>
+                                                            </c:if>
                                                         </c:forEach>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
 
+                                    <!-- ====== COURSES ====== -->
+                                    <h2 class="mb-3">
+                                        📚 <a href="${pageContext.request.contextPath}/courseadmin" class="text-decoration-none text-dark">
+                                            Khóa học
+                                        </a> (Tổng: ${fn:length(courses)})
+                                    </h2>
+
+
+                                    <div class="card mb-5">
+                                        <div class="card-body p-0">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover mb-0">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>ID</th>
+                                                            <th>Tên khóa học</th>
+                                                            <th>Giảng viên</th>
+                                                            <th>Danh mục</th>
+                                                            <th>Thời lượng</th>
+                                                            <th>Trạng thái</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <c:forEach var="c" items="${courses}" varStatus="loop">
+                                                            <c:if test="${loop.index < 10}">
+                                                                <tr>
+                                                                    <td>${c.id}</td>
+                                                                    <td>
+                                                                        <strong>${c.title}</strong><br/>
+                                                                        <a href="${pageContext.request.contextPath}/coursedetailadmin?courseId=${c.id}" class="btn btn-sm btn-link p-0 mt-1">
+                                                                            Quản lý Module & Lesson
+                                                                        </a>
+                                                                    </td>
+                                                                    <td>${c.researcher}</td>
+                                                                    <td>
+                                                                        <c:forEach items="${c.categories}" var="cat">
+                                                                            <span class="badge bg-info">${cat.name}</span>
+                                                                        </c:forEach>
+                                                                    </td>
+                                                                    <td>${c.duration}</td>
+                                                                    <td>
+                                                                        <span class="badge ${c.status == 1 ? 'bg-success' : 'bg-secondary'}">
+                                                                            ${c.status == 1 ? 'Hoạt động' : 'Không hoạt động'}
+                                                                        </span>
+                                                                    </td>
+                                                                </tr>
+                                                            </c:if>
+                                                        </c:forEach>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- ====== PACKAGES ====== -->
+                                    <h2 class="mb-3">
+                                        📦 <a href="${pageContext.request.contextPath}/packageadmin" class="text-decoration-none text-dark">
+                                            Gói dịch vụ
+                                        </a> (Tổng: ${fn:length(packages)})
+                                    </h2>
+
+
+                                    <div class="card mb-5">
+                                        <div class="card-body p-0">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover mb-0">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>ID</th>
+                                                            <th>Tên gói</th>
+                                                            <th>Giá</th>
+                                                            <th>Loại</th>
+                                                            <th>Trạng thái</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <c:forEach var="pkg" items="${packages}" varStatus="loop">
+                                                            <c:if test="${loop.index < 10}">
+                                                                <tr>
+                                                                    <td>${pkg.id}</td>
+                                                                    <td>${pkg.name}</td>
+                                                                    <td><fmt:formatNumber value="${pkg.price}" type="number" groupingUsed="true"/>₫</td>
+                                                                    <td>${pkg.type}</td>
+                                                                    <td>
+                                                                        <span class="badge ${pkg.status ? 'bg-success' : 'bg-secondary'}">
+                                                                            ${pkg.status ? 'Hiển thị' : 'Ẩn'}
+                                                                        </span>
+                                                                    </td>
+                                                                </tr>
+                                                            </c:if>
+                                                        </c:forEach>
                                                     </tbody>
                                                 </table>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-
-                            </c:otherwise>
-                        </c:choose>
-                    </div>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
             </div>
         </div>
+    </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-        <script>
-    const dailyLabels = ${dailyLabels};
-    const dailyVisits = ${dailyVisits};
-    const dailyUsers = ${dailyUsers};
-    const ctrLabels = ${ctrLabels};
-    const ctrValues = ${ctrValues};
-    const courseTitles = ${courseTitles};
-    const avgTimes = ${avgTimes};
-    const completionCourseTitles = ${completionCourseTitles};
-    const completionRates = ${completionRates};
-    const trafficSources = ${trafficSourcesJson};
-    const userDistribution = ${userDistributionJson};
-        </script>
-
-
-        <!-- Script chính vẽ biểu đồ -->
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>
-    $(document).ready(function () {
-    // Biểu đồ CTR
-    const ctrCtx = document.getElementById('ctrChart').getContext('2d');
-    new Chart(ctrCtx, {
-    type: 'line',
-            data: {
-            labels: ctrLabels,
-                    datasets: [{
-                    label: 'CTR (%)',
-                            data: ctrValues.map(v => v * 100),
-                            borderColor: '#4361ee',
-                            backgroundColor: 'rgba(67, 97, 238, 0.1)',
-                            fill: true,
-                            tension: 0.4
-                    }]
-            },
-            options: {
-            plugins: {
-            tooltip: {
-            callbacks: {
-            label: ctx => ctx.parsed.y.toFixed(1) + '%'
-            }
-            }
-            },
-                    scales: {
-                    y: {
-                    beginAtZero: true,
-                            ticks: {
-                            callback: val => val + '%'
-                            }
-                    }
-                    }
-            }
-    });
-    // Biểu đồ User Type
-    const userTypeCtx = document.getElementById('userTypeChart').getContext('2d');
-    new Chart(userTypeCtx, {
-    type: 'doughnut',
-            data: {
-            labels: ['Người mới', 'Người quay lại'],
-                    datasets: [{
-                    data: [${stats.newUsers}, ${stats.returningUsers}],
-                            backgroundColor: ['#4361ee', '#4895ef']
-                    }]
-            },
-            options: {
-            plugins: {
-            legend: {position: 'bottom'}
-            }
-            }
-    });
-    // Biểu đồ traffic nguồn
-    const trafficCtx = document.getElementById('trafficSourceChart').getContext('2d');
-    new Chart(trafficCtx, {
-    type: 'bar',
-            data: {
-            labels: Object.keys(trafficSources),
-                    datasets: [{
-                    label: 'Nguồn truy cập',
-                            data: Object.values(trafficSources),
-                            backgroundColor: ['#4361ee', '#4895ef', '#4cc9f0', '#f8961e']
-                    }]
-            },
-            options: {
-            scales: {
-            y: {beginAtZero: true}
-            }
-            }
-    });
-    // Biểu đồ truy cập
-    const trafficChartCtx = document.getElementById('trafficChart').getContext('2d');
-    new Chart(trafficChartCtx, {
-    type: 'line',
-            data: {
-            labels: dailyLabels,
-                    datasets: [
-                    {
-                    label: 'Lượt truy cập',
-                            data: dailyVisits,
-                            borderColor: '#4361ee',
-                            fill: true,
-                            backgroundColor: 'rgba(67, 97, 238, 0.1)'
-                    },
-                    {
-                    label: 'Người dùng',
-                            data: dailyUsers,
-                            borderColor: '#4cc9f0',
-                            fill: true,
-                            backgroundColor: 'rgba(76, 201, 240, 0.1)'
-                    }
-                    ]
-            },
-            options: {
-            scales: {
-            y: {beginAtZero: true}
-            }
-            }
-    });
-    // Biểu đồ phân bổ người dùng
-    const userDistCtx = document.getElementById('userDistributionChart').getContext('2d');
-    new Chart(userDistCtx, {
-    type: 'pie',
-            data: {
-            labels: ['Thường', 'Premium', 'Nhân viên', 'Quản trị'],
-                    datasets: [{
-                    data: [
-                            userDistribution.regularUsers || 0,
-                            userDistribution.premiumUsers || 0,
-                            userDistribution.staffUsers || 0,
-                            userDistribution.adminUsers || 0
-                    ],
-                            backgroundColor: ['#4361ee', '#4895ef', '#4cc9f0', '#f8961e']
-                    }]
-            },
-            options: {
-            plugins: {
-            legend: {position: 'bottom'}
-            }
-            }
-    });
-    // Biểu đồ thời gian học
-    const learningTimeCtx = document.getElementById('learningTimeChart').getContext('2d');
-    new Chart(learningTimeCtx, {
-    type: 'bar',
-            data: {
-            labels: courseTitles,
-                    datasets: [{
-                    label: 'Thời gian trung bình (phút)',
-                            data: avgTimes,
-                            backgroundColor: '#4361ee'
-                    }]
-            },
-            options: {
-            scales: {
-            y: {
-            beginAtZero: true,
-                    title: {display: true, text: 'Phút'}
-            }
-            }
-            }
-    });
-    // Biểu đồ tỉ lệ hoàn thành
-    const completionCtx = document.getElementById('completionRateChart').getContext('2d');
-    new Chart(completionCtx, {
-    type: 'bar',
-            data: {
-            labels: completionCourseTitles,
-                    datasets: [{
-                    label: 'Tỉ lệ hoàn thành (%)',
-                            data: completionRates.map(r => r * 100),
-                            backgroundColor: '#4cc9f0'
-                    }]
-            },
-            options: {
-            plugins: {
-            tooltip: {
-            callbacks: {
-            label: ctx => ctx.parsed.y.toFixed(1) + '%'
-            }
-            }
-            },
-                    scales: {
-                    y: {
-                    beginAtZero: true,
-                            max: 100,
-                            ticks: {
-                            callback: val => val + '%'
-                            }
-                    }
-                    }
-            }
-    });
-    });
-        </script>
-
-        <script>
-            const userDistribution = ${not empty userDistributionJson ? userDistributionJson : '{}'};
-            const trafficSources = ${not empty trafficSourcesJson ? trafficSourcesJson : '{}'};
-        </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-        <script>
-            function exportTableToExcel(tableID) {
-            const table = document.getElementById(tableID);
-            const wb = XLSX.utils.table_to_book(table, {sheet: "Thống kê"});
-            const wbout = XLSX.write(wb, {bookType: 'xlsx', type: 'binary'});
-            function s2ab(s) {
-            const buf = new ArrayBuffer(s.length);
-            const view = new Uint8Array(buf);
-            for (let i = 0; i < s.length; i++)
-                    view[i] = s.charCodeAt(i) & 0xFF;
-            return buf;
-            }
-
-            saveAs(new Blob([s2ab(wbout)], {type: "application/octet-stream"}), "ThongKeChiTiet.xlsx");
-            }
-        </script>
-
-    </body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- Script chính vẽ biểu đồ -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
 </html>

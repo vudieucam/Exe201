@@ -161,8 +161,14 @@ public class CustomerCourseDAO extends DBConnect {
                 c.setImages(getCourseImages(c.getId()));
                 c.setModules(getCourseModules(c.getId()));
                 c.setReviews(getCourseReviews(c.getId()));
+
+                // ✅ Thêm dòng này:
+                c.setAverageRating(getAverageRating(c.getId()));
+                c.setEnrolledCount(getEnrolledCount(c.getId()));
+
                 return c;
             }
+
         }
         return null;
     }
@@ -424,6 +430,9 @@ public class CustomerCourseDAO extends DBConnect {
         c.setCreatedAt(rs.getDate("created_at"));
         c.setUpdatedAt(rs.getDate("updated_at"));
         c.setIsPaid(rs.getBoolean("is_paid"));
+// Thêm thống kê
+        c.setAverageRating(getAverageRating(c.getId()));
+        c.setEnrolledCount(getEnrolledCount(c.getId()));
         return c;
     }
 
@@ -621,4 +630,121 @@ public class CustomerCourseDAO extends DBConnect {
         }
     }
 
+    private int getUserServicePackageId(int userId) throws SQLException {
+        String sql = "SELECT service_package_id FROM users WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("service_package_id");
+                }
+            }
+        }
+        throw new SQLException("Không tìm thấy người dùng");
+    }
+
+    public double getAverageRating(int courseId) {
+        String sql = "SELECT AVG(CAST(rating AS FLOAT)) AS avg_rating "
+                + "FROM course_reviews "
+                + "WHERE course_id = ? AND status = 1";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, courseId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("avg_rating");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
+
+    public int getEnrolledCount(int courseId) {
+        String sql = "SELECT COUNT(*) AS total "
+                + "FROM course_access "
+                + "WHERE course_id = ? AND status = 1"; // status = 1: đã kích hoạt
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, courseId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public boolean updateCourseStatus(int userId, int courseId, int newStatus) {
+        String sql = "INSERT INTO course_access (user_id, course_id, status, access_date) "
+                + "VALUES (?, ?, ?, GETDATE()) "
+                + "ON DUPLICATE KEY UPDATE status = ?"; // Hoặc cú pháp tương đương cho SQL Server
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, courseId);
+            ps.setInt(3, newStatus);
+            ps.setInt(4, newStatus);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public int getCourseStatusForUser(int userId, int courseId) {
+        String sql = "SELECT status FROM course_access WHERE user_id = ? AND course_id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, courseId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("status");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0; // Mặc định là chưa kích hoạt
+    }
+
+    // Chỉ nên giữ một phiên bản (phiên bản 2 tham số là đủ)
+    public boolean activateCourseForUser(int userId, int courseId) {
+        String sql = "IF EXISTS (SELECT 1 FROM course_access WHERE user_id = ? AND course_id = ?) "
+                + "BEGIN "
+                + "UPDATE course_access SET status = 1, access_date = GETDATE() WHERE user_id = ? AND course_id = ? "
+                + "END "
+                + "ELSE "
+                + "BEGIN "
+                + "INSERT INTO course_access (user_id, course_id, status, access_date) VALUES (?, ?, 1, GETDATE()) "
+                + "END";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, courseId);
+            ps.setInt(3, userId);
+            ps.setInt(4, courseId);
+            ps.setInt(5, userId);
+            ps.setInt(6, courseId);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean isCourseActivated(int userId, int courseId) {
+        String sql = "SELECT status FROM course_access WHERE user_id = ? AND course_id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, courseId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next() && rs.getInt("status") == 1;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

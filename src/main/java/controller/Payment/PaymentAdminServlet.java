@@ -1,202 +1,209 @@
 package controller.Payment;
 
-import dal.PackageDAO;
 import dal.PaymentDAO;
-import java.io.IOException;
+import dal.PackageDAO;
+import dal.UserDAO;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.sql.SQLException;
-import java.util.List;
+import jakarta.servlet.http.*;
 import model.Payments;
-import model.SendMailOK;
 import model.ServicePackage;
 import model.User;
+import model.SendMailOK;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PaymentAdminServlet extends HttpServlet {
 
-    private PackageDAO dao = new PackageDAO();
-    private PaymentDAO paymentDao = new PaymentDAO();
+    private PaymentDAO paymentDao;
+    private PackageDAO pkgDao;
+    private UserDAO userDao;
 
+    @Override
+    public void init() {
+        paymentDao = new PaymentDAO();
+        pkgDao = new PackageDAO();
+        userDao = new UserDAO();
+    }
+
+    /* ------------ HIỂN THỊ DANH SÁCH ------------- */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        try {
-            List<Payments> pending = paymentDao.getAllPayments();
-            req.setAttribute("pendingPayments", pending);
-            req.getRequestDispatcher("paymentsAdmin.jsp").forward(req, resp);
-        } catch (SQLException e) {
-            throw new ServletException("Lỗi truy vấn thanh toán", e);
-        }
+        loadPayments(req);
+        req.getRequestDispatcher("paymentsAdmin.jsp").forward(req, resp);
     }
 
+    /* ------------- XỬ LÝ NÚT BẤM ----------------- */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
         req.setCharacterEncoding("UTF-8");
         String action = req.getParameter("action");
-        String message = null;
-
+        String reason = req.getParameter("reason");    // reject / refund
         try {
             int paymentId = Integer.parseInt(req.getParameter("paymentId"));
+            Payments p = pkgDao.getPaymentById(paymentId);
 
             switch (action) {
-                case "confirmPayment": {
-                    Payments payment = dao.getPaymentById(paymentId);
-                    if (!"confirmed".equalsIgnoreCase(payment.getStatus()) || payment.isIsConfirmed()) {
-                        req.setAttribute("error", "❌ Chỉ được xác nhận khi trạng thái là 'confirmed' và chưa được xác nhận.");
+                /* =========== DUYỆT =========== */
+                case "approve": {
+                    if (!"waiting_admin_confirm".equalsIgnoreCase(p.getStatus())) {
+                        req.setAttribute("err",
+                                "Chỉ duyệt giao dịch đang ở trạng thái 'waiting_admin_confirm'.");
                         break;
                     }
-
-                    boolean ok = paymentDao.setConfirmed(paymentId, true);
-                    if (ok) {
-                        Object[] data = dao.getPaymentInfo(paymentId);
-                        if (data != null) {
-                            User user = (User) data[0];
-                            ServicePackage pkg = (ServicePackage) data[1];
-                            String code = (String) data[2];
-                            sendPaymentConfirmationEmail(user, pkg, code, req);
-                        }
-                        req.setAttribute("success", "✅ Đã xác nhận thanh toán.");
-                    } else {
-                        req.setAttribute("error", "❌ Không thể xác nhận.");
+                    paymentDao.updatePaymentStatus(paymentId, "completed", true);
+                    try {
+                        sendSuccessMail(paymentId, req);
+                    } catch (Exception ex) {
+                        Logger.getLogger(PaymentAdminServlet.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                    req.setAttribute("msg", "✅ Đã duyệt giao dịch #" + paymentId);
                     break;
                 }
 
-                case "revokeConfirmation": {
-                    Payments payment = dao.getPaymentById(paymentId);
-                    if (!"confirmed".equalsIgnoreCase(payment.getStatus())) {
-                        req.setAttribute("error", "⚠️ Chỉ huỷ được nếu trạng thái là 'confirmed'.");
+                /* =========== HUỶ ============= */
+                case "reject": {
+                    if (!"waiting_admin_confirm".equalsIgnoreCase(p.getStatus())) {
+                        req.setAttribute("err",
+                                "Chỉ huỷ giao dịch đang ở trạng thái 'waiting_admin_confirm'.");
                         break;
                     }
-
-                    boolean revoked = paymentDao.setConfirmed(paymentId, false);
-                    if (revoked) {
-                        req.setAttribute("success", "⚠️ Đã huỷ xác nhận.");
-                    } else {
-                        req.setAttribute("error", "❌ Không thể huỷ xác nhận.");
+                    paymentDao.updatePaymentStatus(paymentId, "failed", false);
+                    try {
+                        sendFailMail(paymentId, reason);
+                    } catch (Exception ex) {
+                        Logger.getLogger(PaymentAdminServlet.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                    req.setAttribute("msg", "❌ Đã huỷ giao dịch #" + paymentId);
                     break;
                 }
 
-                case "completePayment": {
-                    Payments payment = dao.getPaymentById(paymentId);
-                    if (!"confirmed".equalsIgnoreCase(payment.getStatus()) || !payment.isIsConfirmed()) {
-                        req.setAttribute("error", "⚠️ Chỉ hoàn tất khi đã xác nhận.");
+                /* ========== HOÀN TIỀN ========= */
+                case "refund": {
+                    if (!"completed".equalsIgnoreCase(p.getStatus())) {
+                        req.setAttribute("err",
+                                "Chỉ hoàn tiền giao dịch đã 'completed'.");
                         break;
                     }
-
-                    boolean completed = paymentDao.setCompleted(paymentId);
-                    if (completed) {
-                        req.setAttribute("success", "🎉 Đã hoàn tất thanh toán.");
-                    } else {
-                        req.setAttribute("error", "❌ Không thể hoàn tất.");
+                    paymentDao.updatePaymentStatus(paymentId, "refunded", false);
+                    try {
+                        sendRefundMail(paymentId, reason);
+                    } catch (Exception ex) {
+                        Logger.getLogger(PaymentAdminServlet.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    break;
-                }
-
-                case "retryPayment": {
-                    Payments payment = dao.getPaymentById(paymentId);
-                    if (!"failed".equalsIgnoreCase(payment.getStatus())) {
-                        req.setAttribute("error", "❌ Chỉ gửi lại yêu cầu nếu trạng thái là 'failed'.");
-                        break;
-                    }
-
-                    boolean retried = dao.retryPayment(paymentId); // ví dụ đặt lại về confirmed và isConfirmed = false
-                    if (retried) {
-                        req.setAttribute("success", "🔁 Đã gửi lại yêu cầu.");
-                    } else {
-                        req.setAttribute("error", "❌ Không thể gửi lại.");
-                    }
+                    req.setAttribute("msg", "💸 Đã hoàn tiền giao dịch #" + paymentId);
                     break;
                 }
 
                 default:
-                    req.setAttribute("error", "⚠️ Hành động không hợp lệ.");
+                    req.setAttribute("err", "Hành động không hợp lệ!");
             }
-
         } catch (NumberFormatException e) {
-            req.setAttribute("error", "ID thanh toán không hợp lệ.");
+            req.setAttribute("err", "ID thanh toán không hợp lệ.");
         } catch (SQLException e) {
-            e.printStackTrace();
-            req.setAttribute("error", "Lỗi xử lý thanh toán: " + e.getMessage());
+            req.setAttribute("err", "Lỗi SQL: " + e.getMessage());
         }
 
-        // Load lại danh sách
-        try {
-            List<Payments> list = paymentDao.getAllPayments();
-            req.setAttribute("pendingPayments", list);
-        } catch (Exception e) {
-            req.setAttribute("error", "Không thể tải danh sách thanh toán.");
-        }
-
+        // load lại danh sách & forward
+        loadPayments(req);
         req.getRequestDispatcher("paymentsAdmin.jsp").forward(req, resp);
     }
 
-    private void sendPaymentConfirmationEmail(User user, ServicePackage pkg, String confirmationCode, HttpServletRequest request) {
-        String activationLink = "";
-        if (user.getActivationToken() != null) {
-            activationLink = request.getScheme() + "://"
-                    + request.getServerName() + ":"
-                    + request.getServerPort()
-                    + request.getContextPath()
-                    + "/authen?action=activate&token=" + user.getActivationToken();
-        }
-
-        String emailBody = "<!DOCTYPE html>"
-                + "<html lang='vi'>"
-                + "<head>"
-                + "<meta charset='UTF-8'>"
-                + "<style>"
-                + "body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fffaf4; color: #333; padding: 20px; }"
-                + ".container { max-width: 600px; margin: auto; background-color: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; }"
-                + "h2 { color: #ff6600; }"
-                + ".button { display: inline-block; background-color: #ff9966; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; }"
-                + ".highlight { background-color: #fff2cc; padding: 6px 12px; border-radius: 8px; font-weight: bold; display: inline-block; margin: 10px 0; }"
-                + ".footer { font-size: 13px; color: #888; margin-top: 30px; line-height: 1.6; }"
-                + ".footer strong { color: #555; }"
-                + "</style>"
-                + "</head>"
-                + "<body>"
-                + "<div class='container'>"
-                + "<h2>🔔 Xác nhận thanh toán PetTech</h2>"
-                + "<p>Xin chào <strong>" + user.getFullname() + "</strong>,</p>"
-                + "<p>Bạn đã yêu cầu đăng ký/nâng cấp gói dịch vụ <strong>" + pkg.getName() + "</strong>.</p>"
-                + "<p>Mã xác nhận thanh toán của bạn là: <span class='highlight'>" + confirmationCode + "</span></p>"
-                + "<p>Vui lòng chờ quản trị viên kiểm tra và xác nhận thanh toán trong vòng 10 phút.</p>";
-
-        if (!activationLink.isEmpty()) {
-            emailBody += "<p>Sau khi thanh toán được xác nhận, vui lòng nhấp vào nút bên dưới để kích hoạt tài khoản:</p>"
-                    + "<p><a class='button' href='" + activationLink + "'>✅ Kích hoạt tài khoản</a></p>";
-        }
-
-        emailBody += "<p>Cảm ơn bạn đã tin tưởng PetTech! 🐾</p>"
-                + "<div class='footer'>"
-                + "<strong>📞 Hỗ trợ:</strong><br>"
-                + "SĐT: <a href='tel:0352138596'>0352 138 596</a><br>"
-                + "Email: <a href='mailto:vdc120403@gmail.com'>vdc120403@gmail.com</a><br>"
-                + "Địa chỉ: Khu Công nghệ cao Hòa Lạc, Thạch Thất, Hà Nội<br><br>"
-                + "<strong>❤️ PetTech Team</strong>"
-                + "</div>"
-                + "</div>"
-                + "</body>"
-                + "</html>";
-
+    /* ------------- HÀM TIỆN ÍCH -------------- */
+    private void loadPayments(HttpServletRequest req) {
         try {
-            SendMailOK.send(
-                    "smtp.gmail.com",
-                    user.getEmail(),
-                    "vdc120403@gmail.com",
-                    "ednn nwbo zbyq gahs",
-                    "🔔 Xác nhận thanh toán PetTech",
-                    emailBody
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
+            List<Payments> list = paymentDao.getAllPayments();
+            req.setAttribute("payments", list);
+        } catch (SQLException e) {
+            req.setAttribute("err", "Không thể tải danh sách thanh toán.");
         }
+    }
+
+    /* ---------- EMAIL TEMPLATE ---------- */
+    private void sendSuccessMail(int payId, HttpServletRequest rq) throws SQLException, Exception {
+        Payments p = pkgDao.getPaymentById(payId);
+        User u = userDao.getUserById(p.getUserId());
+        ServicePackage sp = (p.getServicePackageId() != null)
+                ? pkgDao.getPackageById(p.getServicePackageId())
+                : null;
+
+        String activationLink = (u.getActivationToken() != null)
+                ? rq.getScheme() + "://" + rq.getServerName() + ":" + rq.getServerPort()
+                + rq.getContextPath() + "/authen?action=activate&token="
+                + u.getActivationToken()
+                : "";
+
+        String body = "<div style='font-family:Arial,sans-serif;padding:20px;border:1px solid #e0e0e0;border-radius:8px;'>"
+                + "<h2 style='color:#2ecc71;'>🎉 Thanh toán thành công #" + payId + "</h2>"
+                + "<p>Xin chào <strong>" + u.getFullname() + "</strong>,</p>"
+                + "<p>Chúng tôi đã xác nhận giao dịch thanh toán của bạn tại <strong>PetTech</strong>.</p>"
+                + (sp != null
+                        ? "<p>Gói dịch vụ được kích hoạt: <strong>" + sp.getName() + "</strong></p>"
+                        : "")
+                + (!activationLink.isEmpty()
+                ? "<p style='margin-top:20px;'>Vui lòng <a href='" + activationLink + "' style='color:#3498db;text-decoration:none;font-weight:bold;'>bấm vào đây để kích hoạt tài khoản của bạn</a>.</p>"
+                : "")
+                + "<p style='margin-top:30px;color:#555;'>Cảm ơn bạn đã sử dụng dịch vụ của PetTech! 🐾</p>"
+                + "<hr style='margin-top:30px;border:none;border-top:1px solid #eee;'>"
+                + "<p style='font-size:12px;color:#999;'>Email này được gửi tự động, vui lòng không trả lời lại.</p>"
+                + "</div>";
+
+        SendMailOK.send(
+                "smtp.gmail.com",
+                u.getEmail(),
+                "pettech2495@gmail.com",
+                "ntjj uyia dvxk atta",
+                "PetTech - Thanh toán thành công",
+                body
+        );
+    }
+
+    private void sendFailMail(int payId, String reason) throws SQLException, Exception {
+        Payments p = pkgDao.getPaymentById(payId);
+        User u = userDao.getUserById(p.getUserId());
+
+        String body = "<div style='font-family:Arial,sans-serif;padding:20px;border:1px solid #f1c0c0;border-radius:8px;'>"
+                + "<h2 style='color:#e74c3c;'>💔 Giao dịch bị từ chối #" + payId + "</h2>"
+                + "<p>Xin chào <strong>" + u.getFullname() + "</strong>,</p>"
+                + "<p>Rất tiếc! Giao dịch của bạn đã bị từ chối.</p>"
+                + "<p><strong>Lý do từ chối:</strong> <i>" + reason + "</i></p>"
+                + "<p style='margin-top:30px;color:#555;'>Bạn có thể thử lại hoặc liên hệ bộ phận hỗ trợ để được giúp đỡ.</p>"
+                + "<hr style='margin-top:30px;border:none;border-top:1px solid #eee;'>"
+                + "<p style='font-size:12px;color:#999;'>Email này được gửi tự động, vui lòng không trả lời lại.</p>"
+                + "</div>";
+
+        SendMailOK.send(
+                "smtp.gmail.com", u.getEmail(), "pettech2495@gmail.com",
+                "ntjj uyia dvxk atta",
+                "PetTech - Thanh toán thất bại", body
+        );
+    }
+
+    private void sendRefundMail(int payId, String reason) throws SQLException, Exception {
+        Payments p = pkgDao.getPaymentById(payId);
+        User u = userDao.getUserById(p.getUserId());
+
+        String body = "<div style='font-family:Arial,sans-serif;padding:20px;border:1px solid #ffe0a3;border-radius:8px;'>"
+                + "<h2 style='color:#f39c12;'>💸 Giao dịch được hoàn tiền #" + payId + "</h2>"
+                + "<p>Xin chào <strong>" + u.getFullname() + "</strong>,</p>"
+                + "<p>Chúng tôi đã hoàn tiền cho giao dịch của bạn tại <strong>PetTech</strong>.</p>"
+                + "<p><strong>Lý do hoàn tiền:</strong> <i>" + reason + "</i></p>"
+                + "<p style='margin-top:30px;color:#555;'>Cảm ơn bạn đã tin tưởng chúng tôi.</p>"
+                + "<hr style='margin-top:30px;border:none;border-top:1px solid #eee;'>"
+                + "<p style='font-size:12px;color:#999;'>Email này được gửi tự động, vui lòng không trả lời lại.</p>"
+                + "</div>";
+
+        SendMailOK.send(
+                "smtp.gmail.com", u.getEmail(), "pettech2495@gmail.com",
+                "ntjj uyia dvxk atta",
+                "PetTech - Giao dịch hoàn tiền", body
+        );
     }
 }

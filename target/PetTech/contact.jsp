@@ -12,14 +12,16 @@
 
     <head>
         <!-- Google tag (gtag.js) -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-J33JSNL2QG"></script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-3BE5RLS31D"></script>
         <script>
             window.dataLayer = window.dataLayer || [];
             function gtag() {
                 dataLayer.push(arguments);
             }
             gtag('js', new Date());
-            gtag('config', 'G-J33JSNL2QG');</script>
+
+            gtag('config', 'G-3BE5RLS31D');
+        </script>
         <title>Liên hệ - PetTech</title>
         <link rel="icon" type="image/png" href="images/logo_pettech.jpg">
         <meta charset="utf-8">
@@ -546,6 +548,69 @@
                 </div>
             </div>
         </section>
+        <!-- START: User Guide Section -->
+        <section class="about-section">
+            <div class="container">
+                <div class="section-header text-center">
+                    <h2>📘 Hướng Dẫn Sử Dụng Website PetTech</h2>
+                    <p class="subtitle">Cách để bạn dễ dàng hòa nhập cộng đồng yêu thú cưng</p>
+                </div>
+
+                <div class="row mt-5">
+                    <div class="col-md-12">
+                        <div class="about-content">
+                            <h3>💡 Giới thiệu ngắn</h3>
+                            <p>Website <strong>PetTech</strong> là nền tảng toàn diện dành cho cộng đồng yêu thú cưng – nơi bạn có thể:</p>
+                            <ul>
+                                <li>Kết nối với chuyên gia & người nuôi khác</li>
+                                <li>Tham gia các khóa học huấn luyện – chăm sóc thú cưng</li>
+                                <li>Nhận hỗ trợ từ đội ngũ bác sĩ thú y và huấn luyện viên</li>
+                                <li>Khám phá sản phẩm dịch vụ tiện ích & cập nhật xu hướng</li>
+                            </ul>
+
+                            <h3>📝 I. CÁC BƯỚC TRỞ THÀNH THÀNH VIÊN</h3>
+                            <ul>
+                                <li><strong>Bước 1:</strong> Truy cập website <a href="https://shop.pettech.io">shop.pettech.io</a></li>
+                                <li><strong>Bước 2:</strong> Nhấn "Đăng ký" → chọn gói dịch vụ phù hợp
+                                    <ul>
+                                        <li><em>Miễn phí:</em> Điền Họ tên, Email, SĐT, Mật khẩu, Địa chỉ</li>
+                                        <li><em>Trả phí:</em> Thanh toán rồi điền thông tin như trên</li>
+                                    </ul>
+                                    Sau đó kiểm tra email để <strong>kích hoạt tài khoản</strong>
+                                </li>
+                                <li><strong>Bước 3:</strong> Đăng nhập và khám phá!</li>
+                            </ul>
+
+                            <h3>🎓 II. SỬ DỤNG KHÓA HỌC</h3>
+                            <ul>
+                                <li>Vào mục "Khóa học" trên thanh menu</li>
+                                <li>Chọn khóa học phù hợp (VD: Huấn luyện chó Poodle)</li>
+                                <li>Mỗi khóa có video, tài liệu, bài kiểm tra theo dõi tiến độ</li>
+                            </ul>
+
+                            <h3>💬 III. LIÊN HỆ HỖ TRỢ</h3>
+                            <ul>
+                                <li>Email: <a href="mailto:pettech2495@gmail.com">pettech2495@gmail.com</a></li>
+                                <li>Hotline: <a href="tel:0352138596">0352 138 596</a> (giờ hành chính)</li>
+                            </ul>
+
+                            <h3>🤝 IV. QUYỀN LỢI THÀNH VIÊN</h3>
+                            <ul>
+                                <li>✅ Truy cập đầy đủ khóa học</li>
+                                <li>✅ Nhận chứng chỉ hoàn thành</li>
+                                <li>✅ Ưu đãi giảm giá khóa sau</li>
+                                <li>✅ Tư vấn trực tiếp từ chuyên gia</li>
+                                <li>✅ Cập nhật tài liệu mới mỗi tuần</li>
+                            </ul>
+
+                            <h3>🧡 V. CAM KẾT CỦA PETTECH</h3>
+                            <p class="quote">"Chúng tôi không chỉ cung cấp dịch vụ – mà còn trao gửi yêu thương đến thú cưng bạn yêu quý. Hãy để PetTech đồng hành cùng bạn!"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- END: User Guide Section -->
 
         <!-- Team Section -->
         <section class="team-section">

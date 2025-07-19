@@ -57,13 +57,13 @@ public class CourseAdminServlet extends HttpServlet {
                     listCourses(request, response);
                     break;
             }
+            // Forward đến JSP sau khi xử lý
+            request.getRequestDispatcher("courseAdmin.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "Lỗi hệ thống: " + e.getMessage());
-            listCourses(request, response);
+            request.getRequestDispatcher("courseAdmin.jsp").forward(request, response);
         }
-
-        request.getRequestDispatcher("courseAdmin.jsp").forward(request, response);
     }
 
     @Override

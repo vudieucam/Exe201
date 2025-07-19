@@ -34,6 +34,74 @@ public class CourseDAO extends DBConnect {
         }
     }
 
+    /**
+     * Trả danh sách có thống kê + phân trang
+     */
+    public List<Course> getCoursesWithStats(int offset, int pageSize) throws SQLException {
+        List<Course> list = new ArrayList<>();
+        String sql = "SELECT c.*, c.is_paid, "
+                + "COALESCE(r.avg_rating, 0) AS averageRating, "
+                + "COALESCE(e.enrolledCount ,0) AS enrolledCount, "
+                + "sp.name AS packageName "
+                + "FROM courses AS c "
+                + "LEFT JOIN (SELECT course_id, AVG(CAST(rating AS FLOAT)) AS avg_rating FROM course_reviews GROUP BY course_id) AS r ON c.id = r.course_id "
+                + "LEFT JOIN (SELECT course_id, COUNT(*) AS enrolledCount FROM course_access GROUP BY course_id) AS e ON c.id = e.course_id "
+                + "LEFT JOIN service_packages sp ON c.package_id = sp.id "
+                + "ORDER BY c.id OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, offset);
+            ps.setInt(2, pageSize);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Course c = new Course();
+                    c.setId(rs.getInt("id"));
+                    c.setTitle(rs.getString("title"));
+                    c.setDuration(rs.getString("duration"));
+                    c.setThumbnailUrl(rs.getString("thumbnail_url"));
+                    c.setContent(rs.getString("content"));
+                    c.setIsPaid(rs.getBoolean("is_paid"));
+                    c.setAverageRating(rs.getDouble("averageRating"));
+                    c.setEnrolledCount(rs.getInt("enrolledCount"));
+                    c.setPackageName(rs.getString("packageName"));
+                    list.add(c);
+                }
+            }
+        }
+        return list;
+    }
+
+    public Course getCourseWithStatsById(int id) throws SQLException {
+        String sql = "SELECT c.*, c.is_paid, "
+                + "COALESCE(r.avg_rating, 0) AS averageRating, "
+                + "COALESCE(e.enrolledCount ,0) AS enrolledCount, "
+                + "sp.name AS packageName "
+                + "FROM courses AS c "
+                + "LEFT JOIN (SELECT course_id, AVG(CAST(rating AS FLOAT)) AS avg_rating FROM course_reviews GROUP BY course_id) AS r ON c.id = r.course_id "
+                + "LEFT JOIN (SELECT course_id, COUNT(*) AS enrolledCount FROM course_access GROUP BY course_id) AS e ON c.id = e.course_id "
+                + "LEFT JOIN service_packages sp ON c.package_id = sp.id WHERE c.id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Course c = new Course();
+                    c.setId(rs.getInt("id"));
+                    c.setTitle(rs.getString("title"));
+                    c.setDuration(rs.getString("duration"));
+                    c.setThumbnailUrl(rs.getString("thumbnail_url"));
+                    c.setContent(rs.getString("content"));
+                    c.setIsPaid(rs.getBoolean("is_paid"));
+                    c.setAverageRating(rs.getDouble("averageRating"));
+                    c.setEnrolledCount(rs.getInt("enrolledCount"));
+                    c.setPackageName(rs.getString("packageName"));
+                    return c;
+                }
+            }
+        }
+        return null;
+    }
+
     private Course mapCourseFromResultSet(ResultSet rs) throws SQLException {
         Course course = new Course();
         course.setId(rs.getInt("id"));
@@ -48,7 +116,47 @@ public class CourseDAO extends DBConnect {
         course.setCreatedAt(rs.getTimestamp("created_at"));
         course.setUpdatedAt(rs.getTimestamp("updated_at"));
         course.setIsPaid(rs.getBoolean("is_paid"));
+
+        // Thay vì lấy trực tiếp từ ResultSet, gọi phương thức riêng để tính toán
+        course.setAverageRating(getAverageRating(course.getId()));
+        course.setEnrolledCount(getEnrolledCount(course.getId()));
+
+        // PackageName có thể không có trong mọi truy vấn
+        try {
+            course.setPackageName(rs.getString("packageName"));
+        } catch (SQLException e) {
+            course.setPackageName(""); // Giá trị mặc định nếu cột không tồn tại
+        }
+
         return course;
+    }
+
+    private double getAverageRating(int courseId) {
+        String sql = "SELECT AVG(CAST(rating AS FLOAT)) FROM course_reviews WHERE course_id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, courseId);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
+
+    private int getEnrolledCount(int courseId) {
+        String sql = "SELECT COUNT(*) FROM course_access WHERE course_id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, courseId);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     public List<Course> getAllCourses() {
@@ -76,7 +184,7 @@ public class CourseDAO extends DBConnect {
         List<Course> courses = new ArrayList<>();
         String sql = "SELECT c.* FROM courses c "
                 + "JOIN course_category_mapping ccm ON c.id = ccm.course_id "
-                + "WHERE ccm.category_id = ? AND c.status = 1 AND ccm.status = 1";
+                + "WHERE ccm.category_id = ?";
 
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setInt(1, categoryId);
@@ -555,16 +663,16 @@ public class CourseDAO extends DBConnect {
     // Lấy top khóa học xem nhiều nhất
     public List<Map<String, Object>> getMostViewedCourses(int limit) {
         List<Map<String, Object>> courses = new ArrayList<>();
-        String sql = "SELECT TOP (?) c.id, c.title, cs.views, cs.avg_view_duration\n"
-                + "FROM courses c\n"
-                + "JOIN (\n"
-                + "    SELECT course_id,\n"
-                + "           SUM(views) AS views,\n"
-                + "           AVG(avg_view_duration) AS avg_view_duration\n"
-                + "    FROM course_statistics\n"
-                + "    GROUP BY course_id\n"
-                + ") cs ON c.id = cs.course_id\n"
-                + "WHERE c.status = 1\n"
+        String sql = "SELECT TOP (?) c.id, c.title, cs.views, cs.avg_view_duration"
+                + "FROM courses c"
+                + "JOIN ("
+                + "    SELECT course_id,"
+                + "           SUM(views) AS views,"
+                + "           AVG(avg_view_duration) AS avg_view_duration"
+                + "    FROM course_statistics"
+                + "    GROUP BY course_id"
+                + ") cs ON c.id = cs.course_id"
+                + "WHERE c.status = 1"
                 + "ORDER BY cs.views DESC";
 
         try (PreparedStatement st = connection.prepareStatement(sql)) {
@@ -750,7 +858,6 @@ public class CourseDAO extends DBConnect {
             st.setInt(2, id);
             return st.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
             return false;
         }
     }
@@ -779,5 +886,14 @@ public class CourseDAO extends DBConnect {
             }
         }
         return null;
+    }
+
+    public static void main(String[] args) {
+        CourseDAO courseDAO = new CourseDAO();
+        List<Course> courses = courseDAO.getAllCourses();
+        System.out.println("Danh sách khóa học:");
+        for (Course course : courses) {
+            System.out.println(course.getTitle());
+        }
     }
 }

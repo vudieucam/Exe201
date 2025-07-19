@@ -12,14 +12,16 @@
 
     <head>
         <!-- Google tag (gtag.js) -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-J33JSNL2QG"></script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-3BE5RLS31D"></script>
         <script>
             window.dataLayer = window.dataLayer || [];
             function gtag() {
                 dataLayer.push(arguments);
             }
             gtag('js', new Date());
-            gtag('config', 'G-J33JSNL2QG');</script>
+
+            gtag('config', 'G-3BE5RLS31D');
+        </script>
         <title>Sản phẩm - PetTech</title>
         <meta charset="utf-8">
         <link rel="icon" type="image/png" href="images/logo_pettech.jpg">
@@ -764,7 +766,7 @@
                                 <h5 style="color: #8B5E3C;">Thức ăn cho chó Pedigree</h5>
                                 <p class="text-muted">Bổ sung vitamin, giúp lông mượt.</p>
                                 <p class="text-danger font-weight-bold">120.000 đ</p>
-                                <a href="#" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
+                                <a href="javascript:void(0);" onclick="showProductNotice()" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
                             </div>
                         </div>
                     </div>
@@ -777,7 +779,7 @@
                                 <h5 style="color: #8B5E3C;">Snack mèo Whiskas vị cá</h5>
                                 <p class="text-muted">Giúp răng khỏe mạnh, thơm miệng.</p>
                                 <p class="text-danger font-weight-bold">55.000 đ</p>
-                                <a href="#" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
+                                <a href="javascript:void(0);" onclick="showProductNotice()" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
                             </div>
                         </div>
                     </div>
@@ -790,7 +792,7 @@
                                 <h5 style="color: #8B5E3C;">Bát ăn mèo con dễ thương</h5>
                                 <p class="text-muted">Nhựa cao cấp, dễ rửa sạch.</p>
                                 <p class="text-danger font-weight-bold">35.000 đ</p>
-                                <a href="#" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
+                                <a href="javascript:void(0);" onclick="showProductNotice()" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
                             </div>
                         </div>
                     </div>
@@ -803,7 +805,7 @@
                                 <h5 style="color: #8B5E3C;">Lược chải lông thú cưng</h5>
                                 <p class="text-muted">Chải êm, không gây rụng lông.</p>
                                 <p class="text-danger font-weight-bold">40.000 đ</p>
-                                <a href="#" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
+                                <a href="javascript:void(0);" onclick="showProductNotice()" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
                             </div>
                         </div>
                     </div>
@@ -816,7 +818,7 @@
                                 <h5 style="color: #8B5E3C;">Đồ chơi gặm cho chó</h5>
                                 <p class="text-muted">Chất liệu cao su bền, an toàn.</p>
                                 <p class="text-danger font-weight-bold">60.000 đ</p>
-                                <a href="#" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
+                                <a href="javascript:void(0);" onclick="showProductNotice()" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
                             </div>
                         </div>
                     </div>
@@ -829,7 +831,7 @@
                                 <h5 style="color: #8B5E3C;">Xịt khử mùi thú cưng</h5>
                                 <p class="text-muted">Thơm dịu nhẹ, không kích ứng.</p>
                                 <p class="text-danger font-weight-bold">75.000 đ</p>
-                                <a href="#" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
+                                <a href="javascript:void(0);" onclick="showProductNotice()" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
                             </div>
                         </div>
                     </div>
@@ -842,7 +844,7 @@
                                 <h5 style="color: #8B5E3C;">Giường thú cưng bông mềm</h5>
                                 <p class="text-muted">Êm ái, giữ ấm mùa đông.</p>
                                 <p class="text-danger font-weight-bold">250.000 đ</p>
-                                <a href="#" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
+                                <a href="javascript:void(0);" onclick="showProductNotice()" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
                             </div>
                         </div>
                     </div>
@@ -855,7 +857,7 @@
                                 <h5 style="color: #8B5E3C;">Dây dắt thú cưng co giãn</h5>
                                 <p class="text-muted">Chắc chắn, chống trượt tay.</p>
                                 <p class="text-danger font-weight-bold">95.000 đ</p>
-                                <a href="#" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
+                                <a href="javascript:void(0);" onclick="showProductNotice()" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
                             </div>
                         </div>
                     </div>
@@ -868,7 +870,7 @@
                                 <h5 style="color: #8B5E3C;">Dầu gội thảo mộc cho thú cưng</h5>
                                 <p class="text-muted">Làm sạch, khử mùi, dịu da.</p>
                                 <p class="text-danger font-weight-bold">85.000 đ</p>
-                                <a href="#" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
+                                <a href="javascript:void(0);" onclick="showProductNotice()" class="btn btn-sm" style="background-color: #D99863; color: white; border-radius: 20px;">Xem chi tiết</a>
                             </div>
                         </div>
                     </div>
@@ -877,7 +879,7 @@
         </section>
 
 
-        
+
 
         <!-- Footer -->
         <footer class="footer">
@@ -934,7 +936,7 @@
         <!-- loader -->
         <div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00"/></svg></div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="js/jquery-migrate-3.0.1.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
         <script src="js/jquery.easing.1.3.js"></script>
@@ -971,7 +973,11 @@
                                         console.log("Click ok");
                                 });
         </script>
-
+        <script>
+                    function showProductNotice() {
+                    alert("🔧 Mục sản phẩm hiện đang được cập nhật!\n\nChúng tôi đang trong quá trình thương thảo và hoàn thiện hợp tác với các nhà cung cấp.\nRất mong bạn thông cảm và quay lại sau.\n\n📚 Trong thời gian này, bạn có thể tiếp tục khám phá các khóa học chất lượng tại PetTech.\n\n💖 Cảm ơn bạn vì đã đồng hành cùng chúng tôi!");
+                    }
+        </script>
 
     </body>
 </html>

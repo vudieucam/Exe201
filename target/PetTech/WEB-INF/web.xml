@@ -60,6 +60,26 @@
         <servlet-name>ExportPetExcelServlet</servlet-name>
         <servlet-class>controller.contact.ExportPetExcelServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>CheckoutController</servlet-name>
+        <servlet-class>controller.Payment.CheckoutController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>OrderController</servlet-name>
+        <servlet-class>controller.Payment.OrderController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>PayOSWebhookServlet</servlet-name>
+        <servlet-class>controller.Payment.PayOSWebhookServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>WebhookController</servlet-name>
+        <servlet-class>controller.Payment.WebhookController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ActivateCourseServlet</servlet-name>
+        <servlet-class>customer.Course.ActivateCourseServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginGoogleServlet</servlet-name>
         <url-pattern>/logingoogle</url-pattern>
@@ -123,6 +143,26 @@
     <servlet-mapping>
         <servlet-name>ExportPetExcelServlet</servlet-name>
         <url-pattern>/exportPetExcel</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CheckoutController</servlet-name>
+        <url-pattern>/CheckoutController</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>OrderController</servlet-name>
+        <url-pattern>/OrderController</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PayOSWebhookServlet</servlet-name>
+        <url-pattern>/payos_transfer_handler</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>WebhookController</servlet-name>
+        <url-pattern>/WebhookController</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ActivateCourseServlet</servlet-name>
+        <url-pattern>/activatecourse</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>home</welcome-file>

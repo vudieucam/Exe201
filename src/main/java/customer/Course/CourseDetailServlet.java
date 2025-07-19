@@ -65,16 +65,10 @@ public class CourseDetailServlet extends HttpServlet {
             System.out.println("Request parameters - id: " + request.getParameter("id")
                     + ", lesson: " + request.getParameter("lesson"));
 
-            // Lấy danh sách danh mục và khóa học nổi bật
-//            List<CourseCategory> courseCategories = CustomercourseDAO.getAllCategories();
-//            request.setAttribute("courseCategories", courseCategories);
-
             List<Course> featuredCourses = CustomercourseDAO.getFeaturedCourses(9);
             request.setAttribute("featuredCourses", featuredCourses);
-// Dữ liệu bổ sung
             List<BlogCategory> featuredCategories = blogDAO.getFeaturedCategories();
 
-// Gửi sang JSP
             request.setAttribute("featuredCategories", featuredCategories);
             String idRaw = request.getParameter("id");
 
@@ -99,7 +93,7 @@ public class CourseDetailServlet extends HttpServlet {
             System.out.println("Query String: " + request.getQueryString());
             System.out.println("Session ID: " + request.getSession().getId());
 
-            Course course = courseDAO.getCourseById(courseId);
+            Course course = CustomercourseDAO.getCourseById(courseId);
             System.out.println("Course object from DAO: " + course);
             if (course != null) {
                 System.out.println("Course details - ID: " + course.getId()
@@ -199,6 +193,10 @@ public class CourseDetailServlet extends HttpServlet {
             request.setAttribute("currentLesson", currentLesson);
             request.setAttribute("previousLesson", previousLesson);
             request.setAttribute("nextLesson", nextLesson);
+            System.out.println("DEBUG - Course: " + course);
+            System.out.println("Course ID: " + course.getId());
+            System.out.println("Average Rating: " + course.getAverageRating());
+            System.out.println("Enrolled Count: " + course.getEnrolledCount());
 
             // Forward đến trang JSP
             request.getRequestDispatcher("course_detail.jsp").forward(request, response);
@@ -209,7 +207,6 @@ public class CourseDetailServlet extends HttpServlet {
             request.getRequestDispatcher("course_detail.jsp").forward(request, response);
         }
     }
-
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)

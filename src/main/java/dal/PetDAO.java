@@ -100,7 +100,9 @@ public class PetDAO extends DBConnect {
     }
 
     public List<Pet> getPetsByPage(int pageIndex, int pageSize) throws SQLException {
-        String sql = "SELECT p.id, p.name, p.gender, p.age, p.color, c.name AS category_name, i.image_url "
+        String sql = "SELECT p.id, p.name, p.category_id, p.gender, p.age, p.color, "
+                + "p.weight, p.breed, p.description, p.status, p.created_at, "
+                + "c.name AS category_name, i.image_url "
                 + "FROM pets p "
                 + "JOIN pet_categories c ON p.category_id = c.id "
                 + "LEFT JOIN pet_images i ON p.id = i.pet_id AND i.is_primary = 1 "
@@ -116,10 +118,16 @@ public class PetDAO extends DBConnect {
                 Pet p = new Pet();
                 p.setId(rs.getInt("id"));
                 p.setName(rs.getString("name"));
+                p.setCategoryId(rs.getInt("category_id"));
+                p.setCategoryName(rs.getString("category_name"));
                 p.setGender(rs.getString("gender"));
                 p.setAge(rs.getInt("age"));
                 p.setColor(rs.getString("color"));
-                p.setCategoryName(rs.getString("category_name"));
+                p.setWeight(rs.getDouble("weight")); // dùng double thay vì BigDecimal
+                p.setBreed(rs.getString("breed"));
+                p.setDescription(rs.getString("description"));
+                p.setStatus(rs.getBoolean("status"));
+                p.setCreatedAt(rs.getTimestamp("created_at"));
                 p.setPrimaryImage(rs.getString("image_url"));
                 list.add(p);
             }

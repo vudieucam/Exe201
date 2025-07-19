@@ -553,102 +553,108 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <c:forEach var="p" items="${pendingPayments}" varStatus="st">
+                                        <c:forEach var="p" items="${payments}" varStatus="st">
                                             <tr>
                                                 <td>${st.index + 1}</td>
-                                                <td>${p.orderId}</td>
-                                                <td>${p.userId}</td>
-                                                <td>${p.servicePackageId}</td>
+                                                <td>${p.id}</td>           <!-- Mã thanh toán -->
                                                 <td>
-                                                    <fmt:formatNumber value="${p.amount}" pattern="#,##0 '₫'"/>
+                                                    <a href="userdetail?uid=${p.userId}" class="text-decoration-none text-primary">
+                                                        ${p.userId}
+                                                    </a>
                                                 </td>
+
+                                                <td>${p.servicePackageId}</td>
+
+                                                <!-- Số tiền -->
+                                                <td><fmt:formatNumber value="${p.amount}" pattern="#,##0 '₫'"/></td>
+
                                                 <td>${p.paymentMethod}</td>
                                                 <td><fmt:formatDate value="${p.paymentDate}" pattern="dd/MM/yyyy HH:mm"/></td>
-                                                <td>
-                                                    <span class="status-badge ${p.isConfirmed ? 'status-active' : 'status-pending'}">
-                                                        ${p.status}
-                                                    </span>
-                                                </td>
+
+                                                <!-- Badge trạng thái -->
                                                 <td>
                                                     <c:choose>
-
-
-                                                        <c:when test="${p.status == 'confirmed' && !p.isConfirmed}">
-                                                            <form action="paymentadmin" method="post" class="d-inline">
-                                                                <input type="hidden" name="action" value="confirmPayment"/>
-                                                                <input type="hidden" name="paymentId" value="${p.id}"/>
-                                                                <button class="btn btn-sm btn-success" type="submit"
-                                                                        onclick="return confirm('Xác nhận thanh toán này?');">
-                                                                    ✅ Xác nhận
-                                                                </button>
-                                                            </form>
-                                                            <form action="paymentadmin" method="post" class="d-inline">
-                                                                <input type="hidden" name="action" value="revokeConfirmation"/>
-                                                                <input type="hidden" name="paymentId" value="${p.id}"/>
-                                                                <button class="btn btn-sm btn-warning" type="submit"
-                                                                        onclick="return confirm('Bạn có chắc muốn huỷ xác nhận không?');">
-                                                                    ❌ Huỷ xác nhận
-                                                                </button>
-                                                            </form>
+                                                        <c:when test="${p.status == 'waiting_admin_confirm'}">
+                                                            <span class="status-badge status-warning">Chờ&nbsp;duyệt</span>
                                                         </c:when>
-
-
-                                                        <c:when test="${p.status == 'confirmed' && p.isConfirmed}">
-                                                            <form action="paymentadmin" method="post" class="d-inline">
-                                                                <input type="hidden" name="action" value="completePayment"/>
-                                                                <input type="hidden" name="paymentId" value="${p.id}"/>
-                                                                <button class="btn btn-sm btn-primary" type="submit"
-                                                                        onclick="return confirm('Xác nhận hoàn tất thanh toán này?');">
-                                                                    🎯 Hoàn tất
-                                                                </button>
-                                                            </form>
-                                                            <form action="paymentadmin" method="post" class="d-inline">
-                                                                <input type="hidden" name="action" value="revokeConfirmation"/>
-                                                                <input type="hidden" name="paymentId" value="${p.id}"/>
-                                                                <button class="btn btn-sm btn-warning" type="submit"
-                                                                        onclick="return confirm('Bạn có chắc muốn huỷ xác nhận không?');">
-                                                                    ❌ Huỷ xác nhận
-                                                                </button>
-                                                            </form>
-                                                        </c:when>
-
-
                                                         <c:when test="${p.status == 'completed'}">
-                                                            <span class="text-success">✅ Đã hoàn tất</span>
+                                                            <span class="status-badge status-active">Hoàn&nbsp;tất</span>
                                                         </c:when>
-
-
                                                         <c:when test="${p.status == 'failed'}">
-                                                            <form action="paymentadmin" method="post" class="d-inline">
-                                                                <input type="hidden" name="action" value="retryPayment"/>
-                                                                <input type="hidden" name="paymentId" value="${p.id}"/>
-                                                                <button class="btn btn-sm btn-secondary" type="submit"
-                                                                        onclick="return confirm('Gửi lại yêu cầu thanh toán này?');">
-                                                                    🔁 Gửi lại yêu cầu
-                                                                </button>
-                                                            </form>
+                                                            <span class="status-badge status-inactive">Thất&nbsp;bại</span>
                                                         </c:when>
-
-
                                                         <c:when test="${p.status == 'refunded'}">
-                                                            <span class="text-info">❕ Đã hoàn tiền</span>
+                                                            <span class="status-badge status-warning">Hoàn&nbsp;tiền</span>
                                                         </c:when>
-
-
                                                         <c:when test="${p.status == 'pending'}">
-                                                            <span class="text-muted">⏳ Chờ xử lý</span>
+                                                            <span class="status-badge status-secondary">Khách&nbsp;chưa&nbsp;xác&nbsp;nhận</span>
                                                         </c:when>
-
-
                                                         <c:otherwise>
-                                                            <span class="text-muted">Đã xử lý</span>
+                                                            <span class="status-badge status-secondary">${p.status}</span>
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </td>
-                                            </tr>
+
+
+                                                <!-- Hành động -->
+                                                <td>
+                                                    <!-- =========== CHỜ DUYỆT =========== -->
+                                                    <c:if test="${p.status == 'waiting_admin_confirm'}">
+                                                        <!-- Duyệt -->
+                                                        <form action="paymentadmin" method="post" class="d-inline">
+                                                            <input type="hidden" name="action" value="approve"/>
+                                                            <input type="hidden" name="paymentId" value="${p.id}"/>
+                                                            <button type="submit" class="btn btn-sm btn-success"
+                                                                    onclick="return confirm('Duyệt giao dịch #${p.id}?');">
+                                                                ✅ Duyệt
+                                                            </button>
+                                                        </form>
+
+                                                        <!-- Huỷ -->
+                                                        <button class="btn btn-sm btn-danger"
+                                                                onclick="openReason('reject', ${p.id})">
+                                                            ❌ Huỷ
+                                                        </button>
+                                                    </c:if>
+
+                                                    <!-- =========== HOÀN TIỀN (chỉ khi completed) =========== -->
+                                                    <c:if test="${p.status == 'completed'}">
+                                                        <button class="btn btn-sm btn-warning"
+                                                                onclick="openReason('refund', ${p.id})">
+                                                            💸 Hoàn&nbsp;tiền
+                                                        </button>
+                                                    </c:if>
+
+                                                    <!-- Các trạng thái khác → không thao tác -->
+                                                    <c:if test="${p.status != 'waiting_admin_confirm' && p.status != 'completed'}">—</c:if>
+                                                    </td>
+                                                </tr>
                                         </c:forEach>
                                     </tbody>
+
                                 </table>
+                            </div>
+                        </div>
+                        <!-- Modal nhập lý do Reject / Refund -->
+                        <div class="modal fade" id="reasonModal" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form action="paymentadmin" method="post">
+                                        <input type="hidden" name="action" id="modal-action">
+                                        <input type="hidden" name="paymentId" id="modal-id">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="modal-title">Lý do</h5>
+                                        </div>
+                                        <div class="modal-body">
+                                            <textarea name="reason" class="form-control" rows="3" required
+                                                      placeholder="Nhập lý do..."></textarea>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                                            <button type="submit" class="btn btn-primary">Xác&nbsp;nhận</button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -658,25 +664,30 @@
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-                                                                            // Filter function simple (client side) - chỉ ẩn/hiện row, không gọi server
-                                                                            document.getElementById('search-btn').addEventListener('click', filterTable);
-                                                                            document.getElementById('payment-status-filter').addEventListener('change', filterTable);
-                                                                            document.getElementById('payment-method-filter').addEventListener('change', filterTable);
+                                                                    // Lọc bảng thanh toán theo trạng thái / phương thức / mã
+                                                                    document.getElementById('search-btn').addEventListener('click', filterTable);
+                                                                    document.getElementById('payment-status-filter').addEventListener('change', filterTable);
+                                                                    document.getElementById('payment-method-filter').addEventListener('change', filterTable);
 
-                                                                            function filterTable() {
-                                                                                const search = document.getElementById('payment-search').value.toLowerCase();
-                                                                                const status = document.getElementById('payment-status-filter').value;
-                                                                                const method = document.getElementById('payment-method-filter').value;
-                                                                                document.querySelectorAll('#payments-table tbody tr').forEach(row => {
-                                                                                    const code = row.children[1].innerText.toLowerCase();
-                                                                                    const rowStatus = row.children[7].innerText.trim();
-                                                                                    const rowMethod = row.children[5].innerText.trim();
-                                                                                    const matchSearch = code.includes(search);
-                                                                                    const matchStatus = status === 'all' || rowStatus === status;
-                                                                                    const matchMethod = method === 'all' || rowMethod === method;
-                                                                                    row.style.display = (matchSearch && matchStatus && matchMethod) ? '' : 'none';
-                                                                                });
-                                                                            }
+                                                                    function filterTable() {
+                                                                        const search = document.getElementById('payment-search').value.toLowerCase();
+                                                                        const statusFilter = document.getElementById('payment-status-filter').value.toLowerCase();
+                                                                        const methodFilter = document.getElementById('payment-method-filter').value.toLowerCase();
+
+                                                                        document.querySelectorAll('#payments-table tbody tr').forEach(row => {
+                                                                            const code = row.children[1].innerText.toLowerCase(); // mã thanh toán
+                                                                            const rowMethod = row.children[5].innerText.toLowerCase(); // phương thức
+                                                                            const badge = row.children[7].querySelector('.badge'); // badge status
+                                                                            const rowStatus = badge ? badge.innerText.toLowerCase() : '';
+
+                                                                            const matchSearch = code.includes(search);
+                                                                            const matchStatus = statusFilter === 'all' || rowStatus.includes(statusFilter);
+                                                                            const matchMethod = methodFilter === 'all' || rowMethod === methodFilter;
+
+                                                                            row.style.display = (matchSearch && matchStatus && matchMethod) ? '' : 'none';
+                                                                        });
+                                                                    }
         </script>
+
     </body>
 </html>

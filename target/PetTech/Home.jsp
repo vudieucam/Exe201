@@ -25,14 +25,16 @@
     <head>
 
         <!-- Google tag (gtag.js) -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-J33JSNL2QG"></script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-3BE5RLS31D"></script>
         <script>
             window.dataLayer = window.dataLayer || [];
             function gtag() {
                 dataLayer.push(arguments);
             }
             gtag('js', new Date());
-            gtag('config', 'G-J33JSNL2QG');</script>
+
+            gtag('config', 'G-3BE5RLS31D');
+        </script>
         <title>PetTech</title>
         <meta charset="utf-8">
         <!-- Trong thẻ <head> của file JSP -->
@@ -1230,7 +1232,7 @@
                     <p>Các khóa học được yêu thích nhất tại PetTech</p>
                 </div>
 
-                <div class = row>
+                <div class="row">
                     <c:if test="${not empty featuredCourses}">
                         <c:forEach var="course" items="${featuredCourses}">
                             <div class="col-lg-4 col-md-6 mb-4">
@@ -1264,43 +1266,89 @@
                                     <div class="course-body">
                                         <h3 class="course-title">${course.title}</h3>
 
+                                        <!-- Thời lượng -->
                                         <div class="course-meta">
-                                            <i class="fa fa-clock-o"></i> 
-                                            <c:out value="${not empty course.duration ? course.duration : 'Đang cập nhật'}" />
+                                            <i class="fa fa-clock-o"></i>
+                                            <c:out value="${not empty course.duration ? course.duration : 'Đang cập nhật'}"/>
                                         </div>
 
-                                        <c:if test="${not empty course.researcher}">
-                                            <div class="course-meta">
-                                                <i class="fa fa-user"></i> ${course.researcher}
-                                            </div>
-                                        </c:if>
+                                        <!-- Đánh giá -->
+                                        <div class="course-meta">
+                                            <i class="fa fa-star text-warning"></i>
+                                            <c:choose>
+                                                <c:when test="${course.averageRating > 0}">
+                                                    <fmt:formatNumber value="${course.averageRating}" maxFractionDigits="1" /> / 5
+                                                </c:when>
+                                                <c:otherwise>Chưa có đánh giá</c:otherwise>
+                                            </c:choose>
+                                        </div>
 
+                                        <!-- Số học viên -->
+                                        <div class="course-meta">
+                                            <i class="fa fa-users"></i>
+                                            <c:out value="${course.enrolledCount + 50}" /> học viên
+                                        </div>
+
+                                        <!-- Gói -->
+                                        <div class="course-meta">
+                                            <i class="fa fa-gift"></i>
+                                            Gói:
+                                            <c:choose>
+                                                <c:when test="${course.isPaid}">
+                                                    <span style="color:#ff6600;font-weight:600"> Trả phí</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span style="color:#009933;font-weight:600"> Miễn phí</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
+
+                                        <!-- Nội dung mô tả -->
                                         <p class="course-desc">
                                             <c:choose>
                                                 <c:when test="${not empty course.content}">
-                                                    <c:out value="${fn:length(course.content) > 100 
-                                                                    ? fn:substring(course.content, 0, 100).concat('...') 
-                                                                    : course.content}" />
+                                                    <c:out value="${fn:length(course.content) > 100 ? fn:substring(course.content, 0, 100).concat('...') : course.content}" />
                                                 </c:when>
-                                                <c:otherwise>
-                                                    Nội dung đang được cập nhật...
-                                                </c:otherwise>
+                                                <c:otherwise>Nội dung đang được cập nhật...</c:otherwise>
                                             </c:choose>
                                         </p>
 
+                                        
                                         <c:choose>
+                                            
                                             <c:when test="${not empty sessionScope.user}">
-                                                <a href="${pageContext.request.contextPath}/coursedetail?id=${course.id}" class="course-btn">
-                                                    Xem chi tiết <i class="fa fa-arrow-right"></i>
-                                                </a>
+                                                <c:set var="user" value="${sessionScope.user}" />
+                                                <c:set var="isActivated" value="${course.status == 1 or CustomercourseDAO.isCourseActivated(user.id, course.id)}" />
+
+                                                <c:choose>
+                                                    
+                                                    <c:when test="${isActivated}">
+                                                        <a href="coursedetail?id=${course.id}" class="btn btn-primary">
+                                                            <i class="fa fa-play"></i> Bắt đầu học
+                                                        </a>
+                                                    </c:when>
+
+                                                    
+                                                    <c:otherwise>
+                                                        <form method="post" action="course" class="d-inline">
+                                                            <input type="hidden" name="action" value="activate"/>
+                                                            <input type="hidden" name="courseId" value="${course.id}"/>
+                                                            <button type="submit" class="btn btn-success">
+                                                                <i class="fa fa-unlock"></i> Kích hoạt ngay
+                                                            </button>
+                                                        </form>
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </c:when>
+
+                                            
                                             <c:otherwise>
-                                                <a href="authen?action=login&redirect=${pageContext.request.contextPath}/coursedetail?id=${course.id}"
-                                                   class="course-btn">
-                                                    Xem chi tiết <i class="fa fa-arrow-right"></i>
+                                                <a href="authen?action=login" class="btn btn-info">
+                                                    <i class="fa fa-sign-in"></i> Đăng nhập để kích hoạt
                                                 </a>
                                             </c:otherwise>
                                         </c:choose>
+
                                     </div>
                                 </div>
                             </div>
@@ -1318,11 +1366,14 @@
 
                 <div class="row mt-4">
                     <div class="col text-center">
-                        <a href="course" class="btn btn-outline-primary px-4 py-2">Xem tất cả khóa học</a>
+                        <a href="course" class="btn btn-outline-primary px-4 py-2">
+                            <i class="fa fa-arrow-right"></i> Xem tất cả khóa học
+                        </a>
                     </div>
                 </div>
             </div>
         </section>
+
 
 
 

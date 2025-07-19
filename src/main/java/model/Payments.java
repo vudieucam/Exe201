@@ -7,12 +7,12 @@ package model;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
-
 /**
  *
  * @author FPT
  */
 public class Payments {
+
     private int id;
     private int userId;
     private Integer servicePackageId;
@@ -29,6 +29,15 @@ public class Payments {
     private boolean isConfirmed;
     private String confirmationCode;
     private Timestamp confirmationExpiry;
+    private String failureReason;
+
+    public String getFailureReason() {
+        return failureReason;
+    }
+
+    public void setFailureReason(String failureReason) {
+        this.failureReason = failureReason;
+    }
 
     public Payments() {
     }
@@ -179,5 +188,5 @@ public class Payments {
     public void setConfirmationExpiry(Timestamp confirmationExpiry) {
         this.confirmationExpiry = confirmationExpiry;
     }
-    
+
 }

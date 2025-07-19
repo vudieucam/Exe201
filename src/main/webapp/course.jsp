@@ -7,6 +7,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page import="java.util.List, model.Course" %>
 <%@ page import="java.util.List, java.util.ArrayList" %>
 <%
@@ -23,14 +24,16 @@
 
     <head>
         <!-- Google tag (gtag.js) -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-J33JSNL2QG"></script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-3BE5RLS31D"></script>
         <script>
             window.dataLayer = window.dataLayer || [];
             function gtag() {
                 dataLayer.push(arguments);
             }
             gtag('js', new Date());
-            gtag('config', 'G-J33JSNL2QG');</script>
+
+            gtag('config', 'G-3BE5RLS31D');
+        </script>
         <title>PetTech</title>
         <meta charset="utf-8">
         <link rel="icon" type="image/png" href="images/logo_pettech.jpg">
@@ -862,6 +865,10 @@
             .navbar-nav .dropdown-menu.blog-dropdown .view-all:hover {
                 text-decoration: underline;
             }
+            .fa-star.text-warning {
+                color:#ffb400;
+            }
+
         </style>
 
         <script>
@@ -889,7 +896,7 @@
                     <div class="col-md-6 d-flex justify-content-md-end align-items-center">
                         <c:choose>
                             <c:when test="${not empty sessionScope.user}">
-                                <!-- Hiển thị tên người dùng và nút đăng xuất -->
+
                                 <div class="d-flex align-items-center">
                                     <a class="login-link d-flex align-items-center mr-3" href="authen?action=editprofile">
                                         <i class="fa fa-user-circle mr-2" style="font-size: 1.4rem; color: #6d4aff;"></i>
@@ -902,7 +909,7 @@
                                 </div>
                             </c:when>
                             <c:otherwise>
-                                <!-- Nếu chưa đăng nhập, hiển thị nút đăng nhập/đăng ký -->
+
                                 <a href="authen?action=login" class="login-link d-flex align-items-center mr-3">
                                     <i class="fa fa-sign-in mr-2"></i>
                                     <span>Đăng Nhập</span>
@@ -1014,6 +1021,7 @@
 
                 <div class = row>
                     <c:if test="${not empty courses}">
+                        <!-- Hiển thị khóa học -->
                         <c:forEach var="course" items="${courses}">
                             <div class="col-lg-4 col-md-6 mb-4">
                                 <div class="course-card">
@@ -1046,43 +1054,122 @@
                                     <div class="course-body">
                                         <h3 class="course-title">${course.title}</h3>
 
+                                        <!-- Thời lượng -->
                                         <div class="course-meta">
-                                            <i class="fa fa-clock-o"></i> 
-                                            <c:out value="${not empty course.duration ? course.duration : 'Đang cập nhật'}" />
+                                            <i class="fa fa-clock-o"></i>
+                                            <c:out value="${not empty course.duration ? course.duration : 'Đang cập nhật'}"/>
                                         </div>
 
-                                        <c:if test="${not empty course.researcher}">
-                                            <div class="course-meta">
-                                                <i class="fa fa-user"></i> ${course.researcher}
-                                            </div>
-                                        </c:if>
+                                        <!-- Đánh giá -->
+                                        <div class="course-meta">
+                                            <i class="fa fa-star text-warning"></i>
+                                            <c:choose>
+                                                <c:when test="${course.averageRating > 0}">
+                                                    <fmt:formatNumber value="${course.averageRating}" maxFractionDigits="1" /> / 5
+                                                </c:when>
+                                                <c:otherwise>Chưa có đánh giá</c:otherwise>
+                                            </c:choose>
+                                        </div>
 
+
+                                        <!-- Số học viên -->
+                                        <div class="course-meta">
+                                            <i class="fa fa-users"></i>
+                                            <c:out value="${course.enrolledCount + 50}" /> học viên
+                                        </div>
+
+
+                                        <!-- Gói: Miễn phí hay Trả phí -->
+                                        <div class="course-meta">
+                                            <i class="fa fa-gift"></i>
+                                            Gói:
+                                            <c:choose>
+                                                <c:when test="${course.isPaid}">
+                                                    <span style="color:#ff6600;font-weight:600"> Trả phí</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span style="color:#009933;font-weight:600"> Miễn phí</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
+
+                                        <!-- Nội dung mô tả -->
                                         <p class="course-desc">
                                             <c:choose>
                                                 <c:when test="${not empty course.content}">
-                                                    <c:out value="${fn:length(course.content) > 100 
-                                                                    ? fn:substring(course.content, 0, 100).concat('...') 
-                                                                    : course.content}" />
+                                                    <c:out value="${fn:length(course.content) > 100 ? fn:substring(course.content, 0, 100).concat('...') : course.content}" />
                                                 </c:when>
-                                                <c:otherwise>
-                                                    Nội dung đang được cập nhật...
-                                                </c:otherwise>
+                                                <c:otherwise>Nội dung đang được cập nhật...</c:otherwise>
                                             </c:choose>
                                         </p>
 
+                                        <!-- Thêm thông báo thành công -->
+                                        <c:if test="${not empty param.activated && param.activated eq 'true'}">
+                                            <div class="alert alert-success alert-dismissible fade show">
+                                                <strong>Thành công!</strong> Khóa học đã được kích hoạt
+                                                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                                            </div>
+                                        </c:if>
+
+                                        <!-- Nút kích hoạt/bắt đầu -->
                                         <c:choose>
                                             <c:when test="${not empty sessionScope.user}">
-                                                <a href="${pageContext.request.contextPath}/coursedetail?id=${course.id}" class="course-btn">
-                                                    Xem chi tiết <i class="fa fa-arrow-right"></i>
-                                                </a>
+                                                <c:set var="user" value="${sessionScope.user}" />
+                                                <c:set var="isActivated" value="${course.status == 1 or CustomercourseDAO.isCourseActivated(user.id, course.id)}" />
+
+                                                <c:choose>
+                                                    <c:when test="${isActivated}">
+                                                        <a href="${pageContext.request.contextPath}/coursedetail?id=${course.id}" 
+                                                           class="btn btn-primary">
+                                                            <i class="fa fa-play"></i> Bắt đầu học
+                                                        </a>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <form method="post" action="${pageContext.request.contextPath}/course" class="d-inline">
+                                                            <input type="hidden" name="action" value="activate"/>
+                                                            <input type="hidden" name="courseId" value="${course.id}"/>
+                                                            <button type="submit" class="btn btn-success">
+                                                                <i class="fa fa-unlock"></i> Kích hoạt ngay
+                                                            </button>
+                                                        </form>
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </c:when>
                                             <c:otherwise>
-                                                <a href="authen?action=login&redirect=${pageContext.request.contextPath}/coursedetail?id=${course.id}"
-                                                   class="course-btn">
-                                                    Xem chi tiết <i class="fa fa-arrow-right"></i>
+                                                <a href="${pageContext.request.contextPath}/authen?action=login" class="btn btn-info">
+                                                    <i class="fa fa-sign-in"></i> Đăng nhập để kích hoạt
                                                 </a>
                                             </c:otherwise>
                                         </c:choose>
+
+                                        <!-- Modal nâng cấp tài khoản -->
+                                        <div class="modal fade" id="upgradeModal" tabindex="-1" role="dialog" aria-labelledby="upgradeModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header bg-warning">
+                                                        <h5 class="modal-title" id="upgradeModalLabel">
+                                                            <i class="fa fa-exclamation-triangle"></i> Yêu cầu nâng cấp
+                                                        </h5>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>Khóa học này yêu cầu tài khoản gói 2 hoặc 3. Hiện tại bạn đang sử dụng gói 1.</p>
+                                                        <p>Vui lòng nâng cấp tài khoản để tiếp tục.</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                                            <i class="fa fa-times"></i> Đóng
+                                                        </button>
+                                                        <a href="${pageContext.request.contextPath}/package" class="btn btn-primary">
+                                                            <i class="fa fa-arrow-up"></i> Nâng cấp ngay
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -1209,27 +1296,31 @@
         <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&sensor=false"></script>
         <script src="js/google-map.js"></script>
         <script src="js/main.js"></script>
-
+        <script>
+                                function showUpgradeModal() {
+                                    $('#upgradeModal').modal('show');
+                                }
+        </script>
         <!-- Custom JavaScript -->
         <script>
-                                $(document).ready(function () {
-                                // Back to top button
-                                $(window).scroll(function () {
-                                if ($(this).scrollTop() > 300) {
-                                $('.back-to-top').fadeIn('slow');
-                                } else {
-                                $('.back-to-top').fadeOut('slow');
-                                }
-                                });
-                                        $('.back-to-top').click(function (e) {
-                                e.preventDefault();
-                                        $('html, body').animate({scrollTop: 0}, 500);
-                                        return false;
-                                });
-                                        $('#userDropdown').on('click', function (e) {
-                                e.preventDefault();
-                                        console.log("Click ok");
-                                });
+            $(document).ready(function () {
+            // Back to top button
+            $(window).scroll(function () {
+            if ($(this).scrollTop() > 300) {
+            $('.back-to-top').fadeIn('slow');
+            } else {
+            $('.back-to-top').fadeOut('slow');
+            }
+            });
+                    $('.back-to-top').click(function (e) {
+            e.preventDefault();
+                    $('html, body').animate({scrollTop: 0}, 500);
+                    return false;
+            });
+                    $('#userDropdown').on('click', function (e) {
+            e.preventDefault();
+                    console.log("Click ok");
+            });
         </script>
 
     </body>

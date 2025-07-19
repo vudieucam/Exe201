@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 public class Course {
+
     private int id;
     private String title;
     private String content;
@@ -20,11 +21,14 @@ public class Course {
     private List<CourseModule> modules;
     private List<CourseReview> reviews;
     private boolean isPaid; // false: free, true: paid
+    private double averageRating;   // ⭐
+    private int enrolledCount;   // 👥
+    private String packageName;     // 📦
 
     public Course() {
     }
 
-    public Course(int id, String title, String content, Date postDate, String researcher, String videoUrl, int status, String duration, String thumbnailUrl, Date createdAt, Date updatedAt, List<CourseCategory> categories, List<CourseImage> images, List<CourseModule> modules, List<CourseReview> reviews, boolean isPaid) {
+    public Course(int id, String title, String content, Date postDate, String researcher, String videoUrl, int status, String duration, String thumbnailUrl, Date createdAt, Date updatedAt, List<CourseCategory> categories, List<CourseImage> images, List<CourseModule> modules, List<CourseReview> reviews, boolean isPaid, double averageRating, int enrolledCount, String packageName) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -41,6 +45,9 @@ public class Course {
         this.modules = modules;
         this.reviews = reviews;
         this.isPaid = isPaid;
+        this.averageRating = averageRating;
+        this.enrolledCount = enrolledCount;
+        this.packageName = packageName;
     }
 
     public int getId() {
@@ -171,29 +178,28 @@ public class Course {
         this.isPaid = isPaid;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Course{");
-        sb.append("id=").append(id);
-        sb.append(", title=").append(title);
-        sb.append(", content=").append(content);
-        sb.append(", postDate=").append(postDate);
-        sb.append(", researcher=").append(researcher);
-        sb.append(", videoUrl=").append(videoUrl);
-        sb.append(", status=").append(status);
-        sb.append(", duration=").append(duration);
-        sb.append(", thumbnailUrl=").append(thumbnailUrl);
-        sb.append(", createdAt=").append(createdAt);
-        sb.append(", updatedAt=").append(updatedAt);
-        sb.append(", categories=").append(categories);
-        sb.append(", images=").append(images);
-        sb.append(", modules=").append(modules);
-        sb.append(", reviews=").append(reviews);
-        sb.append(", isPaid=").append(isPaid);
-        sb.append('}');
-        return sb.toString();
+    public double getAverageRating() {
+        return averageRating;
     }
-    
-    
+
+    public void setAverageRating(double averageRating) {
+        this.averageRating = averageRating;
+    }
+
+    public int getEnrolledCount() {
+        return enrolledCount;
+    }
+
+    public void setEnrolledCount(int enrolledCount) {
+        this.enrolledCount = enrolledCount;
+    }
+
+    public String getPackageName() {
+        return packageName;
+    }
+
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
+    }
+
 }

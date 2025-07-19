@@ -14,7 +14,6 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.UUID;
 import model.SendMailOK;
@@ -223,15 +222,15 @@ public class PaymentServlet extends HttpServlet {
                     + "<p>Nếu có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi.</p>"
                     + "<div class='footer'>"
                     + "<strong>📞 Hỗ trợ:</strong> 0352 138 596<br>"
-                    + "<strong>📧 Email:</strong> pettech@email.com<br><br>"
+                    + "<strong>📧 Email:</strong> pettech2495@email.com<br><br>"
                     + "❤️ PetTech Team"
                     + "</div></div></body></html>";
 
             SendMailOK.send(
                     "smtp.gmail.com",
                     user.getEmail(),
-                    "vdc120403@gmail.com",
-                    "ednn nwbo zbyq gahs",
+                    "pettech2495@gmail.com",
+                    "ntjj uyia dvxk atta",
                     "Thông báo nâng cấp gói dịch vụ PetTech",
                     emailBody
             );
@@ -239,4 +238,5 @@ public class PaymentServlet extends HttpServlet {
             e.printStackTrace();
         }
     }
+
 }
